@@ -26,12 +26,12 @@ android {
   kotlinOptions {
     jvmTarget = libs.versions.javaTarget.get()
   }
-
-  lintOptions {
-    textOutput 'stdout'
+  lint {
+    lintConfig file('lint.xml')
+    textOutput file('stdout')
     textReport true
-    lintConfig rootProject.file('lint.xml')
   }
+
 }
 
 dependencies {

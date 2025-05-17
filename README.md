@@ -2,9 +2,11 @@ Picasso
 =======
 
 **Attention**: This library is deprecated.
-Please use alternatives like [Coil](https://coil-kt.github.io/coil/) for future projects, and start planning to migrate existing projects, especially if they rely on Compose UI.
+Please use alternatives like [Coil](https://coil-kt.github.io/coil/) for future projects, and start
+planning to migrate existing projects, especially if they rely on Compose UI.
 Existing versions will continue to function, but no new work is planned.
-While some changes may land in the repo as we support internal legacy usage and migration, there will be no more public releases to Maven Central.
+While some changes may land in the repo as we support internal legacy usage and migration, there
+will be no more public releases to Maven Central.
 
 Thank you to all who used and/or contributed to Picasso over its decade of image loading.
 
@@ -22,11 +24,15 @@ Download
 --------
 
 Download the latest AAR from [Maven Central][2] or grab via Gradle:
+
 ```groovy
 implementation 'com.squareup.picasso:picasso:2.8'
 ```
+
 or Maven:
+
 ```xml
+
 <dependency>
   <groupId>com.squareup.picasso</groupId>
   <artifactId>picasso</artifactId>
@@ -42,7 +48,8 @@ Picasso requires at minimum Java 8 and API 21.
 ProGuard
 --------
 
-If you are using ProGuard you might need to add OkHttp's rules: https://github.com/square/okhttp/#r8--proguard
+If you are using ProGuard you might need to add OkHttp's
+rules: https://github.com/square/okhttp/#r8--proguard
 
 
 
@@ -63,7 +70,8 @@ License
     See the License for the specific language governing permissions and
     limitations under the License.
 
+[1]: https://square.github.io/picasso/
 
- [1]: https://square.github.io/picasso/
- [2]: https://search.maven.org/search?q=g:com.squareup.picasso%20AND%20a:picasso
- [snap]: https://s01.oss.sonatype.org/content/repositories/snapshots/
+[2]: https://search.maven.org/search?q=g:com.squareup.picasso%20AND%20a:picasso
+
+[snap]: https://s01.oss.sonatype.org/content/repositories/snapshots/

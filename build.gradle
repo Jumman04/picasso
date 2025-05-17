@@ -49,8 +49,7 @@ subprojects {
          *
          * internalUrl=YOUR_INTERNAL_URL
          * internalUsername=YOUR_USERNAME
-         * internalPassword=YOUR_PASSWORD
-         */
+         * internalPassword=YOUR_PASSWORD*/
         maven {
           name = "internal"
           url = providers.gradleProperty("internalUrl")
@@ -88,6 +87,6 @@ dependencies {
 
 tasks.register('deployJavadoc', JavaExec) {
   classpath = configurations.osstrich
-  main = 'com.squareup.osstrich.JavadocPublisher'
-  args "$buildDir/osstrich", 'git@github.com:square/picasso.git', 'com.squareup.picasso'
+  mainClass.main = 'com.squareup.osstrich.JavadocPublisher'
+  args "${layout.buildDirectory}/osstrich", 'git@github.com:square/picasso.git', 'com.squareup.picasso'
 }

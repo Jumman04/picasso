@@ -24,15 +24,13 @@ android {
   kotlinOptions {
     jvmTarget = libs.versions.javaTarget.get()
   }
-
-  lintOptions {
+  lint {
+    disable 'InvalidPackage'
     lintConfig file('lint.xml')
-    textOutput 'stdout'
+    textOutput file('stdout')
     textReport true
-
-    // https://github.com/square/okhttp/issues/896
-    ignore 'InvalidPackage'
   }
+
 }
 
 dependencies {

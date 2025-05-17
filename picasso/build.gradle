@@ -23,16 +23,16 @@ android {
     jvmTarget = libs.versions.javaTarget.get()
   }
 
-  lintOptions {
-    textOutput 'stdout'
-    textReport true
-    lintConfig rootProject.file('lint.xml')
-  }
 
   testOptions {
     unitTests {
       includeAndroidResources = true
     }
+  }
+  lint {
+    lintConfig file('lint.xml')
+    textOutput file('stdout')
+    textReport true
   }
 }
 
@@ -60,7 +60,6 @@ spotless {
   kotlin {
     targetExclude(
       // Non-Square licensed files
-      "src/test/java/com/squareup/picasso3/PlatformLruCacheTest.kt",
-    )
+      "src/test/java/com/squareup/picasso3/PlatformLruCacheTest.kt",)
   }
 }

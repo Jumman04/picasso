@@ -1,3 +1,5 @@
+import com.diffplug.gradle.spotless.SpotlessTask
+
 apply plugin: 'com.android.library'
 apply plugin: 'org.jetbrains.kotlin.android'
 apply plugin: 'app.cash.paparazzi'
@@ -20,16 +22,16 @@ android {
     jvmTarget = libs.versions.javaTarget.get()
   }
 
-  lintOptions {
-    textOutput 'stdout'
-    textReport true
-    lintConfig rootProject.file('lint.xml')
-  }
 
   testOptions {
     unitTests {
       includeAndroidResources = true
     }
+  }
+  lint {
+    lintConfig file('lint.xml')
+    textOutput file('stdout')
+    textReport true
   }
 }
 
@@ -40,6 +42,6 @@ dependencies {
 }
 
 // https://github.com/diffplug/spotless/issues/1572
-tasks.withType(com.diffplug.gradle.spotless.SpotlessTask).configureEach {
+tasks.withType(SpotlessTask).configureEach {
   dependsOn(tasks.withType(Test))
 }
