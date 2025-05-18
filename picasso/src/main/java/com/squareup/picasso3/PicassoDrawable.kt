@@ -124,11 +124,7 @@ internal class PicassoDrawable(
      * image.
      */
     fun setResult(
-      target: ImageView,
-      context: Context,
-      result: Result,
-      noFade: Boolean,
-      debugging: Boolean
+      target: ImageView, context: Context, result: Result, noFade: Boolean, debugging: Boolean
     ) {
       val placeholder = target.drawable
       if (placeholder is Animatable) {

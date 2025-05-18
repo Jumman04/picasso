@@ -30,33 +30,40 @@ import java.util.concurrent.TimeUnit.SECONDS
 /** Immutable data about an image and the transformations that will be applied to it. */
 class Request internal constructor(builder: Builder) {
   /** A unique ID for the request.  */
-  @JvmField var id = 0
+  @JvmField
+  var id = 0
 
   /** The time that the request was first submitted (in nanos). */
-  @JvmField var started: Long = 0
+  @JvmField
+  var started: Long = 0
 
   /** The [MemoryPolicy] to use for this request. */
-  @JvmField val memoryPolicy: Int = builder.memoryPolicy
+  @JvmField
+  val memoryPolicy: Int = builder.memoryPolicy
 
   /** The [NetworkPolicy] to use for this request. */
-  @JvmField val networkPolicy: Int = builder.networkPolicy
+  @JvmField
+  val networkPolicy: Int = builder.networkPolicy
 
   /** HTTP headers for the request  */
-  @JvmField val headers: Headers? = builder.headers
+  @JvmField
+  val headers: Headers? = builder.headers
 
   /**
    * The image URI.
    *
    * This is mutually exclusive with [.resourceId].
    */
-  @JvmField val uri: Uri? = builder.uri
+  @JvmField
+  val uri: Uri? = builder.uri
 
   /**
    * The image resource ID.
    *
    * This is mutually exclusive with [.uri].
    */
-  @JvmField val resourceId: Int = builder.resourceId
+  @JvmField
+  val resourceId: Int = builder.resourceId
 
   /**
    * Optional stable key for this request to be used instead of the URI or resource ID when
@@ -65,114 +72,125 @@ class Request internal constructor(builder: Builder) {
   val stableKey: String? = builder.stableKey
 
   /** List of custom transformations to be applied after the built-in transformations. */
-  @JvmField var transformations: List<Transformation> =
-    if (builder.transformations == null) {
-      emptyList()
-    } else {
-      builder.transformations!!.toList()
-    }
+  @JvmField
+  var transformations: List<Transformation> = if (builder.transformations == null) {
+    emptyList()
+  } else {
+    builder.transformations!!.toList()
+  }
 
   /** Target image width for resizing. */
-  @JvmField val targetWidth: Int = builder.targetWidth
+  @JvmField
+  val targetWidth: Int = builder.targetWidth
 
   /** Target image height for resizing. */
-  @JvmField val targetHeight: Int = builder.targetHeight
+  @JvmField
+  val targetHeight: Int = builder.targetHeight
 
   /**
    * True if the final image should use the 'centerCrop' scale technique.
    *
    * This is mutually exclusive with [.centerInside].
    */
-  @JvmField val centerCrop: Boolean = builder.centerCrop
+  @JvmField
+  val centerCrop: Boolean = builder.centerCrop
 
   /** If centerCrop is set, controls alignment of centered image */
-  @JvmField val centerCropGravity: Int = builder.centerCropGravity
+  @JvmField
+  val centerCropGravity: Int = builder.centerCropGravity
 
   /**
    * True if the final image should use the 'centerInside' scale technique.
    *
    * This is mutually exclusive with [.centerCrop].
    */
-  @JvmField val centerInside: Boolean = builder.centerInside
+  @JvmField
+  val centerInside: Boolean = builder.centerInside
 
-  @JvmField val onlyScaleDown: Boolean = builder.onlyScaleDown
+  @JvmField
+  val onlyScaleDown: Boolean = builder.onlyScaleDown
 
   /** Amount to rotate the image in degrees. */
-  @JvmField val rotationDegrees: Float = builder.rotationDegrees
+  @JvmField
+  val rotationDegrees: Float = builder.rotationDegrees
 
   /** Rotation pivot on the X axis. */
-  @JvmField val rotationPivotX: Float = builder.rotationPivotX
+  @JvmField
+  val rotationPivotX: Float = builder.rotationPivotX
 
   /** Rotation pivot on the Y axis. */
-  @JvmField val rotationPivotY: Float = builder.rotationPivotY
+  @JvmField
+  val rotationPivotY: Float = builder.rotationPivotY
 
   /** Whether or not [.rotationPivotX] and [.rotationPivotY] are set. */
-  @JvmField val hasRotationPivot: Boolean = builder.hasRotationPivot
+  @JvmField
+  val hasRotationPivot: Boolean = builder.hasRotationPivot
 
   /** Target image config for decoding. */
-  @JvmField val config: Config? = builder.config
+  @JvmField
+  val config: Config? = builder.config
 
   /** The priority of this request. */
-  @JvmField val priority: Priority = checkNotNull(builder.priority)
+  @JvmField
+  val priority: Priority = checkNotNull(builder.priority)
 
   /** The cache key for this request. */
-  @JvmField var key: String =
-    if (Looper.myLooper() == Looper.getMainLooper()) {
-      createKey()
-    } else {
-      createKey(StringBuilder())
-    }
+  @JvmField
+  var key: String = if (Looper.myLooper() == Looper.getMainLooper()) {
+    createKey()
+  } else {
+    createKey(StringBuilder())
+  }
 
   /** User-provided value to track this request. */
   val tag: Any? = builder.tag
 
-  override fun toString() =
-    buildString {
-      append("Request{")
-      if (resourceId > 0) {
-        append(resourceId)
-      } else {
-        append(uri)
-      }
-      for (transformation in transformations) {
-        append(' ')
-        append(transformation.key())
-      }
-      if (stableKey != null) {
-        append(" stableKey(")
-        append(stableKey)
-        append(')')
-      }
-      if (targetWidth > 0) {
-        append(" resize(")
-        append(targetWidth)
-        append(',')
-        append(targetHeight)
-        append(')')
-      }
-      if (centerCrop) {
-        append(" centerCrop")
-      }
-      if (centerInside) {
-        append(" centerInside")
-      }
-      if (rotationDegrees != 0f) {
-        append(" rotation(")
-        append(rotationDegrees)
-        if (hasRotationPivot) {
-          append(" @ ")
-          append(rotationPivotX)
-          append(',')
-          append(rotationPivotY)
-        }
-        append(')')
-      }
-      if (config != null) {
-        append(' ')
-        append(config)
-      }
-      append('}')
+  override fun toString() = buildString {
+    append("Request{")
+    if (resourceId > 0) {
+      append(resourceId)
+    } else {
+      append(uri)
     }
+    for (transformation in transformations) {
+      append(' ')
+      append(transformation.key())
+    }
+    if (stableKey != null) {
+      append(" stableKey(")
+      append(stableKey)
+      append(')')
+    }
+    if (targetWidth > 0) {
+      append(" resize(")
+      append(targetWidth)
+      append(',')
+      append(targetHeight)
+      append(')')
+    }
+    if (centerCrop) {
+      append(" centerCrop")
+    }
+    if (centerInside) {
+      append(" centerInside")
+    }
+    if (rotationDegrees != 0f) {
+      append(" rotation(")
+      append(rotationDegrees)
+      if (hasRotationPivot) {
+        append(" @ ")
+        append(rotationPivotX)
+        append(',')
+        append(rotationPivotY)
+      }
+      append(')')
+    }
+    if (config != null) {
+      append(' ')
+      append(config)
+    }
+    append('}')
+  }
 
   // TODO make internal
   fun logId(): String {
@@ -222,40 +240,25 @@ class Request internal constructor(builder: Builder) {
     builder.append(KEY_SEPARATOR)
 
     if (data.rotationDegrees != 0f) {
-      builder
-        .append("rotation:")
-        .append(data.rotationDegrees)
+      builder.append("rotation:").append(data.rotationDegrees)
 
       if (data.hasRotationPivot) {
-        builder
-          .append('@')
-          .append(data.rotationPivotX)
-          .append('x')
-          .append(data.rotationPivotY)
+        builder.append('@').append(data.rotationPivotX).append('x').append(data.rotationPivotY)
       }
 
       builder.append(KEY_SEPARATOR)
     }
 
     if (data.hasSize()) {
-      builder
-        .append("resize:")
-        .append(data.targetWidth)
-        .append('x')
-        .append(data.targetHeight)
+      builder.append("resize:").append(data.targetWidth).append('x').append(data.targetHeight)
 
       builder.append(KEY_SEPARATOR)
     }
 
     if (data.centerCrop) {
-      builder
-        .append("centerCrop:")
-        .append(data.centerCropGravity)
-        .append(KEY_SEPARATOR)
+      builder.append("centerCrop:").append(data.centerCropGravity).append(KEY_SEPARATOR)
     } else if (data.centerInside) {
-      builder
-        .append("centerInside")
-        .append(KEY_SEPARATOR)
+      builder.append("centerInside").append(KEY_SEPARATOR)
     }
 
     for (i in data.transformations.indices) {
@@ -302,9 +305,7 @@ class Request internal constructor(builder: Builder) {
     }
 
     internal constructor(
-      uri: Uri?,
-      resourceId: Int,
-      bitmapConfig: Config?
+      uri: Uri?, resourceId: Int, bitmapConfig: Config?
     ) {
       this.uri = uri
       this.resourceId = resourceId
@@ -464,9 +465,7 @@ class Request internal constructor(builder: Builder) {
 
     /** Rotate the image by the specified degrees around a pivot point.  */
     fun rotate(
-      degrees: Float,
-      pivotX: Float,
-      pivotY: Float
+      degrees: Float, pivotX: Float, pivotY: Float
     ) = apply {
       rotationDegrees = degrees
       rotationPivotX = pivotX
@@ -523,8 +522,7 @@ class Request internal constructor(builder: Builder) {
      * options using the varargs parameter.
      */
     fun memoryPolicy(
-      policy: MemoryPolicy,
-      vararg additional: MemoryPolicy
+      policy: MemoryPolicy, vararg additional: MemoryPolicy
     ) = apply {
       memoryPolicy = memoryPolicy or policy.index
 
@@ -538,8 +536,7 @@ class Request internal constructor(builder: Builder) {
      * policy options using the varargs parameter.
      */
     fun networkPolicy(
-      policy: NetworkPolicy,
-      vararg additional: NetworkPolicy
+      policy: NetworkPolicy, vararg additional: NetworkPolicy
     ) = apply {
       networkPolicy = networkPolicy or policy.index
 
@@ -549,12 +546,9 @@ class Request internal constructor(builder: Builder) {
     }
 
     fun addHeader(
-      name: String,
-      value: String
+      name: String, value: String
     ) = apply {
-      this.headers = (headers?.newBuilder() ?: Headers.Builder())
-        .add(name, value)
-        .build()
+      this.headers = (headers?.newBuilder() ?: Headers.Builder()).add(name, value).build()
     }
 
     /** Create the immutable [Request] object.  */

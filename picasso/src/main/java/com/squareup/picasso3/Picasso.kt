@@ -491,9 +491,7 @@ class Picasso internal constructor(
       enqueueAndSubmit(action)
       if (isLoggingEnabled) {
         log(
-          owner = OWNER_MAIN,
-          verb = VERB_RESUMED,
-          logId = action.request.logId()
+          owner = OWNER_MAIN, verb = VERB_RESUMED, logId = action.request.logId()
         )
       }
     }
@@ -676,14 +674,12 @@ class Picasso internal constructor(
 
     /** Create the [Picasso] instance. */
     fun build(): Picasso {
-      var unsharedCache: okhttp3.Cache? = null
+      var unsharedCache: Cache? = null
       if (callFactory == null) {
         val cacheDir = createDefaultCacheDir(context)
         val maxSize = calculateDiskCacheSize(cacheDir)
-        unsharedCache = okhttp3.Cache(cacheDir, maxSize)
-        callFactory = OkHttpClient.Builder()
-          .cache(unsharedCache)
-          .build()
+        unsharedCache = Cache(cacheDir, maxSize)
+        callFactory = OkHttpClient.Builder().cache(unsharedCache).build()
       }
       if (cache == null) {
         cache = PlatformLruCache(calculateMemoryCacheSize(context))
@@ -700,9 +696,18 @@ class Picasso internal constructor(
       }
 
       return Picasso(
-        context, dispatcher, callFactory!!, unsharedCache, cache!!, listener,
-        requestTransformers, requestHandlers, eventListeners, defaultBitmapConfig,
-        indicatorsEnabled, loggingEnabled
+        context,
+        dispatcher,
+        callFactory!!,
+        unsharedCache,
+        cache!!,
+        listener,
+        requestTransformers,
+        requestHandlers,
+        eventListeners,
+        defaultBitmapConfig,
+        indicatorsEnabled,
+        loggingEnabled
       )
     }
   }
@@ -804,8 +809,7 @@ class Picasso internal constructor(
    * @see RequestCreator.priority
    */
   enum class Priority {
-    LOW,
-    NORMAL,
+    LOW, NORMAL,
 
     /**
      * High priority requests will post to the front of main thread's message queue when
@@ -816,9 +820,7 @@ class Picasso internal constructor(
 
   /** Describes where the image was loaded from.  */
   enum class LoadedFrom(@get:JvmName("-debugColor") internal val debugColor: Int) {
-    MEMORY(Color.GREEN),
-    DISK(Color.BLUE),
-    NETWORK(Color.RED)
+    MEMORY(Color.GREEN), DISK(Color.BLUE), NETWORK(Color.RED)
   }
 
   internal companion object {

@@ -59,32 +59,17 @@ internal object BitmapUtils {
   }
 
   fun calculateInSampleSize(
-    reqWidth: Int,
-    reqHeight: Int,
-    options: BitmapFactory.Options,
-    request: Request
+    reqWidth: Int, reqHeight: Int, options: BitmapFactory.Options, request: Request
   ) {
     calculateInSampleSize(
-      reqWidth,
-      reqHeight,
-      options.outWidth,
-      options.outHeight,
-      options,
-      request
+      reqWidth, reqHeight, options.outWidth, options.outHeight, options, request
     )
   }
 
   fun shouldResize(
-    onlyScaleDown: Boolean,
-    inWidth: Int,
-    inHeight: Int,
-    targetWidth: Int,
-    targetHeight: Int
+    onlyScaleDown: Boolean, inWidth: Int, inHeight: Int, targetWidth: Int, targetHeight: Int
   ): Boolean {
-    return (
-      !onlyScaleDown || targetWidth != 0 && inWidth > targetWidth ||
-        targetHeight != 0 && inHeight > targetHeight
-      )
+    return (!onlyScaleDown || targetWidth != 0 && inWidth > targetWidth || targetHeight != 0 && inHeight > targetHeight)
   }
 
   fun calculateInSampleSize(
@@ -107,12 +92,11 @@ internal object BitmapUtils {
   fun decodeStream(source: Source, request: Request): Bitmap {
     val exceptionCatchingSource = ExceptionCatchingSource(source)
     val bufferedSource = exceptionCatchingSource.buffer()
-    val bitmap =
-      if (VERSION.SDK_INT >= 28) {
-        decodeStreamP(request, bufferedSource)
-      } else {
-        decodeStreamPreP(request, bufferedSource)
-      }
+    val bitmap = if (VERSION.SDK_INT >= 28) {
+      decodeStreamP(request, bufferedSource)
+    } else {
+      decodeStreamPreP(request, bufferedSource)
+    }
     exceptionCatchingSource.throwIfCaught()
     return bitmap
   }
@@ -162,12 +146,16 @@ internal object BitmapUtils {
   }
 
   @RequiresApi(28)
-  private fun decodeResourceP(resources: Resources, @DrawableRes id: Int, request: Request): Bitmap {
+  private fun decodeResourceP(
+    resources: Resources, @DrawableRes id: Int, request: Request
+  ): Bitmap {
     val imageSource = ImageDecoder.createSource(resources, id)
     return decodeImageSource(imageSource, request)
   }
 
-  private fun decodeResourcePreP(resources: Resources, @DrawableRes id: Int, request: Request): Bitmap {
+  private fun decodeResourcePreP(
+    resources: Resources, @DrawableRes id: Int, request: Request
+  ): Bitmap {
     val options = createBitmapOptions(request)
     if (requiresInSampleSize(options)) {
       BitmapFactory.decodeResource(resources, id, options)
@@ -195,30 +183,25 @@ internal object BitmapUtils {
   }
 
   private fun ratio(
-    requestWidth: Int,
-    requestHeight: Int,
-    width: Int,
-    height: Int,
-    request: Request
-  ): Int =
-    if (height > requestHeight || width > requestWidth) {
-      val ratio = if (requestHeight == 0) {
-        width / requestWidth
-      } else if (requestWidth == 0) {
-        height / requestHeight
-      } else {
-        val heightRatio = height / requestHeight
-        val widthRatio = width / requestWidth
-        if (request.centerInside) {
-          max(heightRatio, widthRatio)
-        } else {
-          min(heightRatio, widthRatio)
-        }
-      }
-      if (ratio != 0) ratio else 1
+    requestWidth: Int, requestHeight: Int, width: Int, height: Int, request: Request
+  ): Int = if (height > requestHeight || width > requestWidth) {
+    val ratio = if (requestHeight == 0) {
+      width / requestWidth
+    } else if (requestWidth == 0) {
+      height / requestHeight
     } else {
-      1
+      val heightRatio = height / requestHeight
+      val widthRatio = width / requestWidth
+      if (request.centerInside) {
+        max(heightRatio, widthRatio)
+      } else {
+        min(heightRatio, widthRatio)
+      }
     }
+    if (ratio != 0) ratio else 1
+  } else {
+    1
+  }
 
   fun isXmlResource(resources: Resources, @DrawableRes drawableId: Int): Boolean {
     val typedValue = TypedValue()

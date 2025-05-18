@@ -9,6 +9,7 @@ android {
 
   defaultConfig {
     minSdkVersion libs.versions.minSdk.get() as int
+    targetSdkVersion libs.versions.compileSdk.get() as int
     applicationId 'com.example.picasso'
   }
 

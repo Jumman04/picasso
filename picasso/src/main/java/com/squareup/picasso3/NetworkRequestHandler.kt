@@ -33,52 +33,51 @@ internal class NetworkRequestHandler(
   override fun canHandleRequest(data: Request): Boolean {
     val uri = data.uri ?: return false
     val scheme = uri.scheme
-    return SCHEME_HTTP.equals(scheme, ignoreCase = true) ||
-      SCHEME_HTTPS.equals(scheme, ignoreCase = true)
+    return SCHEME_HTTP.equals(scheme, ignoreCase = true) || SCHEME_HTTPS.equals(
+      scheme, ignoreCase = true
+    )
   }
 
   override fun load(picasso: Picasso, request: Request, callback: Callback) {
     val callRequest = createRequest(request)
-    callFactory
-      .newCall(callRequest)
-      .enqueue(object : okhttp3.Callback {
-        override fun onResponse(call: Call, response: Response) {
-          if (!response.isSuccessful) {
-            callback.onError(ResponseException(response.code, request.networkPolicy))
-            return
-          }
-
-          // Cache response is only null when the response comes fully from the network. Both
-          // completely cached and conditionally cached responses will have a non-null cache
-          // response.
-          val loadedFrom = if (response.cacheResponse == null) NETWORK else DISK
-
-          // Sometimes response content length is zero when requests are being replayed.
-          // Haven't found root cause to this but retrying the request seems safe to do so.
-          val body = response.body
-          if (loadedFrom == DISK && body!!.contentLength() == 0L) {
-            body.close()
-            callback.onError(
-              ContentLengthException("Received response with 0 content-length header.")
-            )
-            return
-          }
-          if (loadedFrom == NETWORK && body!!.contentLength() > 0) {
-            picasso.downloadFinished(body.contentLength())
-          }
-          try {
-            val bitmap = decodeStream(body!!.source(), request)
-            callback.onSuccess(Result.Bitmap(bitmap, loadedFrom))
-          } catch (e: IOException) {
-            body!!.close()
-            callback.onError(e)
-          }
+    callFactory.newCall(callRequest).enqueue(object : okhttp3.Callback {
+      override fun onResponse(call: Call, response: Response) {
+        if (!response.isSuccessful) {
+          callback.onError(ResponseException(response.code, request.networkPolicy))
+          return
         }
 
-        override fun onFailure(call: Call, e: IOException) {
+        // Cache response is only null when the response comes fully from the network. Both
+        // completely cached and conditionally cached responses will have a non-null cache
+        // response.
+        val loadedFrom = if (response.cacheResponse == null) NETWORK else DISK
+
+        // Sometimes response content length is zero when requests are being replayed.
+        // Haven't found root cause to this but retrying the request seems safe to do so.
+        val body = response.body
+        if (loadedFrom == DISK && body!!.contentLength() == 0L) {
+          body.close()
+          callback.onError(
+            ContentLengthException("Received response with 0 content-length header.")
+          )
+          return
+        }
+        if (loadedFrom == NETWORK && body!!.contentLength() > 0) {
+          picasso.downloadFinished(body.contentLength())
+        }
+        try {
+          val bitmap = decodeStream(body!!.source(), request)
+          callback.onSuccess(Result.Bitmap(bitmap, loadedFrom))
+        } catch (e: IOException) {
+          body!!.close()
           callback.onError(e)
         }
-      })
+      }
+
+      override fun onFailure(call: Call, e: IOException) {
+        callback.onError(e)
+      }
+    })
   }
 
   override val retryCount: Int
@@ -121,8 +120,7 @@ internal class NetworkRequestHandler(
 
   internal class ContentLengthException(message: String) : RuntimeException(message)
   internal class ResponseException(
-    val code: Int,
-    val networkPolicy: Int
+    val code: Int, val networkPolicy: Int
   ) : RuntimeException("HTTP $code")
 
   private companion object {

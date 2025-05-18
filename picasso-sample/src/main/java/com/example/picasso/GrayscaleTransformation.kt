@@ -34,10 +34,10 @@ class GrayscaleTransformation(private val picasso: Picasso) : Transformation {
   override fun transform(source: Result.Bitmap): Result.Bitmap {
     val bitmap = source.bitmap
 
-    val result = createBitmap(bitmap.width, bitmap.height, bitmap.config)
+    val result = createBitmap(bitmap.width, bitmap.height, bitmap.config!!)
     val noise = try {
       picasso.load(R.drawable.noise).get()!!
-    } catch (e: IOException) {
+    } catch (_: IOException) {
       throw RuntimeException("Failed to apply transformation! Missing resource.")
     }
 

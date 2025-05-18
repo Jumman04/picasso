@@ -28,9 +28,7 @@ import com.squareup.picasso3.Picasso.LoadedFrom
 internal class MediaStoreRequestHandler(context: Context) : ContentStreamRequestHandler(context) {
   override fun canHandleRequest(data: Request): Boolean {
     val uri = data.uri
-    return uri != null &&
-      ContentResolver.SCHEME_CONTENT == uri.scheme &&
-      MediaStore.AUTHORITY == uri.authority
+    return uri != null && ContentResolver.SCHEME_CONTENT == uri.scheme && MediaStore.AUTHORITY == uri.authority
   }
 
   override fun load(picasso: Picasso, request: Request, callback: Callback) {
@@ -75,10 +73,7 @@ internal class MediaStoreRequestHandler(context: Context) : ContentStreamRequest
           Video.Thumbnails.getThumbnail(contentResolver, id, kind, options)
         } else {
           MediaStore.Images.Thumbnails.getThumbnail(
-            contentResolver,
-            id,
-            picassoKind.androidKind,
-            options
+            contentResolver, id, picassoKind.androidKind, options
           )
         }
 
@@ -101,8 +96,12 @@ internal class MediaStoreRequestHandler(context: Context) : ContentStreamRequest
   }
 
   internal enum class PicassoKind(val androidKind: Int, val width: Int, val height: Int) {
-    MICRO(MediaStore.Images.Thumbnails.MICRO_KIND, 96, 96),
-    MINI(MediaStore.Images.Thumbnails.MINI_KIND, 512, 384),
+    MICRO(
+      MediaStore.Images.Thumbnails.MICRO_KIND, 96, 96
+    ),
+    MINI(
+      MediaStore.Images.Thumbnails.MINI_KIND, 512, 384
+    ),
     FULL(MediaStore.Images.Thumbnails.FULL_SCREEN_KIND, -1, -1)
   }
 

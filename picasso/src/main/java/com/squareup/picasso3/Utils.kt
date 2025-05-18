@@ -174,8 +174,9 @@ internal object Utils {
   }
 
   fun isWebPFile(source: BufferedSource): Boolean {
-    return source.rangeEquals(0, WEBP_FILE_HEADER_RIFF) &&
-      source.rangeEquals(8, WEBP_FILE_HEADER_WEBP)
+    return source.rangeEquals(0, WEBP_FILE_HEADER_RIFF) && source.rangeEquals(
+      8, WEBP_FILE_HEADER_WEBP
+    )
   }
 
   fun getResourceId(resources: Resources, data: Request): Int {
@@ -195,18 +196,19 @@ internal object Utils {
           throw FileNotFoundException("Last path segment is not a resource ID: " + data.uri)
         }
       }
+
       2 -> {
         val type = segments[0]
         val name = segments[1]
         resources.getIdentifier(name, type, pkg)
       }
+
       else -> throw FileNotFoundException("More than two path segments: " + data.uri)
     }
   }
 
   fun getResources(
-    context: Context,
-    data: Request
+    context: Context, data: Request
   ): Resources {
     if (data.resourceId != 0 || data.uri == null) {
       return context.resources

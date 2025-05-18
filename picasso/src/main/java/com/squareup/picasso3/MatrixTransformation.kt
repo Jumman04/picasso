@@ -49,9 +49,7 @@ internal class MatrixTransformation(private val data: Request) : Transformation 
     @VisibleForTesting
     @JvmName("-transformResult")
     internal fun transformResult(
-      data: Request,
-      result: android.graphics.Bitmap,
-      exifOrientation: Int
+      data: Request, result: android.graphics.Bitmap, exifOrientation: Int
     ): android.graphics.Bitmap {
       val inWidth = result.width
       val inHeight = result.height
@@ -203,7 +201,8 @@ internal class MatrixTransformation(private val data: Request) : Transformation 
         }
       }
 
-      val transformedResult = createBitmap(result, drawX, drawY, drawWidth, drawHeight, matrix, true)
+      val transformedResult =
+        createBitmap(result, drawX, drawY, drawWidth, drawHeight, matrix, true)
       if (transformedResult != result) {
         result.recycle()
       }
@@ -212,21 +211,18 @@ internal class MatrixTransformation(private val data: Request) : Transformation 
 
     @Suppress("MemberVisibilityCanBePrivate")
     @JvmName("-getExifRotation")
-    internal fun getExifRotation(orientation: Int) =
-      when (orientation) {
-        ORIENTATION_ROTATE_90, ORIENTATION_TRANSPOSE -> 90
-        ORIENTATION_ROTATE_180, ORIENTATION_FLIP_VERTICAL -> 180
-        ORIENTATION_ROTATE_270, ORIENTATION_TRANSVERSE -> 270
-        else -> 0
-      }
+    internal fun getExifRotation(orientation: Int) = when (orientation) {
+      ORIENTATION_ROTATE_90, ORIENTATION_TRANSPOSE -> 90
+      ORIENTATION_ROTATE_180, ORIENTATION_FLIP_VERTICAL -> 180
+      ORIENTATION_ROTATE_270, ORIENTATION_TRANSVERSE -> 270
+      else -> 0
+    }
 
     @Suppress("MemberVisibilityCanBePrivate")
     @JvmName("-getExifTranslation")
-    internal fun getExifTranslation(orientation: Int) =
-      when (orientation) {
-        ORIENTATION_FLIP_HORIZONTAL, ORIENTATION_FLIP_VERTICAL,
-        ORIENTATION_TRANSPOSE, ORIENTATION_TRANSVERSE -> -1
-        else -> 1
-      }
+    internal fun getExifTranslation(orientation: Int) = when (orientation) {
+      ORIENTATION_FLIP_HORIZONTAL, ORIENTATION_FLIP_VERTICAL, ORIENTATION_TRANSPOSE, ORIENTATION_TRANSVERSE -> -1
+      else -> 1
+    }
   }
 }

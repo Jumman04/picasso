@@ -30,27 +30,20 @@ internal class AssetRequestHandler(private val context: Context) : RequestHandle
 
   override fun canHandleRequest(data: Request): Boolean {
     val uri = data.uri
-    return uri != null &&
-      ContentResolver.SCHEME_FILE == uri.scheme &&
-      uri.pathSegments.isNotEmpty() &&
-      ANDROID_ASSET == uri.pathSegments[0]
+    return uri != null && ContentResolver.SCHEME_FILE == uri.scheme && uri.pathSegments.isNotEmpty() && ANDROID_ASSET == uri.pathSegments[0]
   }
 
   override fun load(
-    picasso: Picasso,
-    request: Request,
-    callback: Callback
+    picasso: Picasso, request: Request, callback: Callback
   ) {
     initializeIfFirstTime()
     var signaledCallback = false
     try {
-      assetManager!!.open(getFilePath(request))
-        .source()
-        .use { source ->
-          val bitmap = decodeStream(source, request)
-          signaledCallback = true
-          callback.onSuccess(Result.Bitmap(bitmap, DISK))
-        }
+      assetManager!!.open(getFilePath(request)).source().use { source ->
+        val bitmap = decodeStream(source, request)
+        signaledCallback = true
+        callback.onSuccess(Result.Bitmap(bitmap, DISK))
+      }
     } catch (e: Exception) {
       if (!signaledCallback) {
         callback.onError(e)
@@ -58,7 +51,8 @@ internal class AssetRequestHandler(private val context: Context) : RequestHandle
     }
   }
 
-  @Initializer private fun initializeIfFirstTime() {
+  @Initializer
+  private fun initializeIfFirstTime() {
     if (assetManager == null) {
       synchronized(lock) {
         if (assetManager == null) {
@@ -75,8 +69,7 @@ internal class AssetRequestHandler(private val context: Context) : RequestHandle
 
     fun getFilePath(request: Request): String {
       val uri = checkNotNull(request.uri)
-      return uri.toString()
-        .substring(ASSET_PREFIX_LENGTH)
+      return uri.toString().substring(ASSET_PREFIX_LENGTH)
     }
   }
 }

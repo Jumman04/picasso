@@ -33,8 +33,7 @@ interface DrawableTarget {
    *
    */
   fun onDrawableLoaded(
-    drawable: Drawable,
-    from: LoadedFrom
+    drawable: Drawable, from: LoadedFrom
   )
 
   /**
@@ -44,8 +43,7 @@ interface DrawableTarget {
    * specified via [RequestCreator.error].
    */
   fun onDrawableFailed(
-    e: Exception,
-    errorDrawable: Drawable?
+    e: Exception, errorDrawable: Drawable?
   )
 
   /**

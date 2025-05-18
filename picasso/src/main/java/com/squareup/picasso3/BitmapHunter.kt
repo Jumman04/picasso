@@ -64,7 +64,7 @@ internal open class BitmapHunter(
     private set
 
   val isCancelled: Boolean
-    get() = future?.isCancelled ?: job?.isCancelled ?: false
+    get() = future?.isCancelled ?: job?.isCancelled == true
 
   override fun run() {
     val originalName = Thread.currentThread().name
@@ -120,9 +120,7 @@ internal open class BitmapHunter(
     val latch = CountDownLatch(1)
     try {
       requestHandler.load(
-        picasso = picasso,
-        request = data,
-        callback = object : RequestHandler.Callback {
+        picasso = picasso, request = data, callback = object : RequestHandler.Callback {
           override fun onSuccess(result: RequestHandler.Result?) {
             resultReference.set(result)
             latch.countDown()
@@ -132,8 +130,7 @@ internal open class BitmapHunter(
             exceptionReference.set(t)
             latch.countDown()
           }
-        }
-      )
+        })
 
       latch.await()
     } catch (ie: InterruptedException) {
@@ -207,7 +204,8 @@ internal open class BitmapHunter(
         this.action = null
         true
       }
-      else -> actions?.remove(action) ?: false
+
+      else -> actions?.remove(action) == true
     }
 
     // The action being detached had the highest priority. Update this
@@ -222,12 +220,10 @@ internal open class BitmapHunter(
   }
 
   fun cancel(): Boolean =
-    action == null && actions.isNullOrEmpty() && future?.cancel(false)
-      ?: job?.let {
-        it.cancel()
-        true
-      }
-      ?: false
+    action == null && actions.isNullOrEmpty() && future?.cancel(false) ?: job?.let {
+      it.cancel()
+      true
+    } == true
 
   fun shouldRetry(airplaneMode: Boolean, info: NetworkInfo?): Boolean {
     val hasRetries = retryCount > 0
@@ -242,7 +238,7 @@ internal open class BitmapHunter(
   fun supportsReplay(): Boolean = requestHandler.supportsReplay()
 
   private fun computeNewPriority(): Picasso.Priority {
-    val hasMultiple = actions?.isNotEmpty() ?: false
+    val hasMultiple = actions?.isNotEmpty() == true
     val hasAny = action != null || hasMultiple
 
     // Hunter has no requests, low priority.
@@ -279,10 +275,7 @@ internal open class BitmapHunter(
     }
 
     fun forRequest(
-      picasso: Picasso,
-      dispatcher: Dispatcher,
-      cache: PlatformLruCache,
-      action: Action
+      picasso: Picasso, dispatcher: Dispatcher, cache: PlatformLruCache, action: Action
     ): BitmapHunter {
       val request = action.request
       val requestHandlers = picasso.requestHandlers
@@ -299,10 +292,7 @@ internal open class BitmapHunter(
     }
 
     fun applyTransformations(
-      picasso: Picasso,
-      data: Request,
-      transformations: List<Transformation>,
-      result: Bitmap
+      picasso: Picasso, data: Request, transformations: List<Transformation>, result: Bitmap
     ): Bitmap? {
       var res = result
 
@@ -318,8 +308,7 @@ internal open class BitmapHunter(
         } catch (e: RuntimeException) {
           Picasso.HANDLER.post {
             throw RuntimeException(
-              "Transformation ${transformation.key()} crashed with exception.",
-              e
+              "Transformation ${transformation.key()} crashed with exception.", e
             )
           }
 

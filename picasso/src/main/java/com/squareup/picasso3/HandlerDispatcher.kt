@@ -89,9 +89,7 @@ internal class HandlerDispatcher internal constructor(
   override fun dispatchAirplaneModeChange(airplaneMode: Boolean) {
     handler.sendMessage(
       handler.obtainMessage(
-        AIRPLANE_MODE_CHANGE,
-        if (airplaneMode) AIRPLANE_MODE_ON else AIRPLANE_MODE_OFF,
-        0
+        AIRPLANE_MODE_CHANGE, if (airplaneMode) AIRPLANE_MODE_ON else AIRPLANE_MODE_OFF, 0
       )
     )
   }
@@ -112,11 +110,11 @@ internal class HandlerDispatcher internal constructor(
   override fun dispatchBatchResumeMain(batch: MutableList<Action>) {
     mainHandler.sendMessage(mainHandler.obtainMessage(REQUEST_BATCH_RESUME, batch))
   }
+
   override fun isShutdown() = service.isShutdown
 
   private class DispatcherHandler(
-    looper: Looper,
-    private val dispatcher: HandlerDispatcher
+    looper: Looper, private val dispatcher: HandlerDispatcher
   ) : Handler(looper) {
     override fun handleMessage(msg: Message) {
       when (msg.what) {
@@ -124,37 +122,46 @@ internal class HandlerDispatcher internal constructor(
           val action = msg.obj as Action
           dispatcher.performSubmit(action)
         }
+
         REQUEST_CANCEL -> {
           val action = msg.obj as Action
           dispatcher.performCancel(action)
         }
+
         TAG_PAUSE -> {
           val tag = msg.obj
           dispatcher.performPauseTag(tag)
         }
+
         TAG_RESUME -> {
           val tag = msg.obj
           dispatcher.performResumeTag(tag)
         }
+
         HUNTER_COMPLETE -> {
           val hunter = msg.obj as BitmapHunter
           dispatcher.performComplete(hunter)
         }
+
         HUNTER_RETRY -> {
           val hunter = msg.obj as BitmapHunter
           dispatcher.performRetry(hunter)
         }
+
         HUNTER_DECODE_FAILED -> {
           val hunter = msg.obj as BitmapHunter
           dispatcher.performError(hunter)
         }
+
         NETWORK_STATE_CHANGE -> {
           val info = msg.obj as NetworkInfo
           dispatcher.performNetworkStateChange(info)
         }
+
         AIRPLANE_MODE_CHANGE -> {
           dispatcher.performAirplaneModeChange(msg.arg1 == AIRPLANE_MODE_ON)
         }
+
         else -> {
           dispatcher.mainHandler.post {
             throw AssertionError("Unknown handler message received: ${msg.what}")
@@ -165,8 +172,7 @@ internal class HandlerDispatcher internal constructor(
   }
 
   private class MainDispatcherHandler(
-    looper: Looper,
-    val dispatcher: HandlerDispatcher
+    looper: Looper, val dispatcher: HandlerDispatcher
   ) : Handler(looper) {
     override fun handleMessage(msg: Message) {
       when (msg.what) {
@@ -174,19 +180,21 @@ internal class HandlerDispatcher internal constructor(
           val hunter = msg.obj as BitmapHunter
           dispatcher.performCompleteMain(hunter)
         }
+
         REQUEST_BATCH_RESUME -> {
           val batch = msg.obj as List<Action>
           dispatcher.performBatchResumeMain(batch)
         }
+
         else -> throw AssertionError("Unknown handler message received: " + msg.what)
       }
     }
   }
 
   internal class DispatcherThread : HandlerThread(
-    Utils.THREAD_PREFIX + DISPATCHER_THREAD_NAME,
-    THREAD_PRIORITY_BACKGROUND
+    Utils.THREAD_PREFIX + DISPATCHER_THREAD_NAME, THREAD_PRIORITY_BACKGROUND
   )
+
   internal companion object {
     private const val RETRY_DELAY = 500L
     private const val AIRPLANE_MODE_ON = 1

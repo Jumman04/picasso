@@ -18,9 +18,7 @@ package com.squareup.picasso3
 import com.squareup.picasso3.RequestHandler.Result
 
 internal class FetchAction(
-  picasso: Picasso,
-  data: Request,
-  private var callback: Callback?
+  picasso: Picasso, data: Request, private var callback: Callback?
 ) : Action(picasso, data) {
   override fun complete(result: Result) {
     callback?.onSuccess()

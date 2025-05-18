@@ -56,16 +56,13 @@ internal class ContactsPhotoRequestHandler(private val context: Context) : Reque
 
   override fun canHandleRequest(data: Request): Boolean {
     val uri = data.uri
-    return uri != null &&
-      ContentResolver.SCHEME_CONTENT == uri.scheme &&
-      Contacts.CONTENT_URI.host == uri.host &&
-      matcher.match(data.uri) != UriMatcher.NO_MATCH
+    return uri != null && ContentResolver.SCHEME_CONTENT == uri.scheme && Contacts.CONTENT_URI.host == uri.host && matcher.match(
+      data.uri
+    ) != UriMatcher.NO_MATCH
   }
 
   override fun load(
-    picasso: Picasso,
-    request: Request,
-    callback: Callback
+    picasso: Picasso, request: Request, callback: Callback
   ) {
     var signaledCallback = false
     try {
@@ -89,6 +86,7 @@ internal class ContactsPhotoRequestHandler(private val context: Context) : Reque
           Contacts.lookupContact(contentResolver, uri) ?: throw IOException("no contact found")
         Contacts.openContactPhotoInputStream(contentResolver, contactUri, true)
       }
+
       ID_CONTACT -> Contacts.openContactPhotoInputStream(contentResolver, uri, true)
       ID_THUMBNAIL, ID_DISPLAY_PHOTO -> contentResolver.openInputStream(uri)
       else -> throw IllegalStateException("Invalid uri: $uri")

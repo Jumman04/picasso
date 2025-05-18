@@ -18,8 +18,7 @@ package com.squareup.picasso3
 import com.squareup.picasso3.RequestHandler.Result
 
 internal class GetAction(
-  picasso: Picasso,
-  data: Request
+  picasso: Picasso, data: Request
 ) : Action(picasso, data) {
   override fun complete(result: Result) = Unit
   override fun error(e: Exception) = Unit

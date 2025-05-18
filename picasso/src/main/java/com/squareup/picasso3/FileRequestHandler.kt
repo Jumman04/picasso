@@ -30,9 +30,7 @@ internal class FileRequestHandler(context: Context) : ContentStreamRequestHandle
   }
 
   override fun load(
-    picasso: Picasso,
-    request: Request,
-    callback: Callback
+    picasso: Picasso, request: Request, callback: Callback
   ) {
     var signaledCallback = false
     try {
@@ -52,8 +50,7 @@ internal class FileRequestHandler(context: Context) : ContentStreamRequestHandle
   override fun getExifOrientation(uri: Uri): Int {
     val path = uri.path ?: throw FileNotFoundException("path == null, uri: $uri")
     return ExifInterface(path).getAttributeInt(
-      ExifInterface.TAG_ORIENTATION,
-      ExifInterface.ORIENTATION_NORMAL
+      ExifInterface.TAG_ORIENTATION, ExifInterface.ORIENTATION_NORMAL
     )
   }
 }

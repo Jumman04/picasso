@@ -21,17 +21,14 @@ import com.squareup.picasso3.BitmapUtils.isXmlResource
 import com.squareup.picasso3.Picasso.LoadedFrom.DISK
 
 internal class ResourceDrawableRequestHandler private constructor(
-  private val context: Context,
-  private val loader: DrawableLoader
+  private val context: Context, private val loader: DrawableLoader
 ) : RequestHandler() {
   override fun canHandleRequest(data: Request): Boolean {
     return data.resourceId != 0 && isXmlResource(context.resources, data.resourceId)
   }
 
   override fun load(
-    picasso: Picasso,
-    request: Request,
-    callback: Callback
+    picasso: Picasso, request: Request, callback: Callback
   ) {
     val drawable = loader.load(request.resourceId)
     if (drawable == null) {

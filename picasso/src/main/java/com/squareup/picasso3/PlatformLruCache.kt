@@ -21,19 +21,16 @@ import android.util.LruCache
 /** A memory cache which uses a least-recently used eviction policy.  */
 internal class PlatformLruCache(maxByteCount: Int) {
   /** Create a cache with a given maximum size in bytes.  */
-  val cache =
-    object : LruCache<String, BitmapAndSize>(if (maxByteCount != 0) maxByteCount else 1) {
-      override fun sizeOf(
-        key: String,
-        value: BitmapAndSize
-      ): Int = value.byteCount
-    }
+  val cache = object : LruCache<String, BitmapAndSize>(if (maxByteCount != 0) maxByteCount else 1) {
+    override fun sizeOf(
+      key: String, value: BitmapAndSize
+    ): Int = value.byteCount
+  }
 
   operator fun get(key: String): Bitmap? = cache[key]?.bitmap
 
   operator fun set(
-    key: String,
-    bitmap: Bitmap
+    key: String, bitmap: Bitmap
   ) {
     val byteCount = bitmap.allocationByteCount
     // If the bitmap is too big for the cache, don't even attempt to store it. Doing so will cause
@@ -56,10 +53,7 @@ internal class PlatformLruCache(maxByteCount: Int) {
   fun clearKeyUri(uri: String) {
     // Keys are prefixed with a URI followed by '\n'.
     for (key in cache.snapshot().keys) {
-      if (key.startsWith(uri) &&
-        key.length > uri.length &&
-        key[uri.length] == Request.KEY_SEPARATOR
-      ) {
+      if (key.startsWith(uri) && key.length > uri.length && key[uri.length] == Request.KEY_SEPARATOR) {
         cache.remove(key)
       }
     }
@@ -78,7 +72,6 @@ internal class PlatformLruCache(maxByteCount: Int) {
   fun evictionCount(): Int = cache.evictionCount()
 
   internal class BitmapAndSize(
-    val bitmap: Bitmap,
-    val byteCount: Int
+    val bitmap: Bitmap, val byteCount: Int
   )
 }

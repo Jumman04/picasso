@@ -27,10 +27,10 @@ enum class MemoryPolicy(val index: Int) {
   NO_STORE(1 shl 1);
 
   companion object {
-    @JvmStatic fun shouldReadFromMemoryCache(memoryPolicy: Int) =
-      memoryPolicy and NO_CACHE.index == 0
+    @JvmStatic
+    fun shouldReadFromMemoryCache(memoryPolicy: Int) = memoryPolicy and NO_CACHE.index == 0
 
-    @JvmStatic fun shouldWriteToMemoryCache(memoryPolicy: Int) =
-      memoryPolicy and NO_STORE.index == 0
+    @JvmStatic
+    fun shouldWriteToMemoryCache(memoryPolicy: Int) = memoryPolicy and NO_STORE.index == 0
   }
 }

@@ -42,7 +42,7 @@ abstract class RequestHandler {
    * @see RequestHandler
    * @see [load]
    */
-  sealed class Result constructor(
+  sealed class Result(
     /**
      * Returns the resulting [Picasso.LoadedFrom] generated from a [load] call.
      */
@@ -52,13 +52,11 @@ abstract class RequestHandler {
      */
     val exifRotation: Int = 0
   ) {
-    class Bitmap constructor(
-      val bitmap: android.graphics.Bitmap,
-      loadedFrom: LoadedFrom,
-      exifRotation: Int = 0
+    class Bitmap(
+      val bitmap: android.graphics.Bitmap, loadedFrom: LoadedFrom, exifRotation: Int = 0
     ) : Result(loadedFrom, exifRotation)
 
-    class Drawable constructor(
+    class Drawable(
       val drawable: android.graphics.drawable.Drawable,
       loadedFrom: LoadedFrom,
       exifRotation: Int = 0
@@ -81,16 +79,13 @@ abstract class RequestHandler {
    */
   @Throws(IOException::class)
   abstract fun load(
-    picasso: Picasso,
-    request: Request,
-    callback: Callback
+    picasso: Picasso, request: Request, callback: Callback
   )
 
   open val retryCount = 0
 
   open fun shouldRetry(
-    airplaneMode: Boolean,
-    info: NetworkInfo?
+    airplaneMode: Boolean, info: NetworkInfo?
   ) = false
 
   open fun supportsReplay() = false

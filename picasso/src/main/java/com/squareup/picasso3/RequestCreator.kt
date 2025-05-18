@@ -45,9 +45,7 @@ import java.util.concurrent.atomic.AtomicInteger
 
 /** Fluent API for building an image download request.  */
 class RequestCreator internal constructor(
-  private val picasso: Picasso,
-  uri: Uri?,
-  resourceId: Int
+  private val picasso: Picasso, uri: Uri?, resourceId: Int
 ) {
   private val data = Request.Builder(uri, resourceId, picasso.defaultBitmapConfig)
 
@@ -55,9 +53,11 @@ class RequestCreator internal constructor(
   private var deferred = false
   private var setPlaceholder = true
 
-  @DrawableRes private var placeholderResId = 0
+  @DrawableRes
+  private var placeholderResId = 0
 
-  @DrawableRes private var errorResId = 0
+  @DrawableRes
+  private var errorResId = 0
   private var placeholderDrawable: Drawable? = null
   private var errorDrawable: Drawable? = null
 
@@ -180,8 +180,7 @@ class RequestCreator internal constructor(
    * Use 0 as desired dimension to resize keeping aspect ratio.
    */
   fun resizeDimen(
-    @DimenRes targetWidthResId: Int,
-    @DimenRes targetHeightResId: Int
+    @DimenRes targetWidthResId: Int, @DimenRes targetHeightResId: Int
   ): RequestCreator {
     val resources = picasso.context.resources
     val targetWidth = resources.getDimensionPixelSize(targetWidthResId)
@@ -307,8 +306,7 @@ class RequestCreator internal constructor(
    * options using the varargs parameter.
    */
   fun memoryPolicy(
-    policy: MemoryPolicy,
-    vararg additional: MemoryPolicy
+    policy: MemoryPolicy, vararg additional: MemoryPolicy
   ): RequestCreator {
     data.memoryPolicy(policy, *additional)
     return this
@@ -319,8 +317,7 @@ class RequestCreator internal constructor(
    * options using the varargs parameter.
    */
   fun networkPolicy(
-    policy: NetworkPolicy,
-    vararg additional: NetworkPolicy
+    policy: NetworkPolicy, vararg additional: NetworkPolicy
   ): RequestCreator {
     data.networkPolicy(policy, *additional)
     return this
@@ -376,7 +373,8 @@ class RequestCreator internal constructor(
    *
    * *Note:* It is safe to invoke this method from any thread.
    */
-  @JvmOverloads fun fetch(callback: Callback? = null) {
+  @JvmOverloads
+  fun fetch(callback: Callback? = null) {
     val started = System.nanoTime()
     check(!deferred) { "Fit cannot be used with fetch." }
 
@@ -481,15 +479,16 @@ class RequestCreator internal constructor(
             loadedFrom = LoadedFrom.MEMORY,
             noFade = noFade,
             debugging = picasso.indicatorsEnabled
-          ),
-          LoadedFrom.MEMORY
+          ), LoadedFrom.MEMORY
         )
         return
       }
     }
 
     target.onPrepareLoad(placeHolderDrawable)
-    val action = DrawableTargetAction(picasso, target, request, noFade, placeHolderDrawable, errorDrawable, errorResId)
+    val action = DrawableTargetAction(
+      picasso, target, request, noFade, placeHolderDrawable, errorDrawable, errorResId
+    )
     picasso.enqueueAndSubmit(action)
   }
 
@@ -531,10 +530,7 @@ class RequestCreator internal constructor(
    * given [viewId]. This is used for loading bitmaps into all instances of a widget.
    */
   fun into(
-    remoteViews: RemoteViews,
-    @IdRes viewId: Int,
-    appWidgetId: Int,
-    callback: Callback? = null
+    remoteViews: RemoteViews, @IdRes viewId: Int, appWidgetId: Int, callback: Callback? = null
   ) {
     into(remoteViews, viewId, intArrayOf(appWidgetId), callback)
   }
@@ -545,10 +541,7 @@ class RequestCreator internal constructor(
    */
   @JvmOverloads
   fun into(
-    remoteViews: RemoteViews,
-    @IdRes viewId: Int,
-    appWidgetIds: IntArray,
-    callback: Callback? = null
+    remoteViews: RemoteViews, @IdRes viewId: Int, appWidgetIds: IntArray, callback: Callback? = null
   ) {
     val started = System.nanoTime()
     check(!deferred) { "Fit cannot be used with remote views." }
@@ -558,12 +551,7 @@ class RequestCreator internal constructor(
 
     val request = createRequest(started)
     val action = AppWidgetAction(
-      picasso,
-      request,
-      errorResId,
-      RemoteViewsTarget(remoteViews, viewId),
-      appWidgetIds,
-      callback
+      picasso, request, errorResId, RemoteViewsTarget(remoteViews, viewId), appWidgetIds, callback
     )
 
     performRemoteViewInto(request, action)
@@ -580,7 +568,8 @@ class RequestCreator internal constructor(
    *
    * *Note:* This method will automatically support object recycling.
    */
-  @JvmOverloads fun into(target: ImageView, callback: Callback? = null) {
+  @JvmOverloads
+  fun into(target: ImageView, callback: Callback? = null) {
     val started = System.nanoTime()
     checkMain()
 
@@ -627,13 +616,7 @@ class RequestCreator internal constructor(
     }
 
     val action = ImageViewAction(
-      picasso,
-      target,
-      request,
-      errorDrawable,
-      errorResId,
-      noFade,
-      callback
+      picasso, target, request, errorDrawable, errorResId, noFade, callback
     )
 
     picasso.enqueueAndSubmit(action)

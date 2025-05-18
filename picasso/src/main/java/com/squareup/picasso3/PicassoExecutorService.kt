@@ -28,15 +28,9 @@ import java.util.concurrent.TimeUnit.MILLISECONDS
  * The default [java.util.concurrent.ExecutorService] used for new [Picasso] instances.
  */
 class PicassoExecutorService(
-  threadCount: Int = DEFAULT_THREAD_COUNT,
-  threadFactory: ThreadFactory = PicassoThreadFactory()
+  threadCount: Int = DEFAULT_THREAD_COUNT, threadFactory: ThreadFactory = PicassoThreadFactory()
 ) : ThreadPoolExecutor(
-  threadCount,
-  threadCount,
-  0,
-  MILLISECONDS,
-  PriorityBlockingQueue(),
-  threadFactory
+  threadCount, threadCount, 0, MILLISECONDS, PriorityBlockingQueue(), threadFactory
 ) {
   override fun submit(task: Runnable): Future<*> {
     val ftask = PicassoFutureTask(task as BitmapHunter)

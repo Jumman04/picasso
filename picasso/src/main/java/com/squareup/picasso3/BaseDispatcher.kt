@@ -81,7 +81,8 @@ internal abstract class BaseDispatcher internal constructor(
     receiver.register()
   }
 
-  @CallSuper override fun shutdown() {
+  @CallSuper
+  override fun shutdown() {
     // Unregister network broadcast receiver on the main thread.
     mainThreadHandler.post { receiver.unregister() }
   }
@@ -273,9 +274,7 @@ internal abstract class BaseDispatcher internal constructor(
     if (hunter.shouldRetry(airplaneMode, networkInfo)) {
       if (hunter.picasso.isLoggingEnabled) {
         log(
-          owner = OWNER_DISPATCHER,
-          verb = VERB_RETRYING,
-          logId = getLogIdsForHunter(hunter)
+          owner = OWNER_DISPATCHER, verb = VERB_RETRYING, logId = getLogIdsForHunter(hunter)
         )
       }
       if (hunter.exception is ContentLengthException) {
@@ -342,9 +341,7 @@ internal abstract class BaseDispatcher internal constructor(
         iterator.remove()
         if (action.picasso.isLoggingEnabled) {
           log(
-            owner = OWNER_DISPATCHER,
-            verb = VERB_REPLAYING,
-            logId = action.request.logId()
+            owner = OWNER_DISPATCHER, verb = VERB_REPLAYING, logId = action.request.logId()
           )
         }
         performSubmit(action, false)
@@ -383,9 +380,7 @@ internal abstract class BaseDispatcher internal constructor(
     val picasso = bitmapHunter.picasso
     if (picasso.isLoggingEnabled) {
       log(
-        owner = OWNER_DISPATCHER,
-        verb = VERB_DELIVERED,
-        logId = getLogIdsForHunter(bitmapHunter)
+        owner = OWNER_DISPATCHER, verb = VERB_DELIVERED, logId = getLogIdsForHunter(bitmapHunter)
       )
     }
   }
@@ -420,6 +415,7 @@ internal abstract class BaseDispatcher internal constructor(
           }
           dispatcher.dispatchAirplaneModeChange(intent.getBooleanExtra(EXTRA_AIRPLANE_STATE, false))
         }
+
         CONNECTIVITY_ACTION -> {
           val connectivityManager =
             ContextCompat.getSystemService(context, ConnectivityManager::class.java)

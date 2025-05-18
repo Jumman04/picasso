@@ -41,8 +41,7 @@ internal class DrawableTargetAction(
           loadedFrom = result.loadedFrom,
           noFade = noFade,
           debugging = picasso.indicatorsEnabled
-        ),
-        result.loadedFrom
+        ), result.loadedFrom
       )
       check(!bitmap.isRecycled) { "Target callback must not recycle bitmap!" }
     }

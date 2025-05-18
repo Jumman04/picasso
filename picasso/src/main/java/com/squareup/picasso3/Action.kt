@@ -18,8 +18,7 @@ package com.squareup.picasso3
 import com.squareup.picasso3.RequestHandler.Result
 
 internal abstract class Action(
-  val picasso: Picasso,
-  val request: Request
+  val picasso: Picasso, val request: Request
 ) {
   var willReplay = false
   var cancelled = false

@@ -22,9 +22,7 @@ import android.widget.ImageView
 import java.lang.ref.WeakReference
 
 internal class DeferredRequestCreator(
-  private val creator: RequestCreator,
-  target: ImageView,
-  internal var callback: Callback?
+  private val creator: RequestCreator, target: ImageView, internal var callback: Callback?
 ) : ViewTreeObserver.OnPreDrawListener, OnAttachStateChangeListener {
   private val targetReference = WeakReference(target)
 

@@ -33,13 +33,13 @@ enum class NetworkPolicy(val index: Int) {
   OFFLINE(1 shl 2);
 
   companion object {
-    @JvmStatic fun shouldReadFromDiskCache(networkPolicy: Int) =
-      networkPolicy and NO_CACHE.index == 0
+    @JvmStatic
+    fun shouldReadFromDiskCache(networkPolicy: Int) = networkPolicy and NO_CACHE.index == 0
 
-    @JvmStatic fun shouldWriteToDiskCache(networkPolicy: Int) =
-      networkPolicy and NO_STORE.index == 0
+    @JvmStatic
+    fun shouldWriteToDiskCache(networkPolicy: Int) = networkPolicy and NO_STORE.index == 0
 
-    @JvmStatic fun isOfflineOnly(networkPolicy: Int) =
-      networkPolicy and OFFLINE.index != 0
+    @JvmStatic
+    fun isOfflineOnly(networkPolicy: Int) = networkPolicy and OFFLINE.index != 0
   }
 }
