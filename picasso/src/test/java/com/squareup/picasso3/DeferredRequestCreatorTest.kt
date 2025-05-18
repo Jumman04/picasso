@@ -15,6 +15,7 @@
  */
 package com.squareup.picasso3
 
+import androidx.test.core.app.ApplicationProvider
 import com.google.common.truth.Truth.assertThat
 import com.squareup.picasso3.TestUtils.argumentCaptor
 import com.squareup.picasso3.TestUtils.mockCallback
@@ -29,20 +30,21 @@ import org.mockito.Mockito.verify
 import org.mockito.Mockito.verifyNoMoreInteractions
 import org.mockito.Mockito.`when`
 import org.robolectric.RobolectricTestRunner
-import org.robolectric.RuntimeEnvironment
 
 @RunWith(RobolectricTestRunner::class)
 class DeferredRequestCreatorTest {
-  private val picasso = mockPicasso(RuntimeEnvironment.application)
+  private val picasso = mockPicasso(ApplicationProvider.getApplicationContext())
 
-  @Test fun initWhileAttachedAddsAttachAndPreDrawListener() {
+  @Test
+  fun initWhileAttachedAddsAttachAndPreDrawListener() {
     val target = mockFitImageViewTarget(true)
     val observer = target.viewTreeObserver
     val request = DeferredRequestCreator(mockRequestCreator(picasso), target, null)
     verify(observer).addOnPreDrawListener(request)
   }
 
-  @Test fun initWhileDetachedAddsAttachListenerWhichDefersPreDrawListener() {
+  @Test
+  fun initWhileDetachedAddsAttachListenerWhichDefersPreDrawListener() {
     val target = mockFitImageViewTarget(true)
     `when`(target.windowToken).thenReturn(null)
     val observer = target.viewTreeObserver
@@ -59,7 +61,8 @@ class DeferredRequestCreatorTest {
     verify(observer).removeOnPreDrawListener(request)
   }
 
-  @Test fun cancelWhileAttachedRemovesAttachListener() {
+  @Test
+  fun cancelWhileAttachedRemovesAttachListener() {
     val target = mockFitImageViewTarget(true)
     val request = DeferredRequestCreator(mockRequestCreator(picasso), target, null)
     verify(target).addOnAttachStateChangeListener(request)
@@ -67,7 +70,8 @@ class DeferredRequestCreatorTest {
     verify(target).removeOnAttachStateChangeListener(request)
   }
 
-  @Test fun cancelClearsCallback() {
+  @Test
+  fun cancelClearsCallback() {
     val target = mockFitImageViewTarget(true)
     val callback = mockCallback()
     val request = DeferredRequestCreator(mockRequestCreator(picasso), target, callback)
@@ -76,7 +80,8 @@ class DeferredRequestCreatorTest {
     assertThat(request.callback).isNull()
   }
 
-  @Test fun cancelClearsTag() {
+  @Test
+  fun cancelClearsTag() {
     val target = mockFitImageViewTarget(true)
     val creator = mockRequestCreator(picasso).tag("TAG")
     val request = DeferredRequestCreator(creator, target, null)
@@ -86,7 +91,8 @@ class DeferredRequestCreatorTest {
     assertThat(creator.tag).isNull()
   }
 
-  @Test fun onLayoutSkipsIfViewIsAttachedAndViewTreeObserverIsDead() {
+  @Test
+  fun onLayoutSkipsIfViewIsAttachedAndViewTreeObserverIsDead() {
     val target = mockFitImageViewTarget(false)
     val creator = mockRequestCreator(picasso)
     val request = DeferredRequestCreator(creator, target, null)
@@ -97,7 +103,8 @@ class DeferredRequestCreatorTest {
     verifyNoMoreInteractions(viewTreeObserver)
   }
 
-  @Test fun waitsForAnotherLayoutIfWidthOrHeightIsZero() {
+  @Test
+  fun waitsForAnotherLayoutIfWidthOrHeightIsZero() {
     val target = mockFitImageViewTarget(true)
     `when`(target.width).thenReturn(0)
     `when`(target.height).thenReturn(0)
@@ -107,7 +114,8 @@ class DeferredRequestCreatorTest {
     verify(target.viewTreeObserver, never()).removeOnPreDrawListener(request)
   }
 
-  @Test fun cancelSkipsIfViewTreeObserverIsDead() {
+  @Test
+  fun cancelSkipsIfViewTreeObserverIsDead() {
     val target = mockFitImageViewTarget(false)
     val creator = mockRequestCreator(picasso)
     val request = DeferredRequestCreator(creator, target, null)
@@ -115,7 +123,8 @@ class DeferredRequestCreatorTest {
     verify(target.viewTreeObserver, never()).removeOnPreDrawListener(request)
   }
 
-  @Test fun preDrawSubmitsRequestAndCleansUp() {
+  @Test
+  fun preDrawSubmitsRequestAndCleansUp() {
     val spyPicasso = spy(picasso) // ugh
     val creator = RequestCreator(spyPicasso, TestUtils.URI_1, 0)
 
