@@ -54,8 +54,7 @@ class PicassoPainterTest {
     lateinit var lastRequest: Request
     val context = InstrumentationRegistry.getInstrumentation().targetContext
 
-    val picasso = Picasso.Builder(context)
-      .callFactory { throw RuntimeException() }
+    val picasso = Picasso.Builder(context).callFactory { throw RuntimeException() }
       .dispatchers(Dispatchers.Unconfined, Dispatchers.Unconfined)
       .addRequestHandler(object : RequestHandler() {
         override fun canHandleRequest(data: Request): Boolean = true
@@ -63,8 +62,7 @@ class PicassoPainterTest {
           lastRequest = request
           callback.onSuccess(Result.Bitmap(Bitmap.createBitmap(1, 1, ARGB_8888), LoadedFrom.MEMORY))
         }
-      })
-      .build()
+      }).build()
     var size: IntSize by mutableStateOf(IntSize.Zero)
     var drawn = false
 
@@ -73,15 +71,13 @@ class PicassoPainterTest {
         val painter = picasso.rememberPainter {
           it.load("http://example.com/")
             // Headers are not part of a cache key, using a stable key to break cache
-            .stableKey("http://example.com/$size")
-            .addHeader("width", size.width.toString())
+            .stableKey("http://example.com/$size").addHeader("width", size.width.toString())
             .addHeader("height", size.height.toString())
         }
         Canvas(
           Modifier
             .requiredSize(9.dp)
-            .onSizeChanged { size = it }
-        ) {
+            .onSizeChanged { size = it }) {
           val canvasSize = this.size
 
           with(painter) {
@@ -97,8 +93,7 @@ class PicassoPainterTest {
     // Draw triggers request was made with size.
     assertThat(lastRequest.headers?.toMultimap()).containsAtLeastEntriesIn(
       mapOf(
-        "width" to listOf("9"),
-        "height" to listOf("9")
+        "width" to listOf("9"), "height" to listOf("9")
       )
     )
   }
@@ -107,8 +102,7 @@ class PicassoPainterTest {
   fun redrawDoesNotReexecuteUnchangedRequest() {
     var requestCount = 0
     val context = InstrumentationRegistry.getInstrumentation().targetContext
-    val picasso = Picasso.Builder(context)
-      .callFactory { throw RuntimeException() }
+    val picasso = Picasso.Builder(context).callFactory { throw RuntimeException() }
       .dispatchers(Dispatchers.Unconfined, Dispatchers.Unconfined)
       .addRequestHandler(object : RequestHandler() {
         override fun canHandleRequest(data: Request): Boolean = true
@@ -116,8 +110,7 @@ class PicassoPainterTest {
           requestCount++
           callback.onSuccess(Result.Bitmap(Bitmap.createBitmap(1, 1, ARGB_8888), LoadedFrom.MEMORY))
         }
-      })
-      .build()
+      }).build()
 
     var drawInvalidator by mutableStateOf(0)
     var drawCount = 0
@@ -146,8 +139,7 @@ class PicassoPainterTest {
   fun newRequestLoaded_whenRequestDependenciesChangedAfterFirstFrame() {
     var lastRequest: Request? = null
     val context = InstrumentationRegistry.getInstrumentation().targetContext
-    val picasso = Picasso.Builder(context)
-      .callFactory { throw RuntimeException() }
+    val picasso = Picasso.Builder(context).callFactory { throw RuntimeException() }
       .dispatchers(Dispatchers.Unconfined, Dispatchers.Unconfined)
       .addRequestHandler(object : RequestHandler() {
         override fun canHandleRequest(data: Request): Boolean = true
@@ -155,8 +147,7 @@ class PicassoPainterTest {
           lastRequest = request
           callback.onSuccess(Result.Bitmap(Bitmap.createBitmap(1, 1, ARGB_8888), LoadedFrom.MEMORY))
         }
-      })
-      .build()
+      }).build()
     var testHeader by mutableStateOf("one")
 
     rule.setContent {
@@ -164,8 +155,7 @@ class PicassoPainterTest {
         val painter = picasso.rememberPainter {
           it.load("http://example.com/")
             // Headers are not part of a cache key, using a stable key to break cache
-            .stableKey("http://example.com/$testHeader")
-            .addHeader("testHeader", testHeader)
+            .stableKey("http://example.com/$testHeader").addHeader("testHeader", testHeader)
         }
         Canvas(Modifier.fillMaxSize()) {
           val canvasSize = this.size
@@ -186,12 +176,12 @@ class PicassoPainterTest {
     // On API 21 runOnIdle runs before the composition recomposes :-(
     // Waiting until the request updates, then asserting
     rule.waitUntil { currentRequest != lastRequest }
-    assertThat(lastRequest!!.headers?.get("testHeader")).isEqualTo("two")
+    assertThat(lastRequest.headers?.get("testHeader")).isEqualTo("two")
 
     currentRequest = lastRequest
     testHeader = "three"
 
     rule.waitUntil { currentRequest != lastRequest }
-    assertThat(lastRequest!!.headers?.get("testHeader")).isEqualTo("three")
+    assertThat(lastRequest.headers?.get("testHeader")).isEqualTo("three")
   }
 }

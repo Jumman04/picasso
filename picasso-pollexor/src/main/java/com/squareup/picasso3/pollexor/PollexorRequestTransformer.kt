@@ -18,7 +18,6 @@ package com.squareup.picasso3.pollexor
 import android.net.Uri
 import com.squareup.picasso3.Picasso.RequestTransformer
 import com.squareup.picasso3.Request
-import com.squareup.picasso3.pollexor.PollexorRequestTransformer.Callback
 import com.squareup.pollexor.Thumbor
 import com.squareup.pollexor.ThumborUrlBuilder
 import com.squareup.pollexor.ThumborUrlBuilder.ImageFormat.WEBP

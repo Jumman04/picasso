@@ -30,137 +30,125 @@ class PollexorRequestTransformerTest {
   private val transformer = PollexorRequestTransformer(Thumbor.create(HOST))
   private val secureTransformer = PollexorRequestTransformer(Thumbor.create(HOST, KEY))
   private val alwaysResizeTransformer = PollexorRequestTransformer(
-    Thumbor.create(HOST),
-    alwaysTransform = true
+    Thumbor.create(HOST), alwaysTransform = true
   )
   private val callbackTransformer = PollexorRequestTransformer(
-    Thumbor.create(HOST),
-    callback = { it.filter("custom") }
-  )
+    Thumbor.create(HOST), callback = { it.filter("custom") })
 
-  @Test fun resourceIdRequestsAreNotTransformed() {
+  @Test
+  fun resourceIdRequestsAreNotTransformed() {
     val input = Builder(12).build()
     val output = transformer.transformRequest(input)
     assertThat(output).isSameInstanceAs(input)
   }
 
-  @Test fun resourceIdRequestsAreNotTransformedWhenAlwaysTransformIsTrue() {
+  @Test
+  fun resourceIdRequestsAreNotTransformedWhenAlwaysTransformIsTrue() {
     val input = Builder(12).build()
     val output = alwaysResizeTransformer.transformRequest(input)
     assertThat(output).isSameInstanceAs(input)
   }
 
-  @Test fun nonHttpRequestsAreNotTransformed() {
+  @Test
+  fun nonHttpRequestsAreNotTransformed() {
     val input = Builder(IMAGE_URI).build()
     val output = transformer.transformRequest(input)
     assertThat(output).isSameInstanceAs(input)
   }
 
-  @Test fun nonResizedRequestsAreNotTransformed() {
+  @Test
+  fun nonResizedRequestsAreNotTransformed() {
     val input = Builder(IMAGE_URI).build()
     val output = transformer.transformRequest(input)
     assertThat(output).isSameInstanceAs(input)
   }
 
-  @Test fun nonResizedRequestsAreTransformedWhenAlwaysTransformIsSet() {
+  @Test
+  fun nonResizedRequestsAreTransformedWhenAlwaysTransformIsSet() {
     val input = Builder(IMAGE_URI).build()
     val output = alwaysResizeTransformer.transformRequest(input)
     assertThat(output).isNotSameInstanceAs(input)
     assertThat(output.hasSize()).isFalse()
 
-    val expected = Thumbor.create(HOST)
-      .buildImage(IMAGE)
-      .filter(ThumborUrlBuilder.format(WEBP))
-      .toUrl()
+    val expected =
+      Thumbor.create(HOST).buildImage(IMAGE).filter(ThumborUrlBuilder.format(WEBP)).toUrl()
     assertThat(output.uri.toString()).isEqualTo(expected)
   }
 
-  @Test fun simpleResize() {
+  @Test
+  fun simpleResize() {
     val input = Builder(IMAGE_URI).resize(50, 50).build()
     val output = transformer.transformRequest(input)
     assertThat(output).isNotSameInstanceAs(input)
     assertThat(output.hasSize()).isFalse()
 
-    val expected = Thumbor.create(HOST)
-      .buildImage(IMAGE)
-      .resize(50, 50)
-      .filter(ThumborUrlBuilder.format(WEBP))
-      .toUrl()
+    val expected =
+      Thumbor.create(HOST).buildImage(IMAGE).resize(50, 50).filter(ThumborUrlBuilder.format(WEBP))
+        .toUrl()
     assertThat(output.uri.toString()).isEqualTo(expected)
   }
 
-  @Test fun simpleResizeWithCenterCrop() {
+  @Test
+  fun simpleResizeWithCenterCrop() {
     val input = Builder(IMAGE_URI).resize(50, 50).centerCrop().build()
     val output = transformer.transformRequest(input)
     assertThat(output).isNotSameInstanceAs(input)
     assertThat(output.hasSize()).isFalse()
     assertThat(output.centerCrop).isFalse()
 
-    val expected = Thumbor.create(HOST)
-      .buildImage(IMAGE)
-      .resize(50, 50)
-      .filter(ThumborUrlBuilder.format(WEBP))
-      .toUrl()
+    val expected =
+      Thumbor.create(HOST).buildImage(IMAGE).resize(50, 50).filter(ThumborUrlBuilder.format(WEBP))
+        .toUrl()
     assertThat(output.uri.toString()).isEqualTo(expected)
   }
 
-  @Test fun simpleResizeWithCenterInside() {
+  @Test
+  fun simpleResizeWithCenterInside() {
     val input = Builder(IMAGE_URI).resize(50, 50).centerInside().build()
     val output = transformer.transformRequest(input)
     assertThat(output).isNotSameInstanceAs(input)
     assertThat(output.hasSize()).isFalse()
     assertThat(output.centerInside).isFalse()
 
-    val expected = Thumbor.create(HOST)
-      .buildImage(IMAGE)
-      .resize(50, 50)
-      .filter(ThumborUrlBuilder.format(WEBP))
-      .fitIn()
-      .toUrl()
+    val expected =
+      Thumbor.create(HOST).buildImage(IMAGE).resize(50, 50).filter(ThumborUrlBuilder.format(WEBP))
+        .fitIn().toUrl()
     assertThat(output.uri.toString()).isEqualTo(expected)
   }
 
-  @Test fun simpleResizeWithEncryption() {
+  @Test
+  fun simpleResizeWithEncryption() {
     val input = Builder(IMAGE_URI).resize(50, 50).build()
     val output = secureTransformer.transformRequest(input)
     assertThat(output).isNotSameInstanceAs(input)
     assertThat(output.hasSize()).isFalse()
 
-    val expected = Thumbor.create(HOST, KEY)
-      .buildImage(IMAGE)
-      .resize(50, 50)
-      .filter(ThumborUrlBuilder.format(WEBP))
-      .toUrl()
+    val expected = Thumbor.create(HOST, KEY).buildImage(IMAGE).resize(50, 50)
+      .filter(ThumborUrlBuilder.format(WEBP)).toUrl()
     assertThat(output.uri.toString()).isEqualTo(expected)
   }
 
-  @Test fun simpleResizeWithCenterInsideAndEncryption() {
+  @Test
+  fun simpleResizeWithCenterInsideAndEncryption() {
     val input = Builder(IMAGE_URI).resize(50, 50).centerInside().build()
     val output = secureTransformer.transformRequest(input)
     assertThat(output).isNotSameInstanceAs(input)
     assertThat(output.hasSize()).isFalse()
     assertThat(output.centerInside).isFalse()
 
-    val expected = Thumbor.create(HOST, KEY)
-      .buildImage(IMAGE)
-      .resize(50, 50)
-      .filter(ThumborUrlBuilder.format(WEBP))
-      .fitIn()
-      .toUrl()
+    val expected = Thumbor.create(HOST, KEY).buildImage(IMAGE).resize(50, 50)
+      .filter(ThumborUrlBuilder.format(WEBP)).fitIn().toUrl()
     assertThat(output.uri.toString()).isEqualTo(expected)
   }
 
-  @Test fun configureCallback() {
+  @Test
+  fun configureCallback() {
     val input = Builder(IMAGE_URI).resize(50, 50).build()
     val output = callbackTransformer.transformRequest(input)
     assertThat(output).isNotSameInstanceAs(input)
     assertThat(output.hasSize()).isFalse()
-    val expected = Thumbor.create(HOST)
-      .buildImage(IMAGE)
-      .resize(50, 50)
-      .filter("custom")
-      .filter(ThumborUrlBuilder.format(WEBP))
-      .toUrl()
+    val expected = Thumbor.create(HOST).buildImage(IMAGE).resize(50, 50).filter("custom")
+      .filter(ThumborUrlBuilder.format(WEBP)).toUrl()
     assertThat(output.uri.toString()).isEqualTo(expected)
   }
 

@@ -37,9 +37,7 @@ import com.squareup.picasso3.RequestCreator
 
 @Composable
 fun Picasso.rememberPainter(
-  key: Any? = null,
-  onError: ((Exception) -> Unit)? = null,
-  request: (Picasso) -> RequestCreator
+  key: Any? = null, onError: ((Exception) -> Unit)? = null, request: (Picasso) -> RequestCreator
 ): Painter {
   return remember(key) { PicassoPainter(this, request, onError) }
 }

@@ -28,29 +28,23 @@ import org.junit.Test
 import kotlinx.coroutines.Dispatchers
 
 class PicassoPaparazziTest {
-  @get:Rule val paparazzi = Paparazzi()
+  @get:Rule
+  val paparazzi = Paparazzi()
 
   @Test
   fun loadsUrlIntoImageView() {
-    val picasso = Picasso.Builder(paparazzi.context)
-      .callFactory { throw AssertionError() } // Removes network
-      .dispatchers(
-        mainContext = Dispatchers.Unconfined,
-        backgroundContext = Dispatchers.Unconfined
-      )
-      .addRequestHandler(FakeRequestHandler())
-      .build()
+    val picasso =
+      Picasso.Builder(paparazzi.context).callFactory { throw AssertionError() } // Removes network
+        .dispatchers(
+          mainContext = Dispatchers.Unconfined, backgroundContext = Dispatchers.Unconfined
+        ).addRequestHandler(FakeRequestHandler()).build()
 
     paparazzi.snapshot(
       ImageView(paparazzi.context).apply {
         scaleType = CENTER
-        picasso.load("fake:///zkaAooq.png")
-          .resize(200, 200)
-          .centerInside()
-          .onlyScaleDown()
+        picasso.load("fake:///zkaAooq.png").resize(200, 200).centerInside().onlyScaleDown()
           .into(this)
-      }
-    )
+      })
   }
 
   class FakeRequestHandler : RequestHandler() {
