@@ -21,7 +21,7 @@ buildscript {
 apply plugin: 'binary-compatibility-validator'
 
 apiValidation {
-  _Projects += ['picasso-sample', 'picasso-paparazzi-sample']
+  ignoredProjects += ['picasso-sample', 'picasso-paparazzi-sample']
 }
 
 subprojects {

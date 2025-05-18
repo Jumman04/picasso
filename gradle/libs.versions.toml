@@ -10,7 +10,7 @@ paparazzi = '1.3.4'
 
 minSdk = '24'
 compileSdk = '36'
-core = "1.5.0"
+core = "1.6.1"
 
 [libraries]
 androidx-annotations = { module = 'androidx.annotation:annotation', version = '1.9.1' }
