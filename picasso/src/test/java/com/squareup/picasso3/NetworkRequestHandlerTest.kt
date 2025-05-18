@@ -52,11 +52,13 @@ class NetworkRequestHandlerTest {
   private val responses = LinkedBlockingDeque<Response>()
   private val requests = LinkedBlockingDeque<okhttp3.Request>()
 
-  @Mock internal lateinit var dispatcher: Dispatcher
+  @Mock
+  internal lateinit var dispatcher: Dispatcher
   private lateinit var picasso: Picasso
   private lateinit var networkHandler: NetworkRequestHandler
 
-  @Before fun setUp() {
+  @Before
+  fun setUp() {
     initMocks(this)
     picasso = mockPicasso(RuntimeEnvironment.application)
     networkHandler = NetworkRequestHandler { request ->
@@ -69,14 +71,13 @@ class NetworkRequestHandlerTest {
     }
   }
 
-  @Test fun doesNotForceLocalCacheOnlyWithAirplaneModeOffAndRetryCount() {
+  @Test
+  fun doesNotForceLocalCacheOnlyWithAirplaneModeOffAndRetryCount() {
     responses.add(responseOf(ByteArray(10).toResponseBody(null)))
     val action = TestUtils.mockAction(picasso, URI_KEY_1, URI_1)
     val latch = CountDownLatch(1)
     networkHandler.load(
-      picasso = picasso,
-      request = action.request,
-      callback = object : RequestHandler.Callback {
+      picasso = picasso, request = action.request, callback = object : RequestHandler.Callback {
         override fun onSuccess(result: Result?) {
           try {
             assertThat(requests.takeFirst().cacheControl.toString()).isEmpty()
@@ -87,51 +88,55 @@ class NetworkRequestHandlerTest {
         }
 
         override fun onError(t: Throwable): Unit = throw AssertionError(t)
-      }
-    )
+      })
     assertThat(latch.await(10, SECONDS)).isTrue()
   }
 
-  @Test fun withZeroRetryCountForcesLocalCacheOnly() {
+  @Test
+  fun withZeroRetryCountForcesLocalCacheOnly() {
     responses.add(responseOf(ByteArray(10).toResponseBody(null)))
     val action = TestUtils.mockAction(picasso, URI_KEY_1, URI_1)
     val cache = PlatformLruCache(0)
     val hunter = BitmapHunter(picasso, dispatcher, cache, action, networkHandler)
     hunter.retryCount = 0
     hunter.hunt()
-    assertThat(requests.takeFirst().cacheControl.toString())
-      .isEqualTo(CacheControl.FORCE_CACHE.toString())
+    assertThat(requests.takeFirst().cacheControl.toString()).isEqualTo(CacheControl.FORCE_CACHE.toString())
   }
 
-  @Test fun shouldRetryTwiceWithAirplaneModeOffAndNoNetworkInfo() {
+  @Test
+  fun shouldRetryTwiceWithAirplaneModeOffAndNoNetworkInfo() {
     val action = TestUtils.mockAction(picasso, URI_KEY_1, URI_1)
     val cache = PlatformLruCache(0)
     val hunter = BitmapHunter(picasso, dispatcher, cache, action, networkHandler)
-    assertThat(hunter.shouldRetry(airplaneMode = false, info = null)).isTrue()
-    assertThat(hunter.shouldRetry(airplaneMode = false, info = null)).isTrue()
-    assertThat(hunter.shouldRetry(airplaneMode = false, info = null)).isFalse()
+    assertThat(hunter.shouldRetry(isConnected = false)).isTrue()
+    assertThat(hunter.shouldRetry(isConnected = false)).isTrue()
+    assertThat(hunter.shouldRetry(isConnected = false)).isFalse()
   }
 
-  @Test fun shouldRetryWithUnknownNetworkInfo() {
-    assertThat(networkHandler.shouldRetry(airplaneMode = false, info = null)).isTrue()
-    assertThat(networkHandler.shouldRetry(airplaneMode = true, info = null)).isTrue()
+  @Test
+  fun shouldRetryWithUnknownNetworkInfo() {
+    assertThat(networkHandler.shouldRetry(isConnected = false)).isTrue()
+    assertThat(networkHandler.shouldRetry(isConnected = false)).isTrue()
   }
 
-  @Test fun shouldRetryWithConnectedNetworkInfo() {
+  @Test
+  fun shouldRetryWitthConnectedNetworkInfo() {
     val info = mockNetworkInfo()
-    `when`(info.isConnected).thenReturn(true)
-    assertThat(networkHandler.shouldRetry(airplaneMode = false, info = info)).isTrue()
-    assertThat(networkHandler.shouldRetry(airplaneMode = true, info = info)).isTrue()
+    `when`(info).thenReturn(true)
+    assertThat(networkHandler.shouldRetry(isConnected = info)).isTrue()
+    assertThat(networkHandler.shouldRetry(isConnected = info)).isTrue()
   }
 
-  @Test fun shouldNotRetryWithDisconnectedNetworkInfo() {
+  @Test
+  fun shouldNotRetryWithDisconnectedNetworkInfo() {
     val info = mockNetworkInfo()
-    `when`(info.isConnectedOrConnecting).thenReturn(false)
-    assertThat(networkHandler.shouldRetry(airplaneMode = false, info = info)).isFalse()
-    assertThat(networkHandler.shouldRetry(airplaneMode = true, info = info)).isFalse()
+    `when`(info).thenReturn(false)
+    assertThat(networkHandler.shouldRetry(isConnected = info)).isFalse()
+    assertThat(networkHandler.shouldRetry(isConnected = info)).isFalse()
   }
 
-  @Test fun noCacheAndKnownContentLengthDispatchToStats() {
+  @Test
+  fun noCacheAndKnownContentLengthDispatchToStats() {
     val eventRecorder = EventRecorder()
     val picasso = picasso.newBuilder().addEventListener(eventRecorder).build()
     val knownContentLengthSize = 10
@@ -139,21 +144,19 @@ class NetworkRequestHandlerTest {
     val action = TestUtils.mockAction(picasso, URI_KEY_1, URI_1)
     val latch = CountDownLatch(1)
     networkHandler.load(
-      picasso = picasso,
-      request = action.request,
-      callback = object : RequestHandler.Callback {
+      picasso = picasso, request = action.request, callback = object : RequestHandler.Callback {
         override fun onSuccess(result: Result?) {
           assertThat(eventRecorder.downloadSize).isEqualTo(knownContentLengthSize)
           latch.countDown()
         }
 
         override fun onError(t: Throwable): Unit = throw AssertionError(t)
-      }
-    )
+      })
     assertThat(latch.await(10, SECONDS)).isTrue()
   }
 
-  @Test fun unknownContentLengthFromDiskThrows() {
+  @Test
+  fun unknownContentLengthFromDiskThrows() {
     val eventRecorder = EventRecorder()
     val picasso = picasso.newBuilder().addEventListener(eventRecorder).build()
     val closed = AtomicBoolean()
@@ -166,16 +169,11 @@ class NetworkRequestHandlerTest {
         super.close()
       }
     }
-    responses += responseOf(body)
-      .newBuilder()
-      .cacheResponse(responseOf(null))
-      .build()
+    responses += responseOf(body).newBuilder().cacheResponse(responseOf(null)).build()
     val action = TestUtils.mockAction(picasso, URI_KEY_1, URI_1)
     val latch = CountDownLatch(1)
     networkHandler.load(
-      picasso = picasso,
-      request = action.request,
-      callback = object : RequestHandler.Callback {
+      picasso = picasso, request = action.request, callback = object : RequestHandler.Callback {
         override fun onSuccess(result: Result?): Unit = throw AssertionError()
 
         override fun onError(t: Throwable) {
@@ -183,40 +181,34 @@ class NetworkRequestHandlerTest {
           assertTrue(closed.get())
           latch.countDown()
         }
-      }
-    )
+      })
     assertThat(latch.await(10, SECONDS)).isTrue()
   }
 
-  @Test fun cachedResponseDoesNotDispatchToStats() {
+  @Test
+  fun cachedResponseDoesNotDispatchToStats() {
     val eventRecorder = EventRecorder()
     val picasso = picasso.newBuilder().addEventListener(eventRecorder).build()
-    responses += responseOf(ByteArray(10).toResponseBody(null))
-      .newBuilder()
-      .cacheResponse(responseOf(null))
-      .build()
+    responses += responseOf(ByteArray(10).toResponseBody(null)).newBuilder()
+      .cacheResponse(responseOf(null)).build()
     val action = TestUtils.mockAction(picasso, URI_KEY_1, URI_1)
     val latch = CountDownLatch(1)
     networkHandler.load(
-      picasso = picasso,
-      request = action.request,
-      callback = object : RequestHandler.Callback {
+      picasso = picasso, request = action.request, callback = object : RequestHandler.Callback {
         override fun onSuccess(result: Result?) {
           assertThat(eventRecorder.downloadSize).isEqualTo(0)
           latch.countDown()
         }
 
         override fun onError(t: Throwable): Unit = throw AssertionError(t)
-      }
-    )
+      })
     assertThat(latch.await(10, SECONDS)).isTrue()
   }
 
-  @Test fun customHeaders() {
-    responses += responseOf(ByteArray(10).toResponseBody(null))
-      .newBuilder()
-      .cacheResponse(responseOf(null))
-      .build()
+  @Test
+  fun customHeaders() {
+    responses += responseOf(ByteArray(10).toResponseBody(null)).newBuilder()
+      .cacheResponse(responseOf(null)).build()
     val action = TestUtils.mockAction(
       picasso,
       key = URI_KEY_1,
@@ -225,9 +217,7 @@ class NetworkRequestHandlerTest {
     )
     val latch = CountDownLatch(1)
     networkHandler.load(
-      picasso = picasso,
-      request = action.request,
-      callback = object : RequestHandler.Callback {
+      picasso = picasso, request = action.request, callback = object : RequestHandler.Callback {
         override fun onSuccess(result: Result?) {
           with(requests.first.headers) {
             assertThat(names()).containsExactly(CUSTOM_HEADER_NAME)
@@ -237,12 +227,12 @@ class NetworkRequestHandlerTest {
         }
 
         override fun onError(t: Throwable): Unit = throw AssertionError(t)
-      }
-    )
+      })
     assertThat(latch.await(10, SECONDS)).isTrue()
   }
 
-  @Test fun shouldHandleSchemeInsensitiveCase() {
+  @Test
+  fun shouldHandleSchemeInsensitiveCase() {
     val schemes = arrayOf("http", "https", "HTTP", "HTTPS", "HTtP")
     for (scheme in schemes) {
       val uri = URI_1.buildUpon().scheme(scheme).build()
@@ -250,12 +240,7 @@ class NetworkRequestHandlerTest {
     }
   }
 
-  private fun responseOf(body: ResponseBody?) =
-    Response.Builder()
-      .code(200)
-      .protocol(HTTP_1_1)
-      .request(okhttp3.Request.Builder().url("http://example.com").build())
-      .message("OK")
-      .body(body)
-      .build()
+  private fun responseOf(body: ResponseBody?) = Response.Builder().code(200).protocol(HTTP_1_1)
+    .request(okhttp3.Request.Builder().url("http://example.com").build()).message("OK").body(body)
+    .build()
 }

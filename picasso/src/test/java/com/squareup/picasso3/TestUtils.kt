@@ -24,7 +24,9 @@ import android.content.res.Resources
 import android.graphics.Bitmap.Config.ALPHA_8
 import android.graphics.Bitmap.Config.ARGB_8888
 import android.graphics.drawable.Drawable
-import android.net.NetworkInfo
+import android.net.ConnectivityManager
+import android.net.Network
+import android.net.NetworkCapabilities
 import android.net.Uri
 import android.os.IBinder
 import android.provider.ContactsContract.Contacts.CONTENT_URI
@@ -72,8 +74,10 @@ internal object TestUtils {
   val FILE_KEY_1: String = Request.Builder(Uri.fromFile(FILE_1)).build().key
   val FILE_1_URL: Uri = Uri.parse("file:///" + FILE_1.path)
   val FILE_1_URL_NO_AUTHORITY: Uri = Uri.parse("file:/" + FILE_1.parent)
-  val MEDIA_STORE_CONTENT_1_URL: Uri = Images.Media.EXTERNAL_CONTENT_URI.buildUpon().appendPath("1").build()
-  val MEDIA_STORE_CONTENT_2_URL: Uri = Video.Media.EXTERNAL_CONTENT_URI.buildUpon().appendPath("1").build()
+  val MEDIA_STORE_CONTENT_1_URL: Uri =
+    Images.Media.EXTERNAL_CONTENT_URI.buildUpon().appendPath("1").build()
+  val MEDIA_STORE_CONTENT_2_URL: Uri =
+    Video.Media.EXTERNAL_CONTENT_URI.buildUpon().appendPath("1").build()
   val MEDIA_STORE_CONTENT_KEY_1: String = Request.Builder(MEDIA_STORE_CONTENT_1_URL).build().key
   val MEDIA_STORE_CONTENT_KEY_2: String = Request.Builder(MEDIA_STORE_CONTENT_2_URL).build().key
   val CONTENT_1_URL: Uri = Uri.parse("content://zip/zap/zoop.jpg")
@@ -90,18 +94,13 @@ internal object TestUtils {
   private const val RESOURCE_PACKAGE = "com.squareup.picasso3"
   private const val RESOURCE_TYPE = "drawable"
   private const val RESOURCE_NAME = "foo"
-  val RESOURCE_ID_URI: Uri = Uri.Builder()
-    .scheme(ContentResolver.SCHEME_ANDROID_RESOURCE)
-    .authority(RESOURCE_PACKAGE)
-    .appendPath(RESOURCE_ID_1.toString())
-    .build()
+  val RESOURCE_ID_URI: Uri =
+    Uri.Builder().scheme(ContentResolver.SCHEME_ANDROID_RESOURCE).authority(RESOURCE_PACKAGE)
+      .appendPath(RESOURCE_ID_1.toString()).build()
   val RESOURCE_ID_URI_KEY: String = Request.Builder(RESOURCE_ID_URI).build().key
-  val RESOURCE_TYPE_URI: Uri = Uri.Builder()
-    .scheme(ContentResolver.SCHEME_ANDROID_RESOURCE)
-    .authority(RESOURCE_PACKAGE)
-    .appendPath(RESOURCE_TYPE)
-    .appendPath(RESOURCE_NAME)
-    .build()
+  val RESOURCE_TYPE_URI: Uri =
+    Uri.Builder().scheme(ContentResolver.SCHEME_ANDROID_RESOURCE).authority(RESOURCE_PACKAGE)
+      .appendPath(RESOURCE_TYPE).appendPath(RESOURCE_NAME).build()
   val RESOURCE_TYPE_URI_KEY: String = Request.Builder(RESOURCE_TYPE_URI).build().key
   val CUSTOM_URI: Uri = Uri.parse("foo://bar")
   val CUSTOM_URI_KEY: String = Request.Builder(CUSTOM_URI).build().key
@@ -190,8 +189,7 @@ internal object TestUtils {
   fun mockCallback(): Callback = mock(Callback::class.java)
 
   fun mockDeferredRequestCreator(
-    creator: RequestCreator?,
-    target: ImageView
+    creator: RequestCreator?, target: ImageView
   ): DeferredRequestCreator {
     val observer = mock(ViewTreeObserver::class.java)
     `when`(target.viewTreeObserver).thenReturn(observer)
@@ -200,12 +198,33 @@ internal object TestUtils {
 
   fun mockRequestCreator(picasso: Picasso) = RequestCreator(picasso, null, 0)
 
-  fun mockNetworkInfo(isConnected: Boolean = false): NetworkInfo {
-    val mock = mock(NetworkInfo::class.java)
-    `when`(mock.isConnected).thenReturn(isConnected)
-    `when`(mock.isConnectedOrConnecting).thenReturn(isConnected)
-    return mock
+  fun mockNetworkInfo(isConnected: Boolean = false): Boolean {
+    val connectivityManager = mock(ConnectivityManager::class.java)
+    val network = mock(Network::class.java)
+    val capabilities = mock(NetworkCapabilities::class.java)
+
+    `when`(connectivityManager.activeNetwork).thenReturn(network)
+
+    if (isConnected) {
+      `when`(connectivityManager.getNetworkCapabilities(network)).thenReturn(capabilities)
+      `when`(capabilities.hasCapability(NetworkCapabilities.NET_CAPABILITY_INTERNET)).thenReturn(
+        true
+      )
+      `when`(capabilities.hasCapability(NetworkCapabilities.NET_CAPABILITY_VALIDATED)).thenReturn(
+        true
+      )
+    } else {
+      `when`(connectivityManager.getNetworkCapabilities(network)).thenReturn(null)
+    }
+
+    val activeNetwork = connectivityManager.activeNetwork
+    val networkCapabilities = connectivityManager.getNetworkCapabilities(activeNetwork)
+
+    return networkCapabilities?.hasCapability(NetworkCapabilities.NET_CAPABILITY_INTERNET) == true && networkCapabilities.hasCapability(
+      NetworkCapabilities.NET_CAPABILITY_VALIDATED
+    )
   }
+
 
   fun mockHunter(
     picasso: Picasso,
@@ -215,17 +234,16 @@ internal object TestUtils {
     shouldRetry: Boolean = false,
     supportsReplay: Boolean = false,
     dispatcher: Dispatcher = mock(Dispatcher::class.java)
-  ): BitmapHunter =
-    TestableBitmapHunter(
-      picasso = picasso,
-      dispatcher = dispatcher,
-      cache = PlatformLruCache(0),
-      action = action,
-      result = (result as Bitmap).bitmap,
-      exception = e,
-      shouldRetry = shouldRetry,
-      supportsReplay = supportsReplay
-    )
+  ): BitmapHunter = TestableBitmapHunter(
+    picasso = picasso,
+    dispatcher = dispatcher,
+    cache = PlatformLruCache(0),
+    action = action,
+    result = (result as Bitmap).bitmap,
+    exception = e,
+    shouldRetry = shouldRetry,
+    supportsReplay = supportsReplay
+  )
 
   fun mockPicasso(context: Context): Picasso {
     // Inject a RequestHandler that can handle any request.
@@ -236,7 +254,7 @@ internal object TestUtils {
 
       override fun load(picasso: Picasso, request: Request, callback: Callback) {
         val defaultResult = makeBitmap()
-        val result = RequestHandler.Result.Bitmap(defaultResult, MEMORY)
+        val result = Bitmap(defaultResult, MEMORY)
         callback.onSuccess(result)
       }
     }
@@ -245,24 +263,18 @@ internal object TestUtils {
   }
 
   fun mockPicasso(context: Context, requestHandler: RequestHandler): Picasso {
-    return Picasso.Builder(context)
-      .callFactory(UNUSED_CALL_FACTORY)
-      .withCacheSize(0)
-      .addRequestHandler(requestHandler)
-      .build()
+    return Picasso.Builder(context).callFactory(UNUSED_CALL_FACTORY).withCacheSize(0)
+      .addRequestHandler(requestHandler).build()
   }
 
   fun makeBitmap(
-    width: Int = 10,
-    height: Int = 10
+    width: Int = 10, height: Int = 10
   ): android.graphics.Bitmap = android.graphics.Bitmap.createBitmap(width, height, ALPHA_8)
 
   fun makeLoaderWithDrawable(drawable: Drawable?): DrawableLoader = DrawableLoader { drawable }
 
   internal class FakeAction(
-    picasso: Picasso,
-    request: Request,
-    private val target: Any
+    picasso: Picasso, request: Request, private val target: Any
   ) : Action(picasso, request) {
     var completedResult: Result? = null
     var errorException: Exception? = null
@@ -290,9 +302,7 @@ internal object TestUtils {
   val NO_EVENT_LISTENERS: List<EventListener> = emptyList()
 
   fun defaultPicasso(
-    context: Context,
-    hasRequestHandlers: Boolean,
-    hasTransformers: Boolean
+    context: Context, hasRequestHandlers: Boolean, hasTransformers: Boolean
   ): Picasso {
     val builder = Picasso.Builder(context)
 
@@ -302,15 +312,9 @@ internal object TestUtils {
     if (hasTransformers) {
       builder.addRequestTransformer(NOOP_TRANSFORMER)
     }
-    return builder
-      .callFactory(UNUSED_CALL_FACTORY)
-      .defaultBitmapConfig(DEFAULT_CONFIG)
-      .executor(PicassoExecutorService())
-      .indicatorsEnabled(true)
-      .listener(NOOP_LISTENER)
-      .loggingEnabled(true)
-      .withCacheSize(DEFAULT_CACHE_SIZE)
-      .build()
+    return builder.callFactory(UNUSED_CALL_FACTORY).defaultBitmapConfig(DEFAULT_CONFIG)
+      .executor(PicassoExecutorService()).indicatorsEnabled(true).listener(NOOP_LISTENER)
+      .loggingEnabled(true).withCacheSize(DEFAULT_CACHE_SIZE).build()
   }
 
   internal class EventRecorder : EventListener {
@@ -357,8 +361,7 @@ internal object TestUtils {
   }
 
   internal class PremadeCall(
-    private val request: okhttp3.Request,
-    private val response: Response
+    private val request: okhttp3.Request, private val response: Response
   ) : Call {
     override fun request(): okhttp3.Request = request
     override fun execute(): Response = response
@@ -369,6 +372,7 @@ internal object TestUtils {
         throw AssertionError(e)
       }
     }
+
     override fun cancel(): Unit = throw AssertionError()
     override fun isExecuted(): Boolean = throw AssertionError()
     override fun isCanceled(): Boolean = throw AssertionError()
@@ -387,8 +391,7 @@ internal object TestUtils {
     override fun awaitTermination(timeout: Long, unit: TimeUnit): Boolean =
       delegate.awaitTermination(timeout, unit)
 
-    override fun <T> submit(task: Callable<T>): Future<T> =
-      throw AssertionError("Not implemented.")
+    override fun <T> submit(task: Callable<T>): Future<T> = throw AssertionError("Not implemented.")
 
     override fun <T> submit(task: Runnable, result: T): Future<T> =
       throw AssertionError("Not implemented.")
@@ -402,9 +405,7 @@ internal object TestUtils {
       throw AssertionError("Not implemented.")
 
     override fun <T> invokeAll(
-      tasks: Collection<Callable<T>?>,
-      timeout: Long,
-      unit: TimeUnit
+      tasks: Collection<Callable<T>?>, timeout: Long, unit: TimeUnit
     ): List<Future<T>> = throw AssertionError("Not implemented.")
 
     override fun <T> invokeAny(tasks: Collection<Callable<T>?>): T =
