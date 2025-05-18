@@ -29,10 +29,7 @@ object Shadows {
     @Implementation
     @JvmStatic
     fun getThumbnail(
-      cr: ContentResolver,
-      origId: Long,
-      kind: Int,
-      options: BitmapFactory.Options
+      cr: ContentResolver, origId: Long, kind: Int, options: BitmapFactory.Options
     ): Bitmap = makeBitmap()
   }
 
@@ -41,10 +38,7 @@ object Shadows {
     @Implementation
     @JvmStatic
     fun getThumbnail(
-      cr: ContentResolver,
-      origId: Long,
-      kind: Int,
-      options: BitmapFactory.Options
+      cr: ContentResolver, origId: Long, kind: Int, options: BitmapFactory.Options
     ): Bitmap = makeBitmap(20, 20)
   }
 }

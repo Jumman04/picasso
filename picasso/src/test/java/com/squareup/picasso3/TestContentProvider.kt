@@ -42,20 +42,14 @@ class TestContentProvider : ContentProvider() {
   }
 
   override fun insert(
-    uri: Uri,
-    values: ContentValues?
+    uri: Uri, values: ContentValues?
   ): Uri = TODO("Not yet implemented")
 
   override fun delete(
-    uri: Uri,
-    selection: String?,
-    selectionArgs: Array<out String>?
+    uri: Uri, selection: String?, selectionArgs: Array<out String>?
   ): Int = TODO("Not yet implemented")
 
   override fun update(
-    uri: Uri,
-    values: ContentValues?,
-    selection: String?,
-    selectionArgs: Array<out String>?
+    uri: Uri, values: ContentValues?, selection: String?, selectionArgs: Array<out String>?
   ): Int = TODO("Not yet implemented")
 }
