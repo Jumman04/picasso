@@ -18,7 +18,8 @@ package com.squareup.picasso3
 import android.content.Context
 import android.content.pm.PackageManager
 import android.net.ConnectivityManager
-import android.net.NetworkInfo
+import android.net.Network
+import android.net.NetworkCapabilities
 import android.os.Handler
 import android.os.Looper
 import com.google.common.truth.Truth.assertThat
@@ -380,7 +381,7 @@ class InternalCoroutineDispatcherTest {
       Bitmap(bitmap1, MEMORY),
       TestUtils.mockAction(picasso, TestUtils.URI_KEY_1, TestUtils.URI_1)
     )
-    Mockito.`when`(connectivityManager.activeNetworkInfo).thenReturn(networkInfo)
+    Mockito.`when`(networkInfo).thenReturn(networkInfo)
 
     dispatcher.dispatchRetry(hunter)
     testDispatcher.scheduler.advanceUntilIdle()
@@ -722,9 +723,21 @@ class InternalCoroutineDispatcherTest {
     mainContext: CoroutineContext? = null,
     backgroundContext: CoroutineContext? = null
   ): InternalCoroutineDispatcher {
-    Mockito.`when`(connectivityManager.activeNetworkInfo).thenReturn(
-      if (scansNetworkChanges) Mockito.mock(NetworkInfo::class.java) else null
-    )
+    val network = Mockito.mock(Network::class.java)
+    val capabilities = Mockito.mock(NetworkCapabilities::class.java)
+
+    if (scansNetworkChanges) {
+      Mockito.`when`(connectivityManager.activeNetwork).thenReturn(network)
+      Mockito.`when`(connectivityManager.getNetworkCapabilities(network)).thenReturn(capabilities)
+      Mockito.`when`(capabilities.hasCapability(NetworkCapabilities.NET_CAPABILITY_INTERNET))
+        .thenReturn(true)
+      Mockito.`when`(capabilities.hasCapability(NetworkCapabilities.NET_CAPABILITY_VALIDATED))
+        .thenReturn(true)
+    } else {
+      Mockito.`when`(connectivityManager.activeNetwork).thenReturn(null)
+      Mockito.`when`(connectivityManager.getNetworkCapabilities(null)).thenReturn(null)
+    }
+
     Mockito.`when`(context.getSystemService(Context.CONNECTIVITY_SERVICE))
       .thenReturn(connectivityManager)
     Mockito.`when`(context.checkCallingOrSelfPermission(ArgumentMatchers.anyString())).thenReturn(
@@ -734,6 +747,7 @@ class InternalCoroutineDispatcherTest {
     testDispatcher = StandardTestDispatcher()
     picasso = TestUtils.mockPicasso(context).newBuilder()
       .dispatchers(mainContext ?: testDispatcher, testDispatcher).build()
+
     return InternalCoroutineDispatcher(
       context = context,
       mainThreadHandler = Handler(Looper.getMainLooper()),

@@ -18,6 +18,7 @@ package com.squareup.picasso3
 import android.graphics.Bitmap.Config.ARGB_8888
 import android.widget.RemoteViews
 import androidx.annotation.DrawableRes
+import androidx.test.core.app.ApplicationProvider
 import com.google.common.truth.Truth.assertThat
 import com.squareup.picasso3.Picasso.LoadedFrom.NETWORK
 import com.squareup.picasso3.RemoteViewsAction.RemoteViewsTarget
@@ -37,16 +38,16 @@ import org.mockito.Mockito.verify
 import org.mockito.Mockito.verifyNoInteractions
 import org.mockito.Mockito.`when`
 import org.robolectric.RobolectricTestRunner
-import org.robolectric.RuntimeEnvironment
 
 @RunWith(RobolectricTestRunner::class)
 class RemoteViewsActionTest {
   private lateinit var picasso: Picasso
   private lateinit var remoteViews: RemoteViews
 
-  @Before fun setUp() {
+  @Before
+  fun setUp() {
     picasso = Picasso(
-      context = RuntimeEnvironment.application,
+      context = ApplicationProvider.getApplicationContext(),
       dispatcher = mock(Dispatcher::class.java),
       callFactory = UNUSED_CALL_FACTORY,
       closeableCache = null,
@@ -63,7 +64,8 @@ class RemoteViewsActionTest {
     `when`(remoteViews.layoutId).thenReturn(android.R.layout.list_content)
   }
 
-  @Test fun completeSetsBitmapOnRemoteViews() {
+  @Test
+  fun completeSetsBitmapOnRemoteViews() {
     val callback = mockCallback()
     val bitmap = makeBitmap()
     val action = createAction(callback)
@@ -72,7 +74,8 @@ class RemoteViewsActionTest {
     verify(callback).onSuccess()
   }
 
-  @Test fun errorWithNoResourceIsNoop() {
+  @Test
+  fun errorWithNoResourceIsNoop() {
     val callback = mockCallback()
     val action = createAction(callback)
     val e = RuntimeException()
@@ -81,7 +84,8 @@ class RemoteViewsActionTest {
     verify(callback).onError(e)
   }
 
-  @Test fun errorWithResourceSetsResource() {
+  @Test
+  fun errorWithResourceSetsResource() {
     val callback = mockCallback()
     val action = createAction(callback, 1)
     val e = RuntimeException()
@@ -90,7 +94,8 @@ class RemoteViewsActionTest {
     verify(callback).onError(e)
   }
 
-  @Test fun clearsCallbackOnCancel() {
+  @Test
+  fun clearsCallbackOnCancel() {
     val request = ImageViewAction(
       picasso = picasso,
       target = mockImageViewTarget(),

@@ -36,7 +36,8 @@ class PlatformLruCacheTest {
   private var expectedMissCount = 0
   private var expectedEvictionCount = 0
 
-  @Test fun testStatistics() {
+  @Test
+  fun testStatistics() {
     val cache = PlatformLruCache(3)
     assertStatistics(cache)
 
@@ -84,7 +85,8 @@ class PlatformLruCacheTest {
     assertSnapshot(cache, "e", bitmapE, "b", bitmapB, "c", bitmapC)
   }
 
-  @Test fun evictionWithSingletonCache() {
+  @Test
+  fun evictionWithSingletonCache() {
     val cache = PlatformLruCache(1)
     cache["a"] = bitmapA
     cache["b"] = bitmapB
@@ -95,7 +97,8 @@ class PlatformLruCacheTest {
    * Replacing the value for a key doesn't cause an eviction but it does bring the replaced entry to
    * the front of the queue.
    */
-  @Test fun putCauseEviction() {
+  @Test
+  fun putCauseEviction() {
     val cache = PlatformLruCache(3)
 
     cache["a"] = bitmapA
@@ -105,7 +108,8 @@ class PlatformLruCacheTest {
     assertSnapshot(cache, "a", bitmapA, "c", bitmapC, "b", bitmapD)
   }
 
-  @Test fun evictAll() {
+  @Test
+  fun evictAll() {
     val cache = PlatformLruCache(4)
     cache["a"] = bitmapA
     cache["b"] = bitmapB
@@ -114,7 +118,8 @@ class PlatformLruCacheTest {
     assertThat(cache.cache.snapshot()).isEmpty()
   }
 
-  @Test fun clearPrefixedKey() {
+  @Test
+  fun clearPrefixedKey() {
     val cache = PlatformLruCache(3)
 
     cache["Hello\nAlice!"] = bitmapA
@@ -127,7 +132,8 @@ class PlatformLruCacheTest {
     assertThat(cache.cache.snapshot()).containsKey("Hellos\nWorld!")
   }
 
-  @Test fun invalidate() {
+  @Test
+  fun invalidate() {
     val cache = PlatformLruCache(3)
     cache["Hello\nAlice!"] = bitmapA
     assertThat(cache.size()).isEqualTo(1)
@@ -135,7 +141,8 @@ class PlatformLruCacheTest {
     assertThat(cache.size()).isEqualTo(0)
   }
 
-  @Test fun overMaxSizeDoesNotClear() {
+  @Test
+  fun overMaxSizeDoesNotClear() {
     val cache = PlatformLruCache(16)
     val size4 = Bitmap.createBitmap(2, 2, ALPHA_8)
     val size16 = Bitmap.createBitmap(4, 4, ALPHA_8)
@@ -154,7 +161,8 @@ class PlatformLruCacheTest {
     assertThat(cache.size()).isEqualTo(16)
   }
 
-  @Test fun overMaxSizeRemovesExisting() {
+  @Test
+  fun overMaxSizeRemovesExisting() {
     val cache = PlatformLruCache(20)
     val size4 = Bitmap.createBitmap(2, 2, ALPHA_8)
     val size16 = Bitmap.createBitmap(4, 4, ALPHA_8)
