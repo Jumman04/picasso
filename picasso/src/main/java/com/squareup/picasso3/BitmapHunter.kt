@@ -15,7 +15,6 @@
  */
 package com.squareup.picasso3
 
-import android.net.NetworkInfo
 import com.squareup.picasso3.MemoryPolicy.Companion.shouldReadFromMemoryCache
 import com.squareup.picasso3.Picasso.LoadedFrom
 import com.squareup.picasso3.RequestHandler.Result.Bitmap
@@ -64,7 +63,7 @@ internal open class BitmapHunter(
     private set
 
   val isCancelled: Boolean
-    get() = future?.isCancelled ?: job?.isCancelled == true
+    get() = (future?.isCancelled ?: job?.isCancelled) == true
 
   override fun run() {
     val originalName = Thread.currentThread().name
@@ -219,20 +218,26 @@ internal open class BitmapHunter(
     }
   }
 
-  fun cancel(): Boolean =
-    action == null && actions.isNullOrEmpty() && future?.cancel(false) ?: job?.let {
-      it.cancel()
-      true
-    } == true
+  fun cancel(): Boolean {
+    if (action == null && actions.isNullOrEmpty()) {
+      if (future != null) {
+        if (future!!.cancel(false)) return true
+      } else if (job != null) {
+        job!!.cancel()
+        return true
+      }
+    }
+    return false
+  }
 
-  fun shouldRetry(airplaneMode: Boolean, info: NetworkInfo?): Boolean {
+  fun shouldRetry(isConnected: Boolean): Boolean {
     val hasRetries = retryCount > 0
     if (!hasRetries) {
       return false
     }
     retryCount--
 
-    return requestHandler.shouldRetry(airplaneMode, info)
+    return requestHandler.shouldRetry(isConnected)
   }
 
   fun supportsReplay(): Boolean = requestHandler.supportsReplay()

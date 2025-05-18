@@ -16,7 +16,6 @@
 package com.squareup.picasso3
 
 import android.content.Context
-import android.net.NetworkInfo
 import android.os.Handler
 import com.squareup.picasso3.Dispatcher.Companion.RETRY_DELAY
 import com.squareup.picasso3.Picasso.Priority.HIGH
@@ -106,15 +105,9 @@ internal class InternalCoroutineDispatcher internal constructor(
     }
   }
 
-  override fun dispatchNetworkStateChange(info: NetworkInfo) {
+  override fun dispatchNetworkStateChange(isConnected: Boolean) {
     channel.trySend {
-      performNetworkStateChange(info)
-    }
-  }
-
-  override fun dispatchAirplaneModeChange(airplaneMode: Boolean) {
-    channel.trySend {
-      performAirplaneModeChange(airplaneMode)
+      performNetworkStateChange(isConnected)
     }
   }
 

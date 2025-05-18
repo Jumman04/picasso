@@ -17,14 +17,11 @@ package com.squareup.picasso3
 
 import android.Manifest.permission.ACCESS_NETWORK_STATE
 import android.annotation.SuppressLint
-import android.content.BroadcastReceiver
 import android.content.Context
-import android.content.Intent
-import android.content.Intent.ACTION_AIRPLANE_MODE_CHANGED
-import android.content.IntentFilter
 import android.net.ConnectivityManager
-import android.net.ConnectivityManager.CONNECTIVITY_ACTION
-import android.net.NetworkInfo
+import android.net.Network
+import android.net.NetworkCapabilities
+import android.net.NetworkRequest
 import android.os.Handler
 import android.util.Log
 import androidx.annotation.CallSuper
@@ -45,7 +42,6 @@ import com.squareup.picasso3.Utils.VERB_REPLAYING
 import com.squareup.picasso3.Utils.VERB_RETRYING
 import com.squareup.picasso3.Utils.getLogIdsForHunter
 import com.squareup.picasso3.Utils.hasPermission
-import com.squareup.picasso3.Utils.isAirplaneModeOn
 import com.squareup.picasso3.Utils.log
 import java.util.WeakHashMap
 
@@ -67,17 +63,11 @@ internal abstract class BaseDispatcher internal constructor(
   internal val pausedTags = mutableSetOf<Any>()
 
   @get:JvmName("-receiver")
-  internal val receiver: NetworkBroadcastReceiver
+  internal val receiver: NetworkBroadcastReceiver = NetworkBroadcastReceiver(this)
 
-  @get:JvmName("-airplaneMode")
-  @set:JvmName("-airplaneMode")
-  internal var airplaneMode = isAirplaneModeOn(context)
-
-  private val scansNetworkChanges: Boolean
+  private val scansNetworkChanges: Boolean = hasPermission(context, ACCESS_NETWORK_STATE)
 
   init {
-    scansNetworkChanges = hasPermission(context, ACCESS_NETWORK_STATE)
-    receiver = NetworkBroadcastReceiver(this)
     receiver.register()
   }
 
@@ -262,16 +252,22 @@ internal abstract class BaseDispatcher internal constructor(
       return
     }
 
-    var networkInfo: NetworkInfo? = null
+    var isConnected = false
     if (scansNetworkChanges) {
       val connectivityManager =
         ContextCompat.getSystemService(context, ConnectivityManager::class.java)
       if (connectivityManager != null) {
-        networkInfo = connectivityManager.activeNetworkInfo
+        val network = connectivityManager.activeNetwork
+        val capabilities = connectivityManager.getNetworkCapabilities(network)
+        isConnected =
+          capabilities?.hasCapability(NetworkCapabilities.NET_CAPABILITY_INTERNET) == true && capabilities.hasCapability(
+            NetworkCapabilities.NET_CAPABILITY_VALIDATED
+          )
+
       }
     }
 
-    if (hunter.shouldRetry(airplaneMode, networkInfo)) {
+    if (hunter.shouldRetry(isConnected)) {
       if (hunter.picasso.isLoggingEnabled) {
         log(
           owner = OWNER_DISPATCHER, verb = VERB_RETRYING, logId = getLogIdsForHunter(hunter)
@@ -309,13 +305,9 @@ internal abstract class BaseDispatcher internal constructor(
     deliver(hunter)
   }
 
-  fun performAirplaneModeChange(airplaneMode: Boolean) {
-    this.airplaneMode = airplaneMode
-  }
-
-  fun performNetworkStateChange(info: NetworkInfo?) {
+  fun performNetworkStateChange(isConnected: Boolean) {
     // Intentionally check only if isConnected() here before we flush out failed actions.
-    if (info != null && info.isConnected) {
+    if (isConnected) {
       flushFailedActions()
     }
   }
@@ -385,60 +377,34 @@ internal abstract class BaseDispatcher internal constructor(
     }
   }
 
-  internal class NetworkBroadcastReceiver(
-    private val dispatcher: BaseDispatcher
-  ) : BroadcastReceiver() {
-    fun register() {
-      val filter = IntentFilter()
-      filter.addAction(ACTION_AIRPLANE_MODE_CHANGED)
-      if (dispatcher.scansNetworkChanges) {
-        filter.addAction(CONNECTIVITY_ACTION)
-      }
-      dispatcher.context.registerReceiver(this, filter)
-    }
+  internal class NetworkBroadcastReceiver(private val dispatcher: BaseDispatcher) {
+    private val connectivityManager: ConnectivityManager? =
+      ContextCompat.getSystemService(dispatcher.context, ConnectivityManager::class.java)
 
-    fun unregister() {
-      dispatcher.context.unregisterReceiver(this)
+    private val callback = object : ConnectivityManager.NetworkCallback() {
+      override fun onAvailable(network: Network) {
+        dispatcher.dispatchNetworkStateChange(true)
+      }
+
+      override fun onLost(network: Network) {
+        dispatcher.dispatchNetworkStateChange(false)
+      }
     }
 
     @SuppressLint("MissingPermission")
-    override fun onReceive(context: Context, intent: Intent?) {
-      // On some versions of Android this may be called with a null Intent,
-      // also without extras (getExtras() == null), in such case we use defaults.
-      if (intent == null) {
-        return
-      }
-      when (intent.action) {
-        ACTION_AIRPLANE_MODE_CHANGED -> {
-          if (!intent.hasExtra(EXTRA_AIRPLANE_STATE)) {
-            return // No airplane state, ignore it. Should we query Utils.isAirplaneModeOn?
-          }
-          dispatcher.dispatchAirplaneModeChange(intent.getBooleanExtra(EXTRA_AIRPLANE_STATE, false))
-        }
-
-        CONNECTIVITY_ACTION -> {
-          val connectivityManager =
-            ContextCompat.getSystemService(context, ConnectivityManager::class.java)
-          val networkInfo = try {
-            connectivityManager!!.activeNetworkInfo
-          } catch (re: RuntimeException) {
-            Log.w(TAG, "System UI crashed, ignoring attempt to change network state.")
-            return
-          }
-          if (networkInfo == null) {
-            Log.w(
-              TAG,
-              "No default network is currently active, ignoring attempt to change network state."
-            )
-            return
-          }
-          dispatcher.dispatchNetworkStateChange(networkInfo)
-        }
+    fun register() {
+      if (hasPermission(dispatcher.context, ACCESS_NETWORK_STATE)) {
+        val request = NetworkRequest.Builder().build()
+        connectivityManager?.registerNetworkCallback(request, callback)
+      } else {
+        Log.w("Network", "Skipping network callback: ACCESS_NETWORK_STATE permission not granted")
       }
     }
 
-    internal companion object {
-      const val EXTRA_AIRPLANE_STATE = "state"
+
+    fun unregister() {
+      connectivityManager?.unregisterNetworkCallback(callback)
     }
   }
+
 }

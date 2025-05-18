@@ -15,7 +15,6 @@
  */
 package com.squareup.picasso3
 
-import android.net.NetworkInfo
 import com.squareup.picasso3.Picasso.LoadedFrom
 import java.io.IOException
 
@@ -84,9 +83,7 @@ abstract class RequestHandler {
 
   open val retryCount = 0
 
-  open fun shouldRetry(
-    airplaneMode: Boolean, info: NetworkInfo?
-  ) = false
+  open fun shouldRetry(isConnected: Boolean) = false
 
   open fun supportsReplay() = false
 }

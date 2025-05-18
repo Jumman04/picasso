@@ -15,7 +15,6 @@
  */
 package com.squareup.picasso3
 
-import android.net.NetworkInfo
 import com.squareup.picasso3.BitmapUtils.decodeStream
 import com.squareup.picasso3.NetworkPolicy.Companion.isOfflineOnly
 import com.squareup.picasso3.NetworkPolicy.Companion.shouldReadFromDiskCache
@@ -83,8 +82,7 @@ internal class NetworkRequestHandler(
   override val retryCount: Int
     get() = 2
 
-  override fun shouldRetry(airplaneMode: Boolean, info: NetworkInfo?): Boolean =
-    info == null || info.isConnected
+  override fun shouldRetry(isConnected: Boolean): Boolean = isConnected
 
   override fun supportsReplay(): Boolean = true
 

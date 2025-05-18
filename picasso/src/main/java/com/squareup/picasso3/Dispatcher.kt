@@ -15,8 +15,6 @@
  */
 package com.squareup.picasso3
 
-import android.net.NetworkInfo
-
 internal interface Dispatcher {
   fun shutdown()
 
@@ -34,9 +32,7 @@ internal interface Dispatcher {
 
   fun dispatchFailed(hunter: BitmapHunter)
 
-  fun dispatchNetworkStateChange(info: NetworkInfo)
-
-  fun dispatchAirplaneModeChange(airplaneMode: Boolean)
+  fun dispatchNetworkStateChange(isConnected: Boolean)
 
   fun dispatchSubmit(hunter: BitmapHunter)
 

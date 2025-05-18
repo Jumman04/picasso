@@ -25,7 +25,6 @@ import android.os.Handler
 import android.os.Looper
 import android.os.Message
 import android.os.StatFs
-import android.provider.Settings.Global
 import android.util.Log
 import androidx.core.content.ContextCompat
 import okio.BufferedSource
@@ -153,20 +152,6 @@ internal object Utils {
     val memoryClass = if (largeHeap) am!!.largeMemoryClass else am!!.memoryClass
     // Target ~15% of the available heap.
     return (1024L * 1024L * memoryClass / 7).toInt()
-  }
-
-  fun isAirplaneModeOn(context: Context): Boolean {
-    return try {
-      val contentResolver = context.contentResolver
-      Global.getInt(contentResolver, Global.AIRPLANE_MODE_ON, 0) != 0
-    } catch (e: NullPointerException) {
-      // https://github.com/square/picasso/issues/761, some devices might crash here, assume that
-      // airplane mode is off.
-      false
-    } catch (e: SecurityException) {
-      // https://github.com/square/picasso/issues/1197
-      false
-    }
   }
 
   fun hasPermission(context: Context, permission: String): Boolean {

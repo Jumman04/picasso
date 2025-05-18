@@ -35,7 +35,7 @@ internal class MediaStoreRequestHandler(context: Context) : ContentStreamRequest
     var signaledCallback = false
     try {
       val contentResolver = context.contentResolver
-      val requestUri = checkNotNull(request.uri, { "request.uri == null" })
+      val requestUri = checkNotNull(request.uri) { "request.uri == null" }
       val exifOrientation = getExifOrientation(requestUri)
 
       val mimeType = contentResolver.getType(requestUri)
@@ -53,7 +53,7 @@ internal class MediaStoreRequestHandler(context: Context) : ContentStreamRequest
 
         val id = ContentUris.parseId(requestUri)
 
-        val options = checkNotNull(createBitmapOptions(request), { "options == null" })
+        val options = checkNotNull(createBitmapOptions(request)) { "options == null" }
         options.inJustDecodeBounds = true
 
         calculateInSampleSize(

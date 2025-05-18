@@ -16,7 +16,6 @@
 package com.squareup.picasso3
 
 import android.content.Context
-import android.net.NetworkInfo
 import android.os.Handler
 import android.os.HandlerThread
 import android.os.Looper
@@ -82,16 +81,8 @@ internal class HandlerDispatcher internal constructor(
     handler.sendMessage(handler.obtainMessage(HUNTER_DECODE_FAILED, hunter))
   }
 
-  override fun dispatchNetworkStateChange(info: NetworkInfo) {
-    handler.sendMessage(handler.obtainMessage(NETWORK_STATE_CHANGE, info))
-  }
-
-  override fun dispatchAirplaneModeChange(airplaneMode: Boolean) {
-    handler.sendMessage(
-      handler.obtainMessage(
-        AIRPLANE_MODE_CHANGE, if (airplaneMode) AIRPLANE_MODE_ON else AIRPLANE_MODE_OFF, 0
-      )
-    )
+  override fun dispatchNetworkStateChange(isConnected: Boolean) {
+    handler.sendMessage(handler.obtainMessage(NETWORK_STATE_CHANGE, isConnected))
   }
 
   override fun dispatchSubmit(hunter: BitmapHunter) {
@@ -154,12 +145,8 @@ internal class HandlerDispatcher internal constructor(
         }
 
         NETWORK_STATE_CHANGE -> {
-          val info = msg.obj as NetworkInfo
-          dispatcher.performNetworkStateChange(info)
-        }
-
-        AIRPLANE_MODE_CHANGE -> {
-          dispatcher.performAirplaneModeChange(msg.arg1 == AIRPLANE_MODE_ON)
+          val isConnected = msg.obj as Boolean
+          dispatcher.performNetworkStateChange(isConnected)
         }
 
         else -> {
@@ -197,15 +184,12 @@ internal class HandlerDispatcher internal constructor(
 
   internal companion object {
     private const val RETRY_DELAY = 500L
-    private const val AIRPLANE_MODE_ON = 1
-    private const val AIRPLANE_MODE_OFF = 0
     private const val REQUEST_SUBMIT = 1
     private const val REQUEST_CANCEL = 2
     private const val HUNTER_COMPLETE = 4
     private const val HUNTER_RETRY = 5
     private const val HUNTER_DECODE_FAILED = 6
     private const val NETWORK_STATE_CHANGE = 9
-    private const val AIRPLANE_MODE_CHANGE = 10
     private const val TAG_PAUSE = 11
     private const val TAG_RESUME = 12
     private const val REQUEST_BATCH_RESUME = 13
