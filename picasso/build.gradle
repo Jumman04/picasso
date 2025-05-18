@@ -50,6 +50,7 @@ dependencies {
   testImplementation libs.robolectric
   testImplementation libs.mockito
   testImplementation libs.okhttp.mockWebServer
+  testImplementation libs.core
 
   androidTestImplementation libs.androidx.junit
   androidTestImplementation libs.androidx.testRunner
