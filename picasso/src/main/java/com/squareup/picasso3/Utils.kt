@@ -52,7 +52,7 @@ internal object Utils {
   const val OWNER_HUNTER = "Hunter"
   const val VERB_CREATED = "created"
   const val VERB_CHANGED = "changed"
-  const val VERB_IGNORED = "ignored"
+  const val VERB__ = "_"
   const val VERB_ENQUEUED = "enqueued"
   const val VERB_CANCELED = "canceled"
   const val VERB_RETRYING = "retrying"
@@ -81,13 +81,6 @@ internal object Utils {
    */
   private val WEBP_FILE_HEADER_RIFF: ByteString = "RIFF".encodeUtf8()
   private val WEBP_FILE_HEADER_WEBP: ByteString = "WEBP".encodeUtf8()
-
-  fun <T> checkNotNull(value: T?, message: String?): T {
-    if (value == null) {
-      throw NullPointerException(message)
-    }
-    return value
-  }
 
   fun checkNotMain() {
     check(!isMain) { "Method call should not happen from the main thread." }
@@ -139,7 +132,7 @@ internal object Utils {
       val available = blockCount * blockSize
       // Target 2% of the total space.
       size = available / 50
-    } catch (ignored: IllegalArgumentException) {
+    } catch (_: IllegalArgumentException) {
     }
 
     // Bound inside min/max size for disk cache.
@@ -177,7 +170,7 @@ internal object Utils {
       1 -> {
         try {
           segments[0].toInt()
-        } catch (e: NumberFormatException) {
+        } catch (_: NumberFormatException) {
           throw FileNotFoundException("Last path segment is not a resource ID: " + data.uri)
         }
       }
@@ -203,7 +196,7 @@ internal object Utils {
       val pkg =
         data.uri.authority ?: throw FileNotFoundException("No package provided: " + data.uri)
       context.packageManager.getResourcesForApplication(pkg)
-    } catch (e: NameNotFoundException) {
+    } catch (_: NameNotFoundException) {
       throw FileNotFoundException("Unable to obtain resources for package: " + data.uri)
     }
   }

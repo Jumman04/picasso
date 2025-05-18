@@ -29,7 +29,8 @@ import org.robolectric.RobolectricTestRunner
 
 @RunWith(RobolectricTestRunner::class)
 class UtilsTest {
-  @Test fun matchingRequestsHaveSameKey() {
+  @Test
+  fun matchingRequestsHaveSameKey() {
     val request = Request.Builder(URI_1).build()
     val request2 = Request.Builder(URI_1).build()
     assertThat(request.key).isEqualTo(request2.key)
@@ -53,7 +54,8 @@ class UtilsTest {
     assertThat(requestTransform5.key).isNotEqualTo(requestTransform6.key)
   }
 
-  @Test fun detectedWebPFile() {
+  @Test
+  fun detectedWebPFile() {
     assertThat(isWebPFile(Buffer().writeUtf8("RIFFxxxxWEBP"))).isTrue()
     assertThat(isWebPFile(Buffer().writeUtf8("RIFFxxxxxWEBP"))).isFalse()
     assertThat(isWebPFile(Buffer().writeUtf8("ABCDxxxxWEBP"))).isFalse()
@@ -61,21 +63,24 @@ class UtilsTest {
     assertThat(isWebPFile(Buffer().writeUtf8("RIFFxxWEBP"))).isFalse()
   }
 
-  @Test fun ensureBuilderIsCleared() {
+  @Test
+  fun ensureBuilderIsCleared() {
     Request.Builder(RESOURCE_ID_URI).build()
     assertThat(Utils.MAIN_THREAD_KEY_BUILDER.length).isEqualTo(0)
     Request.Builder(URI_1).build()
     assertThat(Utils.MAIN_THREAD_KEY_BUILDER.length).isEqualTo(0)
   }
 
-  @Test fun getResourceById() {
+  @Test
+  fun getResourceById() {
     val request = Request.Builder(RESOURCE_ID_URI).build()
     val res = Utils.getResources(mockPackageResourceContext(), request)
     val id = Utils.getResourceId(res, request)
     assertThat(id).isEqualTo(RESOURCE_ID_1)
   }
 
-  @Test fun getResourceByTypeAndName() {
+  @Test
+  fun getResourceByTypeAndName() {
     val request = Request.Builder(RESOURCE_TYPE_URI).build()
     val res = Utils.getResources(mockPackageResourceContext(), request)
     val id = Utils.getResourceId(res, request)

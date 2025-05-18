@@ -19,8 +19,7 @@ import android.graphics.Bitmap
 import android.graphics.Bitmap.Config.ARGB_8888
 
 internal class TestTransformation(
-  private val key: String,
-  private val result: Bitmap? = Bitmap.createBitmap(10, 10, ARGB_8888)
+  private val key: String, private val result: Bitmap? = Bitmap.createBitmap(10, 10, ARGB_8888)
 ) : Transformation {
   override fun transform(source: RequestHandler.Result.Bitmap): RequestHandler.Result.Bitmap {
     val bitmap = source.bitmap
