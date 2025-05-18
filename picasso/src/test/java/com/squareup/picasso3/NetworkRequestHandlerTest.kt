@@ -15,6 +15,7 @@
  */
 package com.squareup.picasso3
 
+import androidx.test.core.app.ApplicationProvider
 import com.google.common.truth.Truth.assertThat
 import com.squareup.picasso3.RequestHandler.Result
 import com.squareup.picasso3.TestUtils.CUSTOM_HEADER_NAME
@@ -39,9 +40,8 @@ import org.junit.Test
 import org.junit.runner.RunWith
 import org.mockito.Mock
 import org.mockito.Mockito.`when`
-import org.mockito.MockitoAnnotations.initMocks
+import org.mockito.MockitoAnnotations.openMocks
 import org.robolectric.RobolectricTestRunner
-import org.robolectric.RuntimeEnvironment
 import java.util.concurrent.CountDownLatch
 import java.util.concurrent.LinkedBlockingDeque
 import java.util.concurrent.TimeUnit.SECONDS
@@ -59,8 +59,8 @@ class NetworkRequestHandlerTest {
 
   @Before
   fun setUp() {
-    initMocks(this)
-    picasso = mockPicasso(RuntimeEnvironment.application)
+    openMocks(this)
+    picasso = mockPicasso(ApplicationProvider.getApplicationContext())
     networkHandler = NetworkRequestHandler { request ->
       requests.add(request)
       try {

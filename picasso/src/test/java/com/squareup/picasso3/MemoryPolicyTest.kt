@@ -22,25 +22,29 @@ import org.junit.Test
 
 class MemoryPolicyTest {
 
-  @Test fun dontReadFromMemoryCache() {
+  @Test
+  fun dontReadFromMemoryCache() {
     var memoryPolicy = 0
     memoryPolicy = memoryPolicy or NO_CACHE.index
     assertThat(MemoryPolicy.shouldReadFromMemoryCache(memoryPolicy)).isFalse()
   }
 
-  @Test fun readFromMemoryCache() {
+  @Test
+  fun readFromMemoryCache() {
     var memoryPolicy = 0
     memoryPolicy = memoryPolicy or NO_STORE.index
     assertThat(MemoryPolicy.shouldReadFromMemoryCache(memoryPolicy)).isTrue()
   }
 
-  @Test fun dontWriteToMemoryCache() {
+  @Test
+  fun dontWriteToMemoryCache() {
     var memoryPolicy = 0
     memoryPolicy = memoryPolicy or NO_STORE.index
     assertThat(MemoryPolicy.shouldWriteToMemoryCache(memoryPolicy)).isFalse()
   }
 
-  @Test fun writeToMemoryCache() {
+  @Test
+  fun writeToMemoryCache() {
     var memoryPolicy = 0
     memoryPolicy = memoryPolicy or NO_CACHE.index
     assertThat(MemoryPolicy.shouldWriteToMemoryCache(memoryPolicy)).isTrue()

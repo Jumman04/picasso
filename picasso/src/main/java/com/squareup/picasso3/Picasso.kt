@@ -283,16 +283,14 @@ class Picasso internal constructor(
    * Passing `null` as a [path] will not trigger any request but will set a
    * placeholder, if one is specified.
    *
-   * @throws IllegalArgumentException if [path] is empty or blank string.
    * @see #load(Uri)
    * @see #load(File)
    * @see #load(int)
    */
   fun load(path: String?): RequestCreator {
-    if (path == null) {
+    if (path.isNullOrBlank()) {
       return RequestCreator(this, null, 0)
     }
-    require(path.isNotBlank()) { "Path must not be empty." }
     return load(Uri.parse(path))
   }
 
@@ -383,7 +381,7 @@ class Picasso internal constructor(
     dispatcher.shutdown()
     try {
       closeableCache?.close()
-    } catch (ignored: IOException) {
+    } catch (_: IOException) {
     }
     for (deferredRequestCreator in targetToDeferredRequestCreator.values) {
       deferredRequestCreator.cancel()

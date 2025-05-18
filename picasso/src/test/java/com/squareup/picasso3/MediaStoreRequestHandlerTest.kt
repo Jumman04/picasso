@@ -49,71 +49,61 @@ class MediaStoreRequestHandlerTest {
   private lateinit var context: Context
   private lateinit var picasso: Picasso
 
-  @Before fun setUp() {
+  @Before
+  fun setUp() {
     context = RuntimeEnvironment.getApplication().applicationContext
     picasso = mockPicasso(context)
     Robolectric.setupContentProvider(TestContentProvider::class.java, "media")
   }
 
-  @Test fun decodesVideoThumbnailWithVideoMimeType() {
+  @Test
+  fun decodesVideoThumbnailWithVideoMimeType() {
     val bitmap = makeBitmap()
     val request = Request.Builder(
-      uri = MEDIA_STORE_CONTENT_2_URL,
-      resourceId = 0,
-      bitmapConfig = ARGB_8888
-    )
-      .stableKey(MEDIA_STORE_CONTENT_KEY_2)
-      .resize(100, 100)
-      .build()
+      uri = MEDIA_STORE_CONTENT_2_URL, resourceId = 0, bitmapConfig = ARGB_8888
+    ).stableKey(MEDIA_STORE_CONTENT_KEY_2).resize(100, 100).build()
     val action = mockAction(picasso, request)
     val requestHandler = MediaStoreRequestHandler(context)
     requestHandler.load(
-      picasso = picasso,
-      request = action.request,
-      callback = object : Callback {
+      picasso = picasso, request = action.request, callback = object : Callback {
         override fun onSuccess(result: RequestHandler.Result?) =
           assertBitmapsEqual((result as RequestHandler.Result.Bitmap?)!!.bitmap, bitmap)
 
         override fun onError(t: Throwable) = fail(t.message)
-      }
-    )
+      })
   }
 
-  @Test fun decodesImageThumbnailWithImageMimeType() {
+  @Test
+  fun decodesImageThumbnailWithImageMimeType() {
     val bitmap = makeBitmap(20, 20)
     val request = Request.Builder(
-      uri = MEDIA_STORE_CONTENT_1_URL,
-      resourceId = 0,
-      bitmapConfig = ARGB_8888
-    )
-      .stableKey(MEDIA_STORE_CONTENT_KEY_1)
-      .resize(100, 100)
-      .build()
+      uri = MEDIA_STORE_CONTENT_1_URL, resourceId = 0, bitmapConfig = ARGB_8888
+    ).stableKey(MEDIA_STORE_CONTENT_KEY_1).resize(100, 100).build()
     val action = mockAction(picasso, request)
     val requestHandler = MediaStoreRequestHandler(context)
     requestHandler.load(
-      picasso = picasso,
-      request = action.request,
-      callback = object : Callback {
+      picasso = picasso, request = action.request, callback = object : Callback {
         override fun onSuccess(result: RequestHandler.Result?) =
           assertBitmapsEqual((result as RequestHandler.Result.Bitmap?)!!.bitmap, bitmap)
 
         override fun onError(t: Throwable) = fail(t.message)
-      }
-    )
+      })
   }
 
-  @Test fun getPicassoKindMicro() {
+  @Test
+  fun getPicassoKindMicro() {
     assertThat(getPicassoKind(96, 96)).isEqualTo(MICRO)
     assertThat(getPicassoKind(95, 95)).isEqualTo(MICRO)
   }
 
-  @Test fun getPicassoKindMini() {
+  @Test
+  fun getPicassoKindMini() {
     assertThat(getPicassoKind(512, 384)).isEqualTo(MINI)
     assertThat(getPicassoKind(100, 100)).isEqualTo(MINI)
   }
 
-  @Test fun getPicassoKindFull() {
+  @Test
+  fun getPicassoKindFull() {
     assertThat(getPicassoKind(513, 385)).isEqualTo(FULL)
     assertThat(getPicassoKind(1000, 1000)).isEqualTo(FULL)
     assertThat(getPicassoKind(1000, 384)).isEqualTo(FULL)

@@ -42,7 +42,7 @@ internal class NetworkRequestHandler(
     callFactory.newCall(callRequest).enqueue(object : okhttp3.Callback {
       override fun onResponse(call: Call, response: Response) {
         if (!response.isSuccessful) {
-          callback.onError(ResponseException(response.code, request.networkPolicy))
+          callback.onError(ResponseException(response.code))
           return
         }
 
@@ -117,9 +117,7 @@ internal class NetworkRequestHandler(
   }
 
   internal class ContentLengthException(message: String) : RuntimeException(message)
-  internal class ResponseException(
-    val code: Int, val networkPolicy: Int
-  ) : RuntimeException("HTTP $code")
+  internal class ResponseException(code: Int) : RuntimeException("HTTP $code")
 
   private companion object {
     private const val SCHEME_HTTP = "http"
