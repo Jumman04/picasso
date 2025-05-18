@@ -31,7 +31,8 @@ class PicassoDrawableTest {
   private val placeholder: Drawable = ColorDrawable(RED)
   private val bitmap = Bitmap.createBitmap(10, 10, Bitmap.Config.ALPHA_8)
 
-  @Test fun createWithNoPlaceholderAnimation() {
+  @Test
+  fun createWithNoPlaceholderAnimation() {
     val pd = PicassoDrawable(
       placeholder = null,
       context = ApplicationProvider.getApplicationContext(),
@@ -45,7 +46,8 @@ class PicassoDrawableTest {
     assertThat(pd.animating).isTrue()
   }
 
-  @Test fun createWithPlaceholderAnimation() {
+  @Test
+  fun createWithPlaceholderAnimation() {
     val pd = PicassoDrawable(
       context = ApplicationProvider.getApplicationContext(),
       bitmap = bitmap,
@@ -59,7 +61,8 @@ class PicassoDrawableTest {
     assertThat(pd.animating).isTrue()
   }
 
-  @Test fun createWithBitmapCacheHit() {
+  @Test
+  fun createWithBitmapCacheHit() {
     val pd = PicassoDrawable(
       context = ApplicationProvider.getApplicationContext(),
       bitmap = bitmap,

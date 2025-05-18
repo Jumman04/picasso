@@ -33,9 +33,9 @@ class PicassoExecutorService(
   threadCount, threadCount, 0, MILLISECONDS, PriorityBlockingQueue(), threadFactory
 ) {
   override fun submit(task: Runnable): Future<*> {
-    val ftask = PicassoFutureTask(task as BitmapHunter)
-    execute(ftask)
-    return ftask
+    val flask = PicassoFutureTask(task as BitmapHunter)
+    execute(flask)
+    return flask
   }
 
   private class PicassoThreadFactory : ThreadFactory {
