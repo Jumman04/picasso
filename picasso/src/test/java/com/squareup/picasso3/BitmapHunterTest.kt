@@ -17,7 +17,6 @@ package com.squareup.picasso3
 
 import android.content.Context
 import android.graphics.Bitmap.Config.ARGB_8888
-import android.net.NetworkInfo
 import android.net.Uri
 import android.os.Looper
 import android.view.Gravity
@@ -77,7 +76,7 @@ import org.mockito.Mock
 import org.mockito.Mockito.mock
 import org.mockito.Mockito.verify
 import org.mockito.Mockito.`when`
-import org.mockito.MockitoAnnotations.initMocks
+import org.mockito.MockitoAnnotations.openMocks
 import org.robolectric.RobolectricTestRunner
 import org.robolectric.Shadows.shadowOf
 import java.io.File
@@ -86,63 +85,67 @@ import java.util.concurrent.FutureTask
 
 @RunWith(RobolectricTestRunner::class)
 class BitmapHunterTest {
-  @Mock internal lateinit var context: Context
+  @Mock
+  internal lateinit var context: Context
 
-  @Mock internal lateinit var dispatcher: Dispatcher
+  @Mock
+  internal lateinit var dispatcher: Dispatcher
   private lateinit var picasso: Picasso
 
   private val cache = PlatformLruCache(2048)
   private val bitmap = makeBitmap()
 
-  @Before fun setUp() {
-    initMocks(this)
+  @Before
+  fun setUp() {
+    openMocks(this)
     `when`(context.applicationContext).thenReturn(context)
     picasso = mockPicasso(context, NOOP_REQUEST_HANDLER)
   }
 
-  @Test fun nullDecodeResponseIsError() {
+  @Test
+  fun nullDecodeResponseIsError() {
     val action = mockAction(picasso, URI_KEY_1, URI_1)
     val hunter = TestableBitmapHunter(picasso, dispatcher, cache, action, null)
     hunter.run()
     verify(dispatcher).dispatchFailed(hunter)
   }
 
-  @Test fun runWithResultDispatchComplete() {
+  @Test
+  fun runWithResultDispatchComplete() {
     val action = mockAction(picasso, URI_KEY_1, URI_1)
     val hunter = TestableBitmapHunter(picasso, dispatcher, cache, action, bitmap)
     hunter.run()
     verify(dispatcher).dispatchComplete(hunter)
   }
 
-  @Test fun runWithNoResultDispatchFailed() {
+  @Test
+  fun runWithNoResultDispatchFailed() {
     val action = mockAction(picasso, URI_KEY_1, URI_1)
     val hunter = TestableBitmapHunter(picasso, dispatcher, cache, action)
     hunter.run()
     verify(dispatcher).dispatchFailed(hunter)
   }
 
-  @Test fun responseExceptionDispatchFailed() {
+  @Test
+  fun responseExceptionDispatchFailed() {
     val action = mockAction(picasso, URI_KEY_1, URI_1)
     val hunter = TestableBitmapHunter(
-      picasso,
-      dispatcher,
-      cache,
-      action,
-      null,
-      ResponseException(504)
+      picasso, dispatcher, cache, action, null, ResponseException(504)
     )
     hunter.run()
     verify(dispatcher).dispatchFailed(hunter)
   }
 
-  @Test fun runWithIoExceptionDispatchRetry() {
+  @Test
+  fun runWithIoExceptionDispatchRetry() {
     val action = mockAction(picasso, URI_KEY_1, URI_1)
     val hunter = TestableBitmapHunter(picasso, dispatcher, cache, action, null, IOException())
     hunter.run()
     verify(dispatcher).dispatchRetry(hunter)
   }
 
-  @Test fun huntDecodesWhenNotInCache() {
+  @Test
+  fun huntDecodesWhenNotInCache() {
     val eventRecorder = EventRecorder()
     val picasso = picasso.newBuilder().addEventListener(eventRecorder).build()
     val action = mockAction(picasso, URI_KEY_1, URI_1, mockImageViewTarget())
@@ -156,7 +159,8 @@ class BitmapHunterTest {
     assertThat(eventRecorder.decodedBitmap).isEqualTo(bitmap)
   }
 
-  @Test fun huntReturnsWhenResultInCache() {
+  @Test
+  fun huntReturnsWhenResultInCache() {
     cache[URI_KEY_1 + KEY_SEPARATOR] = bitmap
     val eventRecorder = EventRecorder()
     val picasso = picasso.newBuilder().addEventListener(eventRecorder).build()
@@ -171,7 +175,8 @@ class BitmapHunterTest {
     assertThat(eventRecorder.decodedBitmap).isNull()
   }
 
-  @Test fun huntUnrecognizedUri() {
+  @Test
+  fun huntUnrecognizedUri() {
     val action = mockAction(picasso, CUSTOM_URI_KEY, CUSTOM_URI)
     val hunter = forRequest(picasso, dispatcher, cache, action)
     try {
@@ -181,7 +186,8 @@ class BitmapHunterTest {
     }
   }
 
-  @Test fun huntDecodesWithRequestHandler() {
+  @Test
+  fun huntDecodesWithRequestHandler() {
     val picasso = mockPicasso(context, CustomRequestHandler())
     val action = mockAction(picasso, CUSTOM_URI_KEY, CUSTOM_URI)
     val hunter = forRequest(picasso, dispatcher, cache, action)
@@ -189,7 +195,8 @@ class BitmapHunterTest {
     assertThat(result!!.bitmap).isEqualTo(bitmap)
   }
 
-  @Test fun attachSingleRequest() {
+  @Test
+  fun attachSingleRequest() {
     val action1 = mockAction(picasso, URI_KEY_1, URI_1, mockImageViewTarget())
     val hunter = TestableBitmapHunter(picasso, dispatcher, cache, action1)
     assertThat(hunter.action).isEqualTo(action1)
@@ -199,7 +206,8 @@ class BitmapHunterTest {
     assertThat(hunter.actions).isNull()
   }
 
-  @Test fun attachMultipleRequests() {
+  @Test
+  fun attachMultipleRequests() {
     val action1 = mockAction(picasso, URI_KEY_1, URI_1, mockImageViewTarget())
     val action2 = mockAction(picasso, URI_KEY_1, URI_1, mockImageViewTarget())
     val hunter = TestableBitmapHunter(picasso, dispatcher, cache, action1)
@@ -209,7 +217,8 @@ class BitmapHunterTest {
     assertThat(hunter.actions).hasSize(1)
   }
 
-  @Test fun detachSingleRequest() {
+  @Test
+  fun detachSingleRequest() {
     val action = mockAction(picasso, URI_KEY_1, URI_1, mockImageViewTarget())
     val hunter = TestableBitmapHunter(picasso, dispatcher, cache, action)
     assertThat(hunter.action).isNotNull()
@@ -217,7 +226,8 @@ class BitmapHunterTest {
     assertThat(hunter.action).isNull()
   }
 
-  @Test fun detachMultipleRequests() {
+  @Test
+  fun detachMultipleRequests() {
     val action = mockAction(picasso, URI_KEY_1, URI_1, mockImageViewTarget())
     val action2 = mockAction(picasso, URI_KEY_1, URI_1, mockImageViewTarget())
     val hunter = TestableBitmapHunter(picasso, dispatcher, cache, action)
@@ -230,7 +240,8 @@ class BitmapHunterTest {
     assertThat(hunter.action).isNull()
   }
 
-  @Test fun cancelSingleRequest() {
+  @Test
+  fun cancelSingleRequest() {
     val action1 = mockAction(picasso, URI_KEY_1, URI_1, mockImageViewTarget())
     val hunter = TestableBitmapHunter(picasso, dispatcher, cache, action1)
     hunter.future = FutureTask(mock(Runnable::class.java), mock(Any::class.java))
@@ -241,7 +252,8 @@ class BitmapHunterTest {
     assertThat(hunter.isCancelled).isTrue()
   }
 
-  @Test fun cancelMultipleRequests() {
+  @Test
+  fun cancelMultipleRequests() {
     val action1 = mockAction(picasso, URI_KEY_1, URI_1, mockImageViewTarget())
     val action2 = mockAction(picasso, URI_KEY_1, URI_1, mockImageViewTarget())
     val hunter = TestableBitmapHunter(picasso, dispatcher, cache, action1)
@@ -257,35 +269,40 @@ class BitmapHunterTest {
 
   // ---------------------------------------
 
-  @Test fun forContentProviderRequest() {
+  @Test
+  fun forContentProviderRequest() {
     val picasso = mockPicasso(context, ContentStreamRequestHandler(context))
     val action = mockAction(picasso, CONTENT_KEY_1, CONTENT_1_URL)
     val hunter = forRequest(picasso, dispatcher, cache, action)
     assertThat(hunter.requestHandler).isInstanceOf(ContentStreamRequestHandler::class.java)
   }
 
-  @Test fun forMediaStoreRequest() {
+  @Test
+  fun forMediaStoreRequest() {
     val picasso = mockPicasso(context, MediaStoreRequestHandler(context))
     val action = mockAction(picasso, MEDIA_STORE_CONTENT_KEY_1, MEDIA_STORE_CONTENT_1_URL)
     val hunter = forRequest(picasso, dispatcher, cache, action)
     assertThat(hunter.requestHandler).isInstanceOf(MediaStoreRequestHandler::class.java)
   }
 
-  @Test fun forContactsPhotoRequest() {
+  @Test
+  fun forContactsPhotoRequest() {
     val picasso = mockPicasso(context, ContactsPhotoRequestHandler(context))
     val action = mockAction(picasso, CONTACT_KEY_1, CONTACT_URI_1)
     val hunter = forRequest(picasso, dispatcher, cache, action)
     assertThat(hunter.requestHandler).isInstanceOf(ContactsPhotoRequestHandler::class.java)
   }
 
-  @Test fun forContactsThumbnailPhotoRequest() {
+  @Test
+  fun forContactsThumbnailPhotoRequest() {
     val picasso = mockPicasso(context, ContactsPhotoRequestHandler(context))
     val action = mockAction(picasso, CONTACT_PHOTO_KEY_1, CONTACT_PHOTO_URI_1)
     val hunter = forRequest(picasso, dispatcher, cache, action)
     assertThat(hunter.requestHandler).isInstanceOf(ContactsPhotoRequestHandler::class.java)
   }
 
-  @Test fun forNetworkRequest() {
+  @Test
+  fun forNetworkRequest() {
     val requestHandler = NetworkRequestHandler(UNUSED_CALL_FACTORY)
     val picasso = mockPicasso(context, requestHandler)
     val action = mockAction(picasso, URI_KEY_1, URI_1)
@@ -293,14 +310,16 @@ class BitmapHunterTest {
     assertThat(hunter.requestHandler).isSameInstanceAs(requestHandler)
   }
 
-  @Test fun forFileWithAuthorityRequest() {
+  @Test
+  fun forFileWithAuthorityRequest() {
     val picasso = mockPicasso(context, FileRequestHandler(context))
     val action = mockAction(picasso, FILE_KEY_1, FILE_1_URL)
     val hunter = forRequest(picasso, dispatcher, cache, action)
     assertThat(hunter.requestHandler).isInstanceOf(FileRequestHandler::class.java)
   }
 
-  @Test fun forAndroidBitmapResourceRequest() {
+  @Test
+  fun forAndroidBitmapResourceRequest() {
     val resources = mockResources(BITMAP_RESOURCE_VALUE)
     `when`(context.resources).thenReturn(resources)
     val picasso = mockPicasso(context, ResourceRequestHandler(context))
@@ -309,21 +328,24 @@ class BitmapHunterTest {
     assertThat(hunter.requestHandler).isInstanceOf(ResourceRequestHandler::class.java)
   }
 
-  @Test fun forAndroidBitmapResourceUriWithId() {
+  @Test
+  fun forAndroidBitmapResourceUriWithId() {
     val picasso = mockPicasso(context, ResourceRequestHandler(context))
     val action = mockAction(picasso, RESOURCE_ID_URI_KEY, RESOURCE_ID_URI)
     val hunter = forRequest(picasso, dispatcher, cache, action)
     assertThat(hunter.requestHandler).isInstanceOf(ResourceRequestHandler::class.java)
   }
 
-  @Test fun forAndroidBitmapResourceUriWithType() {
+  @Test
+  fun forAndroidBitmapResourceUriWithType() {
     val picasso = mockPicasso(context, ResourceRequestHandler(context))
     val action = mockAction(picasso, RESOURCE_TYPE_URI_KEY, RESOURCE_TYPE_URI)
     val hunter = forRequest(picasso, dispatcher, cache, action)
     assertThat(hunter.requestHandler).isInstanceOf(ResourceRequestHandler::class.java)
   }
 
-  @Test fun forAndroidXmlResourceRequest() {
+  @Test
+  fun forAndroidXmlResourceRequest() {
     val resources = mockResources(XML_RESOURCE_VALUE)
     `when`(context.resources).thenReturn(resources)
     val requestHandler =
@@ -334,40 +356,55 @@ class BitmapHunterTest {
     assertThat(hunter.requestHandler).isInstanceOf(ResourceDrawableRequestHandler::class.java)
   }
 
-  @Test fun forAssetRequest() {
+  @Test
+  fun forAssetRequest() {
     val picasso = mockPicasso(context, AssetRequestHandler(context))
     val action = mockAction(picasso, ASSET_KEY_1, ASSET_URI_1)
     val hunter = forRequest(picasso, dispatcher, cache, action)
     assertThat(hunter.requestHandler).isInstanceOf(AssetRequestHandler::class.java)
   }
 
-  @Test fun forFileWithNoPathSegments() {
+  @Test
+  fun forFileWithNoPathSegments() {
     val picasso = mockPicasso(context, FileRequestHandler(context))
     val action = mockAction(picasso, "keykeykey", Uri.fromFile(File("/")))
     val hunter = forRequest(picasso, dispatcher, cache, action)
     assertThat(hunter.requestHandler).isInstanceOf(FileRequestHandler::class.java)
   }
 
-  @Test fun forCustomRequest() {
+  @Test
+  fun forCustomRequest() {
     val picasso = mockPicasso(context, CustomRequestHandler())
     val action = mockAction(picasso, CUSTOM_URI_KEY, CUSTOM_URI)
     val hunter = forRequest(picasso, dispatcher, cache, action)
     assertThat(hunter.requestHandler).isInstanceOf(CustomRequestHandler::class.java)
   }
 
-  @Test fun forOverrideRequest() {
+  @Test
+  fun forOverrideRequest() {
     val handler = AssetRequestHandler(context)
     // Must use non-mock constructor because that is where Picasso's list of handlers is created.
     val picasso = Picasso(
-      context, dispatcher, UNUSED_CALL_FACTORY, null, cache, null, NO_TRANSFORMERS,
-      listOf(handler), emptyList(), ARGB_8888, false, false
+      context,
+      dispatcher,
+      UNUSED_CALL_FACTORY,
+      null,
+      cache,
+      null,
+      NO_TRANSFORMERS,
+      listOf(handler),
+      emptyList(),
+      ARGB_8888,
+      false,
+      false
     )
     val action = mockAction(picasso, ASSET_KEY_1, ASSET_URI_1)
     val hunter = forRequest(picasso, dispatcher, cache, action)
     assertThat(hunter.requestHandler).isEqualTo(handler)
   }
 
-  @Test fun sequenceIsIncremented() {
+  @Test
+  fun sequenceIsIncremented() {
     val picasso = mockPicasso(context)
     val action = mockAction(picasso, URI_KEY_1, URI_1)
     val hunter1 = forRequest(picasso, dispatcher, cache, action)
@@ -375,7 +412,8 @@ class BitmapHunterTest {
     assertThat(hunter2.sequence).isGreaterThan(hunter1.sequence)
   }
 
-  @Test fun getPriorityWithNoRequests() {
+  @Test
+  fun getPriorityWithNoRequests() {
     val requestHandler = NetworkRequestHandler(UNUSED_CALL_FACTORY)
     val picasso = mockPicasso(context, requestHandler)
     val action = mockAction(picasso, URI_KEY_1, URI_1)
@@ -386,7 +424,8 @@ class BitmapHunterTest {
     assertThat(hunter.priority).isEqualTo(LOW)
   }
 
-  @Test fun getPriorityWithSingleRequest() {
+  @Test
+  fun getPriorityWithSingleRequest() {
     val requestHandler = NetworkRequestHandler(UNUSED_CALL_FACTORY)
     val picasso = mockPicasso(context, requestHandler)
     val action = mockAction(picasso = picasso, key = URI_KEY_1, uri = URI_1, priority = HIGH)
@@ -396,7 +435,8 @@ class BitmapHunterTest {
     assertThat(hunter.priority).isEqualTo(HIGH)
   }
 
-  @Test fun getPriorityWithMultipleRequests() {
+  @Test
+  fun getPriorityWithMultipleRequests() {
     val requestHandler = NetworkRequestHandler(UNUSED_CALL_FACTORY)
     val picasso = mockPicasso(context, requestHandler)
     val action1 = mockAction(picasso = picasso, key = URI_KEY_1, uri = URI_1, priority = NORMAL)
@@ -408,7 +448,8 @@ class BitmapHunterTest {
     assertThat(hunter.priority).isEqualTo(HIGH)
   }
 
-  @Test fun getPriorityAfterDetach() {
+  @Test
+  fun getPriorityAfterDetach() {
     val requestHandler = NetworkRequestHandler(UNUSED_CALL_FACTORY)
     val picasso = mockPicasso(context, requestHandler)
     val action1 = mockAction(picasso = picasso, key = URI_KEY_1, uri = URI_1, priority = NORMAL)
@@ -424,7 +465,8 @@ class BitmapHunterTest {
     assertThat(hunter.priority).isEqualTo(NORMAL)
   }
 
-  @Test fun exifRotation() {
+  @Test
+  fun exifRotation() {
     val data = Request.Builder(URI_1).rotate(-45f).build()
     val source = android.graphics.Bitmap.createBitmap(10, 10, ARGB_8888)
     val result = transformResult(data, source, ORIENTATION_ROTATE_90)
@@ -436,7 +478,8 @@ class BitmapHunterTest {
     assertThat(shadowMatrix.preOperations).containsExactly("rotate 90.0")
   }
 
-  @Test fun exifRotationSizing() {
+  @Test
+  fun exifRotationSizing() {
     val data = Request.Builder(URI_1).resize(5, 10).build()
     val source = android.graphics.Bitmap.createBitmap(10, 10, ARGB_8888)
     val result = transformResult(data, source, ORIENTATION_ROTATE_90)
@@ -448,7 +491,8 @@ class BitmapHunterTest {
     assertThat(shadowMatrix.preOperations).contains("scale 1.0 0.5")
   }
 
-  @Test fun exifRotationNoSizing() {
+  @Test
+  fun exifRotationNoSizing() {
     val data = Request.Builder(URI_1).build()
     val source = android.graphics.Bitmap.createBitmap(10, 10, ARGB_8888)
     val result = transformResult(data, source, ORIENTATION_ROTATE_90)
@@ -460,7 +504,8 @@ class BitmapHunterTest {
     assertThat(shadowMatrix.preOperations).contains("rotate 90.0")
   }
 
-  @Test fun rotation90Sizing() {
+  @Test
+  fun rotation90Sizing() {
     val data = Request.Builder(URI_1).rotate(90f).resize(5, 10).build()
     val source = android.graphics.Bitmap.createBitmap(10, 10, ARGB_8888)
     val result = transformResult(data, source, 0)
@@ -472,7 +517,8 @@ class BitmapHunterTest {
     assertThat(shadowMatrix.preOperations).contains("scale 1.0 0.5")
   }
 
-  @Test fun rotation180Sizing() {
+  @Test
+  fun rotation180Sizing() {
     val data = Request.Builder(URI_1).rotate(180f).resize(5, 10).build()
     val source = android.graphics.Bitmap.createBitmap(10, 10, ARGB_8888)
     val result = transformResult(data, source, 0)
@@ -484,7 +530,8 @@ class BitmapHunterTest {
     assertThat(shadowMatrix.preOperations).contains("scale 0.5 1.0")
   }
 
-  @Test fun rotation90WithPivotSizing() {
+  @Test
+  fun rotation90WithPivotSizing() {
     val data = Request.Builder(URI_1).rotate(90f, 0f, 10f).resize(5, 10).build()
     val source = android.graphics.Bitmap.createBitmap(10, 10, ARGB_8888)
     val result = transformResult(data, source, 0)
@@ -496,7 +543,8 @@ class BitmapHunterTest {
     assertThat(shadowMatrix.preOperations).contains("scale 1.0 0.5")
   }
 
-  @Test fun exifVerticalFlip() {
+  @Test
+  fun exifVerticalFlip() {
     val data = Request.Builder(URI_1).rotate(-45f).build()
     val source = android.graphics.Bitmap.createBitmap(10, 10, ARGB_8888)
     val result = transformResult(data, source, ExifInterface.ORIENTATION_FLIP_VERTICAL)
@@ -509,7 +557,8 @@ class BitmapHunterTest {
     assertThat(shadowMatrix.preOperations).containsExactly("rotate 180.0")
   }
 
-  @Test fun exifHorizontalFlip() {
+  @Test
+  fun exifHorizontalFlip() {
     val data = Request.Builder(URI_1).rotate(-45f).build()
     val source = android.graphics.Bitmap.createBitmap(10, 10, ARGB_8888)
     val result = transformResult(data, source, ExifInterface.ORIENTATION_FLIP_HORIZONTAL)
@@ -524,7 +573,8 @@ class BitmapHunterTest {
     assertThat(shadowMatrix.preOperations).doesNotContain("rotate 270.0")
   }
 
-  @Test fun exifTranspose() {
+  @Test
+  fun exifTranspose() {
     val data = Request.Builder(URI_1).rotate(-45f).build()
     val source = android.graphics.Bitmap.createBitmap(10, 10, ARGB_8888)
     val result = transformResult(data, source, ExifInterface.ORIENTATION_TRANSPOSE)
@@ -537,7 +587,8 @@ class BitmapHunterTest {
     assertThat(shadowMatrix.preOperations).containsExactly("rotate 90.0")
   }
 
-  @Test fun exifTransverse() {
+  @Test
+  fun exifTransverse() {
     val data = Request.Builder(URI_1).rotate(-45f).build()
     val source = android.graphics.Bitmap.createBitmap(10, 10, ARGB_8888)
     val result = transformResult(data, source, ExifInterface.ORIENTATION_TRANSVERSE)
@@ -550,7 +601,8 @@ class BitmapHunterTest {
     assertThat(shadowMatrix.preOperations).containsExactly("rotate 270.0")
   }
 
-  @Test fun keepsAspectRationWhileResizingWhenDesiredWidthIs0() {
+  @Test
+  fun keepsAspectRationWhileResizingWhenDesiredWidthIs0() {
     val request = Request.Builder(URI_1).resize(20, 0).build()
     val source = android.graphics.Bitmap.createBitmap(40, 20, ARGB_8888)
 
@@ -562,7 +614,8 @@ class BitmapHunterTest {
     assertThat(shadowMatrix.preOperations).containsExactly("scale 0.5 0.5")
   }
 
-  @Test fun keepsAspectRationWhileResizingWhenDesiredHeightIs0() {
+  @Test
+  fun keepsAspectRationWhileResizingWhenDesiredHeightIs0() {
     val request = Request.Builder(URI_1).resize(0, 10).build()
     val source = android.graphics.Bitmap.createBitmap(40, 20, ARGB_8888)
 
@@ -574,7 +627,8 @@ class BitmapHunterTest {
     assertThat(shadowMatrix.preOperations).containsExactly("scale 0.5 0.5")
   }
 
-  @Test fun centerCropResultMatchesTargetSize() {
+  @Test
+  fun centerCropResultMatchesTargetSize() {
     val request = Request.Builder(URI_1).resize(1080, 642).centerCrop().build()
     val source = android.graphics.Bitmap.createBitmap(640, 640, ARGB_8888)
 
@@ -584,7 +638,8 @@ class BitmapHunterTest {
     assertThat(result.height).isEqualTo(642)
   }
 
-  @Test fun centerCropResultMatchesTargetSizeWhileDesiredWidthIs0() {
+  @Test
+  fun centerCropResultMatchesTargetSizeWhileDesiredWidthIs0() {
     val request = Request.Builder(URI_1).resize(0, 642).centerCrop().build()
     val source = android.graphics.Bitmap.createBitmap(640, 640, ARGB_8888)
 
@@ -594,7 +649,8 @@ class BitmapHunterTest {
     assertThat(result.height).isEqualTo(642)
   }
 
-  @Test fun centerCropResultMatchesTargetSizeWhileDesiredHeightIs0() {
+  @Test
+  fun centerCropResultMatchesTargetSizeWhileDesiredHeightIs0() {
     val request = Request.Builder(URI_1).resize(1080, 0).centerCrop().build()
     val source = android.graphics.Bitmap.createBitmap(640, 640, ARGB_8888)
 
@@ -604,7 +660,8 @@ class BitmapHunterTest {
     assertThat(result.height).isEqualTo(1080)
   }
 
-  @Test fun centerInsideResultMatchesTargetSizeWhileDesiredWidthIs0() {
+  @Test
+  fun centerInsideResultMatchesTargetSizeWhileDesiredWidthIs0() {
     val request = Request.Builder(URI_1).resize(0, 642).centerInside().build()
     val source = android.graphics.Bitmap.createBitmap(640, 640, ARGB_8888)
 
@@ -614,7 +671,8 @@ class BitmapHunterTest {
     assertThat(result.height).isEqualTo(642)
   }
 
-  @Test fun centerInsideResultMatchesTargetSizeWhileDesiredHeightIs0() {
+  @Test
+  fun centerInsideResultMatchesTargetSizeWhileDesiredHeightIs0() {
     val request = Request.Builder(URI_1).resize(1080, 0).centerInside().build()
     val source = android.graphics.Bitmap.createBitmap(640, 640, ARGB_8888)
 
@@ -624,7 +682,8 @@ class BitmapHunterTest {
     assertThat(result.height).isEqualTo(1080)
   }
 
-  @Test fun exifRotationWithManualRotation() {
+  @Test
+  fun exifRotationWithManualRotation() {
     val source = android.graphics.Bitmap.createBitmap(10, 10, ARGB_8888)
     val data = Request.Builder(URI_1).rotate(-45f).build()
 
@@ -639,7 +698,8 @@ class BitmapHunterTest {
     assertThat(shadowMatrix.setOperations).containsEntry("rotate", "-45.0")
   }
 
-  @Test fun rotation() {
+  @Test
+  fun rotation() {
     val source = android.graphics.Bitmap.createBitmap(10, 10, ARGB_8888)
     val data = Request.Builder(URI_1).rotate(-45f).build()
 
@@ -653,7 +713,8 @@ class BitmapHunterTest {
     assertThat(shadowMatrix.setOperations).containsEntry("rotate", "-45.0")
   }
 
-  @Test fun pivotRotation() {
+  @Test
+  fun pivotRotation() {
     val source = android.graphics.Bitmap.createBitmap(10, 10, ARGB_8888)
     val data = Request.Builder(URI_1).rotate(-45f, 10f, 10f).build()
 
@@ -667,7 +728,8 @@ class BitmapHunterTest {
     assertThat(shadowMatrix.setOperations).containsEntry("rotate", "-45.0 10.0 10.0")
   }
 
-  @Test fun resize() {
+  @Test
+  fun resize() {
     val source = android.graphics.Bitmap.createBitmap(10, 10, ARGB_8888)
     val data = Request.Builder(URI_1).resize(20, 15).build()
 
@@ -681,7 +743,8 @@ class BitmapHunterTest {
     assertThat(shadowMatrix.preOperations).containsExactly("scale 2.0 1.5")
   }
 
-  @Test fun centerCropTallTooSmall() {
+  @Test
+  fun centerCropTallTooSmall() {
     val source = android.graphics.Bitmap.createBitmap(10, 20, ARGB_8888)
     val data = Request.Builder(URI_1).resize(40, 40).centerCrop().build()
 
@@ -699,7 +762,8 @@ class BitmapHunterTest {
     assertThat(shadowMatrix.preOperations).containsExactly("scale 4.0 4.0")
   }
 
-  @Test fun centerCropTallTooLarge() {
+  @Test
+  fun centerCropTallTooLarge() {
     val source = android.graphics.Bitmap.createBitmap(100, 200, ARGB_8888)
     val data = Request.Builder(URI_1).resize(50, 50).centerCrop().build()
 
@@ -717,7 +781,8 @@ class BitmapHunterTest {
     assertThat(shadowMatrix.preOperations).containsExactly("scale 0.5 0.5")
   }
 
-  @Test fun centerCropWideTooSmall() {
+  @Test
+  fun centerCropWideTooSmall() {
     val source = android.graphics.Bitmap.createBitmap(20, 10, ARGB_8888)
     val data = Request.Builder(URI_1).resize(40, 40).centerCrop().build()
 
@@ -735,7 +800,8 @@ class BitmapHunterTest {
     assertThat(shadowMatrix.preOperations).containsExactly("scale 4.0 4.0")
   }
 
-  @Test fun centerCropWithGravityHorizontalLeft() {
+  @Test
+  fun centerCropWithGravityHorizontalLeft() {
     val source = android.graphics.Bitmap.createBitmap(20, 10, ARGB_8888)
     val data = Request.Builder(URI_1).resize(40, 40).centerCrop(Gravity.LEFT).build()
 
@@ -753,7 +819,8 @@ class BitmapHunterTest {
     assertThat(shadowMatrix.preOperations).containsExactly("scale 4.0 4.0")
   }
 
-  @Test fun centerCropWithGravityHorizontalRight() {
+  @Test
+  fun centerCropWithGravityHorizontalRight() {
     val source = android.graphics.Bitmap.createBitmap(20, 10, ARGB_8888)
     val data = Request.Builder(URI_1).resize(40, 40).centerCrop(Gravity.RIGHT).build()
 
@@ -771,7 +838,8 @@ class BitmapHunterTest {
     assertThat(shadowMatrix.preOperations).containsExactly("scale 4.0 4.0")
   }
 
-  @Test fun centerCropWithGravityVerticalTop() {
+  @Test
+  fun centerCropWithGravityVerticalTop() {
     val source = android.graphics.Bitmap.createBitmap(10, 20, ARGB_8888)
     val data = Request.Builder(URI_1).resize(40, 40).centerCrop(Gravity.TOP).build()
 
@@ -789,7 +857,8 @@ class BitmapHunterTest {
     assertThat(shadowMatrix.preOperations).containsExactly("scale 4.0 4.0")
   }
 
-  @Test fun centerCropWithGravityVerticalBottom() {
+  @Test
+  fun centerCropWithGravityVerticalBottom() {
     val source = android.graphics.Bitmap.createBitmap(10, 20, ARGB_8888)
     val data = Request.Builder(URI_1).resize(40, 40).centerCrop(Gravity.BOTTOM).build()
 
@@ -807,7 +876,8 @@ class BitmapHunterTest {
     assertThat(shadowMatrix.preOperations).containsExactly("scale 4.0 4.0")
   }
 
-  @Test fun centerCropWideTooLarge() {
+  @Test
+  fun centerCropWideTooLarge() {
     val source = android.graphics.Bitmap.createBitmap(200, 100, ARGB_8888)
     val data = Request.Builder(URI_1).resize(50, 50).centerCrop().build()
 
@@ -825,7 +895,8 @@ class BitmapHunterTest {
     assertThat(shadowMatrix.preOperations).containsExactly("scale 0.5 0.5")
   }
 
-  @Test fun centerInsideTallTooSmall() {
+  @Test
+  fun centerInsideTallTooSmall() {
     val source = android.graphics.Bitmap.createBitmap(20, 10, ARGB_8888)
     val data = Request.Builder(URI_1).resize(50, 50).centerInside().build()
 
@@ -839,7 +910,8 @@ class BitmapHunterTest {
     assertThat(shadowMatrix.preOperations).containsExactly("scale 2.5 2.5")
   }
 
-  @Test fun centerInsideTallTooLarge() {
+  @Test
+  fun centerInsideTallTooLarge() {
     val source = android.graphics.Bitmap.createBitmap(100, 50, ARGB_8888)
     val data = Request.Builder(URI_1).resize(50, 50).centerInside().build()
 
@@ -853,7 +925,8 @@ class BitmapHunterTest {
     assertThat(shadowMatrix.preOperations).containsExactly("scale 0.5 0.5")
   }
 
-  @Test fun centerInsideWideTooSmall() {
+  @Test
+  fun centerInsideWideTooSmall() {
     val source = android.graphics.Bitmap.createBitmap(10, 20, ARGB_8888)
     val data = Request.Builder(URI_1).resize(50, 50).centerInside().build()
 
@@ -867,7 +940,8 @@ class BitmapHunterTest {
     assertThat(shadowMatrix.preOperations).containsExactly("scale 2.5 2.5")
   }
 
-  @Test fun centerInsideWideTooLarge() {
+  @Test
+  fun centerInsideWideTooLarge() {
     val source = android.graphics.Bitmap.createBitmap(50, 100, ARGB_8888)
     val data = Request.Builder(URI_1).resize(50, 50).centerInside().build()
 
@@ -882,7 +956,8 @@ class BitmapHunterTest {
     assertThat(shadowMatrix.preOperations).containsExactly("scale 0.5 0.5")
   }
 
-  @Test fun onlyScaleDownOriginalBigger() {
+  @Test
+  fun onlyScaleDownOriginalBigger() {
     val source = android.graphics.Bitmap.createBitmap(100, 100, ARGB_8888)
     val data = Request.Builder(URI_1).resize(50, 50).onlyScaleDown().build()
     val result = transformResult(data, source, 0)
@@ -896,7 +971,8 @@ class BitmapHunterTest {
     assertThat(shadowMatrix.preOperations).containsExactly("scale 0.5 0.5")
   }
 
-  @Test fun onlyScaleDownOriginalSmaller() {
+  @Test
+  fun onlyScaleDownOriginalSmaller() {
     val source = android.graphics.Bitmap.createBitmap(50, 50, ARGB_8888)
     val data = Request.Builder(URI_1).resize(100, 100).onlyScaleDown().build()
     val result = transformResult(data, source, 0)
@@ -907,7 +983,8 @@ class BitmapHunterTest {
     assertThat(shadowBitmap.createdFromBitmap).isNotSameInstanceAs(source)
   }
 
-  @Test fun onlyScaleDownOriginalSmallerWidthIs0() {
+  @Test
+  fun onlyScaleDownOriginalSmallerWidthIs0() {
     val source = android.graphics.Bitmap.createBitmap(50, 50, ARGB_8888)
     val data = Request.Builder(URI_1).resize(0, 60).onlyScaleDown().build()
     val result = transformResult(data, source, 0)
@@ -917,7 +994,8 @@ class BitmapHunterTest {
     assertThat(shadowBitmap.createdFromBitmap).isNull()
   }
 
-  @Test fun onlyScaleDownOriginalSmallerHeightIs0() {
+  @Test
+  fun onlyScaleDownOriginalSmallerHeightIs0() {
     val source = android.graphics.Bitmap.createBitmap(50, 50, ARGB_8888)
     val data = Request.Builder(URI_1).resize(60, 0).onlyScaleDown().build()
     val result = transformResult(data, source, 0)
@@ -927,7 +1005,8 @@ class BitmapHunterTest {
     assertThat(shadowBitmap.createdFromBitmap).isNull()
   }
 
-  @Test fun onlyScaleDownOriginalBiggerWidthIs0() {
+  @Test
+  fun onlyScaleDownOriginalBiggerWidthIs0() {
     val source = android.graphics.Bitmap.createBitmap(50, 50, ARGB_8888)
     val data = Request.Builder(URI_1).resize(0, 40).onlyScaleDown().build()
     val result = transformResult(data, source, 0)
@@ -941,7 +1020,8 @@ class BitmapHunterTest {
     assertThat(shadowMatrix.preOperations).containsExactly("scale 0.8 0.8")
   }
 
-  @Test fun onlyScaleDownOriginalBiggerHeightIs0() {
+  @Test
+  fun onlyScaleDownOriginalBiggerHeightIs0() {
     val source = android.graphics.Bitmap.createBitmap(50, 50, ARGB_8888)
     val data = Request.Builder(URI_1).resize(40, 0).onlyScaleDown().build()
     val result = transformResult(data, source, 0)
@@ -955,7 +1035,8 @@ class BitmapHunterTest {
     assertThat(shadowMatrix.preOperations).containsExactly("scale 0.8 0.8")
   }
 
-  @Test fun reusedBitmapIsNotRecycled() {
+  @Test
+  fun reusedBitmapIsNotRecycled() {
     val data = Request.Builder(URI_1).build()
     val source = android.graphics.Bitmap.createBitmap(10, 10, ARGB_8888)
     val result = transformResult(data, source, 0)
@@ -963,7 +1044,8 @@ class BitmapHunterTest {
     assertThat(result.isRecycled).isFalse()
   }
 
-  @Test fun crashingOnTransformationThrows() {
+  @Test
+  fun crashingOnTransformationThrows() {
     val badTransformation = object : Transformation {
       override fun transform(source: Bitmap): Bitmap {
         throw NullPointerException("hello")
@@ -982,13 +1064,13 @@ class BitmapHunterTest {
       shadowOf(Looper.getMainLooper()).idle()
       fail("Expected exception to be thrown.")
     } catch (e: RuntimeException) {
-      assertThat(e)
-        .hasMessageThat()
+      assertThat(e).hasMessageThat()
         .isEqualTo("Transformation ${badTransformation.key()} crashed with exception.")
     }
   }
 
-  @Test fun recycledTransformationBitmapThrows() {
+  @Test
+  fun recycledTransformationBitmapThrows() {
     val badTransformation: Transformation = object : Transformation {
       override fun transform(source: Bitmap): Bitmap {
         source.bitmap.recycle()
@@ -1008,8 +1090,7 @@ class BitmapHunterTest {
       shadowOf(Looper.getMainLooper()).idle()
       fail("Expected exception to be thrown.")
     } catch (e: RuntimeException) {
-      assertThat(e)
-        .hasMessageThat()
+      assertThat(e).hasMessageThat()
         .isEqualTo("Transformation ${badTransformation.key()} returned a recycled Bitmap.")
     }
   }
@@ -1073,7 +1154,7 @@ class BitmapHunterTest {
     override val retryCount: Int
       get() = 1
 
-    override fun shouldRetry(airplaneMode: Boolean, info: NetworkInfo?): Boolean {
+    override fun shouldRetry(isConnected: Boolean): Boolean {
       return shouldRetry
     }
 
