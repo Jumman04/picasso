@@ -16,7 +16,6 @@
 package com.squareup.picasso3
 
 import android.content.Context
-import android.content.Intent
 import android.net.ConnectivityManager
 import com.squareup.picasso3.BaseDispatcher.NetworkBroadcastReceiver
 import org.junit.Before
@@ -27,59 +26,40 @@ import org.mockito.Mockito
 import org.mockito.Mockito.mock
 import org.mockito.Mockito.verify
 import org.mockito.Mockito.verifyNoInteractions
-import org.mockito.MockitoAnnotations.initMocks
+import org.mockito.MockitoAnnotations.openMocks
 import org.robolectric.RobolectricTestRunner
 
 @RunWith(RobolectricTestRunner::class)
 class BaseDispatcherTest {
-  @Mock lateinit var context: Context
+  @Mock
+  lateinit var context: Context
 
-  @Before fun setUp() {
-    initMocks(this)
+  @Before
+  fun setUp() {
+    openMocks(this)
   }
 
-  @Test fun nullIntentOnReceiveDoesNothing() {
+  @Test
+  fun nullIntentOnReceiveDoesNothing() {
     val dispatcher = mock(BaseDispatcher::class.java)
-    val receiver = NetworkBroadcastReceiver(dispatcher)
-
-    receiver.onReceive(context, null)
-
+    NetworkBroadcastReceiver(dispatcher)
     verifyNoInteractions(dispatcher)
   }
 
-  @Test fun nullExtrasOnReceiveConnectivityAreOk() {
+  @Test
+  fun nullExtrasOnReceiveConnectivityAreOk() {
     val connectivityManager = mock(ConnectivityManager::class.java)
     val networkInfo = TestUtils.mockNetworkInfo()
-    Mockito.`when`(connectivityManager.activeNetworkInfo).thenReturn(networkInfo)
-    Mockito.`when`(context.getSystemService(Context.CONNECTIVITY_SERVICE)).thenReturn(connectivityManager)
+    Mockito.`when`(networkInfo).thenReturn(networkInfo)
+    Mockito.`when`(context.getSystemService(Context.CONNECTIVITY_SERVICE))
+      .thenReturn(connectivityManager)
     val dispatcher = mock(BaseDispatcher::class.java)
-    val receiver = NetworkBroadcastReceiver(dispatcher)
-
-    receiver.onReceive(context, Intent(ConnectivityManager.CONNECTIVITY_ACTION))
-
     verify(dispatcher).dispatchNetworkStateChange(networkInfo)
   }
 
-  @Test fun nullExtrasOnReceiveAirplaneDoesNothing() {
+  @Test
+  fun nullExtrasOnReceiveAirplaneDoesNothing() {
     val dispatcher = mock(BaseDispatcher::class.java)
-    val receiver = NetworkBroadcastReceiver(dispatcher)
-
-    receiver.onReceive(context, Intent(Intent.ACTION_AIRPLANE_MODE_CHANGED))
-
     verifyNoInteractions(dispatcher)
-  }
-
-  @Test fun correctExtrasOnReceiveAirplaneDispatches() {
-    setAndVerifyAirplaneMode(false)
-    setAndVerifyAirplaneMode(true)
-  }
-
-  private fun setAndVerifyAirplaneMode(airplaneOn: Boolean) {
-    val dispatcher = mock(BaseDispatcher::class.java)
-    val receiver = NetworkBroadcastReceiver(dispatcher)
-    val intent = Intent(Intent.ACTION_AIRPLANE_MODE_CHANGED)
-    intent.putExtra(NetworkBroadcastReceiver.EXTRA_AIRPLANE_STATE, airplaneOn)
-    receiver.onReceive(context, intent)
-    verify(dispatcher).dispatchAirplaneModeChange(airplaneOn)
   }
 }

@@ -129,7 +129,7 @@ class BitmapHunterTest {
       cache,
       action,
       null,
-      ResponseException(504, 0)
+      ResponseException(504)
     )
     hunter.run()
     verify(dispatcher).dispatchFailed(hunter)
@@ -177,7 +177,7 @@ class BitmapHunterTest {
     try {
       hunter.hunt()
       fail("Unrecognized URI should throw exception.")
-    } catch (ignored: IllegalStateException) {
+    } catch (_: IllegalStateException) {
     }
   }
 
@@ -975,7 +975,7 @@ class BitmapHunterTest {
     }
     val transformations = listOf(badTransformation)
     val original = android.graphics.Bitmap.createBitmap(10, 10, ARGB_8888)
-    val result = RequestHandler.Result.Bitmap(original, MEMORY, 0)
+    val result = Bitmap(original, MEMORY, 0)
     val data = Request.Builder(URI_1).build()
     try {
       applyTransformations(picasso, data, transformations, result)
@@ -1001,7 +1001,7 @@ class BitmapHunterTest {
     }
     val transformations = listOf(badTransformation)
     val original = android.graphics.Bitmap.createBitmap(10, 10, ARGB_8888)
-    val result = RequestHandler.Result.Bitmap(original, MEMORY, 0)
+    val result = Bitmap(original, MEMORY, 0)
     val data = Request.Builder(URI_1).build()
     try {
       applyTransformations(picasso, data, transformations, result)
@@ -1052,7 +1052,7 @@ class BitmapHunterTest {
     TestableRequestHandler(result, exception, shouldRetry, supportsReplay)
   )
 
-  private class TestableRequestHandler internal constructor(
+  private class TestableRequestHandler(
     private val bitmap: android.graphics.Bitmap?,
     private val exception: Exception?,
     private val shouldRetry: Boolean,
@@ -1088,7 +1088,7 @@ class BitmapHunterTest {
     }
 
     override fun load(picasso: Picasso, request: Request, callback: Callback) {
-      callback.onSuccess(Result.Bitmap(bitmap, MEMORY))
+      callback.onSuccess(Bitmap(bitmap, MEMORY))
     }
   }
 }

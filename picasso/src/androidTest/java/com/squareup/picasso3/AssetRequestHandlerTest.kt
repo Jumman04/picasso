@@ -23,7 +23,8 @@ import org.junit.runner.RunWith
 
 @RunWith(AndroidJUnit4::class)
 class AssetRequestHandlerTest {
-  @Test fun truncatesFilePrefix() {
+  @Test
+  fun truncatesFilePrefix() {
     val uri = Uri.parse("file:///android_asset/foo/bar.png")
     val request = Request.Builder(uri).build()
 

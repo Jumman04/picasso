@@ -36,10 +36,10 @@ import com.squareup.picasso3.Utils.OWNER_DISPATCHER
 import com.squareup.picasso3.Utils.VERB_CANCELED
 import com.squareup.picasso3.Utils.VERB_DELIVERED
 import com.squareup.picasso3.Utils.VERB_ENQUEUED
-import com.squareup.picasso3.Utils.VERB_IGNORED
 import com.squareup.picasso3.Utils.VERB_PAUSED
 import com.squareup.picasso3.Utils.VERB_REPLAYING
 import com.squareup.picasso3.Utils.VERB_RETRYING
+import com.squareup.picasso3.Utils.VERB__
 import com.squareup.picasso3.Utils.getLogIdsForHunter
 import com.squareup.picasso3.Utils.hasPermission
 import com.squareup.picasso3.Utils.log
@@ -101,7 +101,7 @@ internal abstract class BaseDispatcher internal constructor(
       if (action.picasso.isLoggingEnabled) {
         log(
           owner = OWNER_DISPATCHER,
-          verb = VERB_IGNORED,
+          verb = VERB__,
           logId = action.request.logId(),
           extras = "because shut down"
         )

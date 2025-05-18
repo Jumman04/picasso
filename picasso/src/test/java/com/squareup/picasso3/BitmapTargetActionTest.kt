@@ -19,6 +19,7 @@ import android.content.Context
 import android.graphics.Bitmap
 import android.graphics.Bitmap.Config.ARGB_8888
 import android.graphics.drawable.Drawable
+import androidx.test.core.app.ApplicationProvider
 import com.squareup.picasso3.Picasso.LoadedFrom.MEMORY
 import com.squareup.picasso3.TestUtils.NO_EVENT_LISTENERS
 import com.squareup.picasso3.TestUtils.NO_HANDLERS
@@ -36,16 +37,16 @@ import org.mockito.Mockito.mock
 import org.mockito.Mockito.verify
 import org.mockito.Mockito.`when`
 import org.robolectric.RobolectricTestRunner
-import org.robolectric.RuntimeEnvironment
 
 @RunWith(RobolectricTestRunner::class)
 class BitmapTargetActionTest {
 
-  @Test fun invokesSuccessIfTargetIsNotNull() {
+  @Test
+  fun invokesSuccessIfTargetIsNotNull() {
     val bitmap = makeBitmap()
     val target = mockBitmapTarget()
     val request = BitmapTargetAction(
-      picasso = mockPicasso(RuntimeEnvironment.application),
+      picasso = mockPicasso(ApplicationProvider.getApplicationContext()),
       target = target,
       data = SIMPLE_REQUEST,
       errorDrawable = null,
@@ -55,11 +56,12 @@ class BitmapTargetActionTest {
     verify(target).onBitmapLoaded(bitmap, MEMORY)
   }
 
-  @Test fun invokesOnBitmapFailedIfTargetIsNotNullWithErrorDrawable() {
+  @Test
+  fun invokesOnBitmapFailedIfTargetIsNotNullWithErrorDrawable() {
     val errorDrawable = mock(Drawable::class.java)
     val target = mockBitmapTarget()
     val request = BitmapTargetAction(
-      picasso = mockPicasso(RuntimeEnvironment.application),
+      picasso = mockPicasso(ApplicationProvider.getApplicationContext()),
       target = target,
       data = SIMPLE_REQUEST,
       errorDrawable = errorDrawable,
@@ -72,15 +74,26 @@ class BitmapTargetActionTest {
     verify(target).onBitmapFailed(e, errorDrawable)
   }
 
-  @Test fun invokesOnBitmapFailedIfTargetIsNotNullWithErrorResourceId() {
+  @Test
+  fun invokesOnBitmapFailedIfTargetIsNotNullWithErrorResourceId() {
     val errorDrawable = mock(Drawable::class.java)
     val target = mockBitmapTarget()
     val context = mock(Context::class.java)
     val dispatcher = mock(Dispatcher::class.java)
     val cache = PlatformLruCache(0)
     val picasso = Picasso(
-      context, dispatcher, UNUSED_CALL_FACTORY, null, cache, null,
-      NO_TRANSFORMERS, NO_HANDLERS, NO_EVENT_LISTENERS, ARGB_8888, false, false
+      context,
+      dispatcher,
+      UNUSED_CALL_FACTORY,
+      null,
+      cache,
+      null,
+      NO_TRANSFORMERS,
+      NO_HANDLERS,
+      NO_EVENT_LISTENERS,
+      ARGB_8888,
+      false,
+      false
     )
     val request = BitmapTargetAction(
       picasso = picasso,
@@ -97,24 +110,21 @@ class BitmapTargetActionTest {
     verify(target).onBitmapFailed(e, errorDrawable)
   }
 
-  @Test fun recyclingInSuccessThrowsException() {
-    val picasso = mockPicasso(RuntimeEnvironment.application)
+  @Test
+  fun recyclingInSuccessThrowsException() {
+    val picasso = mockPicasso(ApplicationProvider.getApplicationContext())
     val bitmap = makeBitmap()
     val tr = BitmapTargetAction(
-      picasso = picasso,
-      target = object : BitmapTarget {
+      picasso = picasso, target = object : BitmapTarget {
         override fun onBitmapLoaded(bitmap: Bitmap, from: Picasso.LoadedFrom) = bitmap.recycle()
         override fun onBitmapFailed(e: Exception, errorDrawable: Drawable?) = fail()
         override fun onPrepareLoad(placeHolderDrawable: Drawable?) = fail()
-      },
-      data = SIMPLE_REQUEST,
-      errorDrawable = null,
-      errorResId = 0
+      }, data = SIMPLE_REQUEST, errorDrawable = null, errorResId = 0
     )
     try {
       tr.complete(RequestHandler.Result.Bitmap(bitmap, MEMORY))
       fail()
-    } catch (ignored: IllegalStateException) {
+    } catch (_: IllegalStateException) {
     }
   }
 }
