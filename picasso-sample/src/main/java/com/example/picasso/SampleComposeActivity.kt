@@ -15,8 +15,6 @@
  */
 package com.example.picasso
 
-import android.graphics.Bitmap
-import android.graphics.Bitmap.Config
 import android.graphics.Canvas
 import android.os.Bundle
 import androidx.compose.foundation.Image
@@ -51,6 +49,7 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.IntSize
 import androidx.compose.ui.unit.dp
+import androidx.core.graphics.createBitmap
 import com.squareup.picasso3.Picasso
 import com.squareup.picasso3.Picasso.LoadedFrom.MEMORY
 import com.squareup.picasso3.Request
@@ -64,9 +63,8 @@ class SampleComposeActivity : PicassoSampleActivity() {
     super.onCreate(savedInstanceState)
     val composeView = ComposeView(this)
 
-    val urls = Data.URLS.toMutableList().shuffled() +
-      Data.URLS.toMutableList().shuffled() +
-      Data.URLS.toMutableList().shuffled()
+    val urls = Data.URLS.toMutableList().shuffled() + Data.URLS.toMutableList()
+      .shuffled() + Data.URLS.toMutableList().shuffled()
 
     composeView.setContent {
       Content(urls)
@@ -95,8 +93,7 @@ fun Content(urls: List<String>, picasso: Picasso = PicassoInitializer.get()) {
         .background(Color.DarkGray)
         .padding(vertical = 4.dp),
       onContentScaleSelected = { contentScale = it },
-      onAlignmentSelected = { alignment = it }
-    )
+      onAlignmentSelected = { alignment = it })
   }
 }
 
@@ -109,8 +106,7 @@ fun ImageGrid(
   picasso: Picasso = PicassoInitializer.get()
 ) {
   LazyVerticalGrid(
-    columns = Adaptive(150.dp),
-    modifier = modifier
+    columns = Adaptive(150.dp), modifier = modifier
   ) {
     items(urls.size) {
       val url = urls[it]
@@ -153,8 +149,7 @@ fun Options(
             onClick = {
               contentScaleKey = key
               onContentScaleSelected(value)
-            }
-          )
+            })
         }
       }
     }
@@ -170,14 +165,10 @@ fun Options(
       ) {
         entries.forEach { (key, value) ->
           OptionText(
-            modifier = Modifier.weight(1F),
-            key = key,
-            selected = alignmentKey == key,
-            onClick = {
+            modifier = Modifier.weight(1F), key = key, selected = alignmentKey == key, onClick = {
               alignmentKey = key
               onAlignmentSelected(value)
-            }
-          )
+            })
         }
       }
     }
@@ -237,30 +228,24 @@ private fun ContentPreview() {
 
   val context = LocalContext.current
   Content(
-    urls = images.keys.toList(),
-    picasso = remember {
-      Picasso.Builder(context)
-        .callFactory { throw AssertionError() } // Removes network
+    urls = images.keys.toList(), picasso = remember {
+      Picasso.Builder(context).callFactory { throw AssertionError() } // Removes network
         .dispatchers(
-          mainContext = Dispatchers.Unconfined,
-          backgroundContext = Dispatchers.Unconfined
-        )
-        .addRequestHandler(
-          object : RequestHandler() {
-            override fun canHandleRequest(data: Request) = data.uri?.toString()?.run(images::containsKey) == true
-            override fun load(picasso: Picasso, request: Request, callback: Callback) {
-              val (color, size) = images[request.uri!!.toString()]!!
-              val bitmap = Bitmap.createBitmap(size.width, size.height, Config.ARGB_8888).apply {
-                Canvas(this).apply {
-                  drawColor(color)
-                }
-              }
+          mainContext = Dispatchers.Unconfined, backgroundContext = Dispatchers.Unconfined
+        ).addRequestHandler(object : RequestHandler() {
+          override fun canHandleRequest(data: Request) =
+            data.uri?.toString()?.run(images::containsKey) == true
 
-              callback.onSuccess(Result.Bitmap(bitmap, MEMORY))
+          override fun load(picasso: Picasso, request: Request, callback: Callback) {
+            val (color, size) = images[request.uri!!.toString()]!!
+            val bitmap = createBitmap(size.width, size.height).apply {
+              Canvas(this).apply {
+                drawColor(color)
+              }
             }
+
+            callback.onSuccess(Result.Bitmap(bitmap, MEMORY))
           }
-        )
-        .build()
-    }
-  )
+        }).build()
+    })
 }

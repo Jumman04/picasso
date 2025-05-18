@@ -23,8 +23,7 @@ import android.widget.AbsListView.OnScrollListener.SCROLL_STATE_TOUCH_SCROLL
 class SampleScrollListener(private val context: Context) : AbsListView.OnScrollListener {
 
   override fun onScrollStateChanged(
-    view: AbsListView,
-    scrollState: Int
+    view: AbsListView, scrollState: Int
   ) {
     val picasso = PicassoInitializer.get()
     when (scrollState) {
@@ -34,9 +33,6 @@ class SampleScrollListener(private val context: Context) : AbsListView.OnScrollL
   }
 
   override fun onScroll(
-    view: AbsListView,
-    firstVisibleItem: Int,
-    visibleItemCount: Int,
-    totalItemCount: Int
+    view: AbsListView, firstVisibleItem: Int, visibleItemCount: Int, totalItemCount: Int
   ) = Unit
 }

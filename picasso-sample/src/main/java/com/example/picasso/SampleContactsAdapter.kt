@@ -30,9 +30,7 @@ internal class SampleContactsAdapter(context: Context) : CursorAdapter(context, 
   private val inflater = LayoutInflater.from(context)
 
   override fun newView(
-    context: Context,
-    cursor: Cursor,
-    viewGroup: ViewGroup
+    context: Context, cursor: Cursor, viewGroup: ViewGroup
   ): View {
     val itemLayout = inflater.inflate(R.layout.sample_contacts_activity_item, viewGroup, false)
     itemLayout.tag = ViewHolder(
@@ -43,24 +41,18 @@ internal class SampleContactsAdapter(context: Context) : CursorAdapter(context, 
   }
 
   override fun bindView(
-    view: View,
-    context: Context,
-    cursor: Cursor
+    view: View, context: Context, cursor: Cursor
   ) {
     val contactUri = Contacts.getLookupUri(
-      cursor.getLong(ContactsQuery.ID),
-      cursor.getString(ContactsQuery.LOOKUP_KEY)
+      cursor.getLong(ContactsQuery.ID), cursor.getString(ContactsQuery.LOOKUP_KEY)
     )
     val holder = (view.tag as ViewHolder).apply {
       text1.text = cursor.getString(ContactsQuery.DISPLAY_NAME)
       icon.assignContactUri(contactUri)
     }
 
-    PicassoInitializer.get()
-      .load(contactUri)
-      .placeholder(R.drawable.contact_picture_placeholder)
-      .tag(context)
-      .into(holder.icon)
+    PicassoInitializer.get().load(contactUri).placeholder(R.drawable.contact_picture_placeholder)
+      .tag(context).into(holder.icon)
   }
 
   override fun getCount(): Int {
@@ -68,7 +60,6 @@ internal class SampleContactsAdapter(context: Context) : CursorAdapter(context, 
   }
 
   private class ViewHolder(
-    val text1: TextView,
-    val icon: QuickContactBadge
+    val text1: TextView, val icon: QuickContactBadge
   )
 }

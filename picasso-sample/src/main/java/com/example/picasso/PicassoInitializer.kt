@@ -30,11 +30,9 @@ class PicassoInitializer : Initializer<Unit> {
   companion object {
     private lateinit var appContext: Context
     private val instance: Picasso by lazy {
-      Picasso
-        .Builder(appContext)
-        .addEventListener(StatsEventListener())
-        .build()
+      Picasso.Builder(appContext).addEventListener(StatsEventListener()).build()
     }
+
     fun get() = instance
   }
 }

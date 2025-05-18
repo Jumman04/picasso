@@ -15,7 +15,6 @@
  */
 package com.example.picasso
 
-import android.app.Activity
 import android.content.Intent
 import android.os.Bundle
 import android.provider.MediaStore.Images.Media
@@ -56,11 +55,9 @@ class SampleGalleryActivity : PicassoSampleActivity() {
   }
 
   override fun onActivityResult(
-    requestCode: Int,
-    resultCode: Int,
-    data: Intent?
+    requestCode: Int, resultCode: Int, data: Intent?
   ) {
-    if (requestCode == GALLERY_REQUEST && resultCode == Activity.RESULT_OK && data != null) {
+    if (requestCode == GALLERY_REQUEST && resultCode == RESULT_OK && data != null) {
       image = data.data.toString()
       loadImage()
     } else {
@@ -72,19 +69,13 @@ class SampleGalleryActivity : PicassoSampleActivity() {
     // Index 1 is the progress bar. Show it while we're loading the image.
     animator.displayedChild = 1
 
-    PicassoInitializer.get()
-      .load(image)
-      .fit()
-      .centerInside()
-      .into(
-        imageView,
-        object : EmptyCallback() {
-          override fun onSuccess() {
-            // Index 0 is the image view.
-            animator.displayedChild = 0
-          }
+    PicassoInitializer.get().load(image).fit().centerInside().into(
+      imageView, object : EmptyCallback() {
+        override fun onSuccess() {
+          // Index 0 is the image view.
+          animator.displayedChild = 0
         }
-      )
+      })
   }
 
   companion object {

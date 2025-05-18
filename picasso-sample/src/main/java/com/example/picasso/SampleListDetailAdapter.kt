@@ -28,17 +28,14 @@ internal class SampleListDetailAdapter(private val context: Context) : BaseAdapt
   private val urls = Data.URLS.toList()
 
   override fun getView(
-    position: Int,
-    view: View?,
-    parent: ViewGroup
+    position: Int, view: View?, parent: ViewGroup
   ): View {
     val newView: View
     val holder: ViewHolder
     if (view == null) {
       newView = layoutInflater.inflate(R.layout.sample_list_detail_item, parent, false)
       holder = ViewHolder(
-        image = newView.findViewById(R.id.photo),
-        text = newView.findViewById(R.id.url)
+        image = newView.findViewById(R.id.photo), text = newView.findViewById(R.id.url)
       )
       newView.tag = holder
     } else {
@@ -51,14 +48,9 @@ internal class SampleListDetailAdapter(private val context: Context) : BaseAdapt
     holder.text.text = url
 
     // Trigger the download of the URL asynchronously into the image view.
-    PicassoInitializer.get()
-      .load(url)
-      .placeholder(R.drawable.placeholder)
-      .error(R.drawable.error)
-      .resizeDimen(R.dimen.list_detail_image_size, R.dimen.list_detail_image_size)
-      .centerInside()
-      .tag(context)
-      .into(holder.image)
+    PicassoInitializer.get().load(url).placeholder(R.drawable.placeholder).error(R.drawable.error)
+      .resizeDimen(R.dimen.list_detail_image_size, R.dimen.list_detail_image_size).centerInside()
+      .tag(context).into(holder.image)
 
     return newView
   }
@@ -70,7 +62,6 @@ internal class SampleListDetailAdapter(private val context: Context) : BaseAdapt
   override fun getItemId(position: Int): Long = position.toLong()
 
   internal class ViewHolder(
-    val image: ImageView,
-    val text: TextView
+    val image: ImageView, val text: TextView
   )
 }

@@ -22,7 +22,6 @@ import android.content.Context
 import android.content.Intent
 import android.content.pm.PackageManager.PERMISSION_GRANTED
 import android.os.Build.VERSION
-import android.os.Build.VERSION_CODES
 import android.os.Build.VERSION_CODES.TIRAMISU
 import android.view.LayoutInflater
 import android.view.View
@@ -39,39 +38,39 @@ import java.util.Random
 
 internal class PicassoSampleAdapter(context: Context?) : BaseAdapter() {
   internal enum class Sample(
-    val label: String,
-    private val activityClass: Class<out Activity>?
+    val label: String, private val activityClass: Class<out Activity>?
   ) {
-    GRID_VIEW("Image Grid View", SampleGridViewActivity::class.java),
-    COMPOSE_UI("Compose UI", SampleComposeActivity::class.java),
-    GALLERY("Load from Gallery", SampleGalleryActivity::class.java),
-    CONTACTS("Contact Photos", SampleContactsActivity::class.java),
-    LIST_DETAIL("List / Detail View", SampleListDetailActivity::class.java),
+    GRID_VIEW("Image Grid View", SampleGridViewActivity::class.java), COMPOSE_UI(
+      "Compose UI", SampleComposeActivity::class.java
+    ),
+    GALLERY("Load from Gallery", SampleGalleryActivity::class.java), CONTACTS(
+      "Contact Photos", SampleContactsActivity::class.java
+    ),
+    LIST_DETAIL(
+      "List / Detail View", SampleListDetailActivity::class.java
+    ),
     SHOW_NOTIFICATION("Sample Notification", null) {
       override fun launch(activity: Activity) {
         val remoteViews = RemoteViews(activity.packageName, R.layout.notification_view)
 
         val intent = Intent(activity, SampleGridViewActivity::class.java)
 
-        val flags = if (VERSION.SDK_INT >= VERSION_CODES.M) PendingIntent.FLAG_IMMUTABLE else 0
+        val flags = PendingIntent.FLAG_IMMUTABLE
         val notification =
-          NotificationCompat.Builder(activity, CHANNEL_ID)
-            .setSmallIcon(R.drawable.icon)
+          NotificationCompat.Builder(activity, CHANNEL_ID).setSmallIcon(R.drawable.icon)
             .setContentIntent(PendingIntent.getActivity(activity, -1, intent, flags))
-            .setContent(remoteViews)
-            .setAutoCancel(true)
-            .setChannelId(CHANNEL_ID)
-            .build()
+            .setContent(remoteViews).setAutoCancel(true).setChannelId(CHANNEL_ID).build()
 
         val notificationManager = NotificationManagerCompat.from(activity)
 
-        val channel = NotificationChannelCompat
-          .Builder(CHANNEL_ID, NotificationManagerCompat.IMPORTANCE_DEFAULT)
-          .setName("Picasso Notification Channel")
+        val channel = NotificationChannelCompat.Builder(
+          CHANNEL_ID, NotificationManagerCompat.IMPORTANCE_DEFAULT
+        ).setName("Picasso Notification Channel")
         notificationManager.createNotificationChannel(channel.build())
 
-        if (VERSION.SDK_INT >= TIRAMISU &&
-          checkSelfPermission(activity, POST_NOTIFICATIONS) != PERMISSION_GRANTED
+        if (VERSION.SDK_INT >= TIRAMISU && checkSelfPermission(
+            activity, POST_NOTIFICATIONS
+          ) != PERMISSION_GRANTED
         ) {
           requestPermissions(activity, arrayOf(POST_NOTIFICATIONS), 200)
           return
@@ -79,13 +78,9 @@ internal class PicassoSampleAdapter(context: Context?) : BaseAdapter() {
         notificationManager.notify(NOTIFICATION_ID, notification)
 
         // Now load an image for this notification.
-        PicassoInitializer.get()
-          .load(Data.URLS[Random().nextInt(Data.URLS.size)])
-          .resizeDimen(
-            R.dimen.notification_icon_width_height,
-            R.dimen.notification_icon_width_height
-          )
-          .into(remoteViews, R.id.photo, NOTIFICATION_ID, notification)
+        PicassoInitializer.get().load(Data.URLS[Random().nextInt(Data.URLS.size)]).resizeDimen(
+          R.dimen.notification_icon_width_height, R.dimen.notification_icon_width_height
+        ).into(remoteViews, R.id.photo, NOTIFICATION_ID, notification)
       }
     };
 
@@ -97,16 +92,14 @@ internal class PicassoSampleAdapter(context: Context?) : BaseAdapter() {
 
   private val inflater: LayoutInflater = LayoutInflater.from(context)
 
-  override fun getCount(): Int = Sample.values().size
+  override fun getCount(): Int = Sample.entries.size
 
-  override fun getItem(position: Int): Sample = Sample.values()[position]
+  override fun getItem(position: Int): Sample = Sample.entries[position]
 
   override fun getItemId(position: Int): Long = position.toLong()
 
   override fun getView(
-    position: Int,
-    convertView: View?,
-    parent: ViewGroup
+    position: Int, convertView: View?, parent: ViewGroup
   ): View {
     val view = if (convertView == null) {
       inflater.inflate(R.layout.picasso_sample_activity_item, parent, false) as TextView

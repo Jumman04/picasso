@@ -30,26 +30,19 @@ class SampleListDetailActivity : PicassoSampleActivity() {
     super.onCreate(savedInstanceState)
 
     if (savedInstanceState == null) {
-      supportFragmentManager
-        .beginTransaction()
-        .add(R.id.sample_content, ListFragment.newInstance())
+      supportFragmentManager.beginTransaction().add(R.id.sample_content, ListFragment.newInstance())
         .commit()
     }
   }
 
   fun showDetails(url: String) {
-    supportFragmentManager
-      .beginTransaction()
-      .replace(R.id.sample_content, DetailFragment.newInstance(url))
-      .addToBackStack(null)
-      .commit()
+    supportFragmentManager.beginTransaction()
+      .replace(R.id.sample_content, DetailFragment.newInstance(url)).addToBackStack(null).commit()
   }
 
   class ListFragment : Fragment() {
     override fun onCreateView(
-      inflater: LayoutInflater,
-      container: ViewGroup?,
-      savedInstanceState: Bundle?
+      inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?
     ): View? {
       val activity = activity as SampleListDetailActivity
       val adapter = SampleListDetailAdapter(activity)
@@ -75,24 +68,18 @@ class SampleListDetailActivity : PicassoSampleActivity() {
 
   class DetailFragment : Fragment() {
     override fun onCreateView(
-      inflater: LayoutInflater,
-      container: ViewGroup?,
-      savedInstanceState: Bundle?
+      inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?
     ): View? {
       val activity = activity as SampleListDetailActivity
-      val view = LayoutInflater.from(activity)
-        .inflate(R.layout.sample_list_detail_detail, container, false)
+      val view =
+        LayoutInflater.from(activity).inflate(R.layout.sample_list_detail_detail, container, false)
 
       val urlView = view.findViewById<TextView>(R.id.url)
       val imageView = view.findViewById<ImageView>(R.id.photo)
 
       val url = requireArguments().getString(KEY_URL)
       urlView.text = url
-      PicassoInitializer.get()
-        .load(url)
-        .fit()
-        .tag(activity)
-        .into(imageView)
+      PicassoInitializer.get().load(url).fit().tag(activity).into(imageView)
 
       return view
     }

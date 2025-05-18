@@ -22,6 +22,7 @@ import android.widget.AdapterView.OnItemClickListener
 import android.widget.FrameLayout
 import android.widget.ListView
 import android.widget.ToggleButton
+import androidx.activity.OnBackPressedCallback
 import androidx.fragment.app.FragmentActivity
 
 abstract class PicassoSampleActivity : FragmentActivity() {
@@ -47,14 +48,17 @@ abstract class PicassoSampleActivity : FragmentActivity() {
     }
 
     lifecycle.addObserver(PicassoInitializer.get())
-  }
 
-  override fun onBackPressed() {
-    if (showHide.isChecked) {
-      showHide.isChecked = false
-    } else {
-      super.onBackPressed()
-    }
+    onBackPressedDispatcher.addCallback(this, object : OnBackPressedCallback(true) {
+      override fun handleOnBackPressed() {
+        if (showHide.isChecked) {
+          showHide.isChecked = false
+        } else {
+          finish()
+        }
+      }
+    })
+
   }
 
   override fun setContentView(layoutResID: Int) {
