@@ -20,7 +20,8 @@ import android.content.Context.CONNECTIVITY_SERVICE
 import android.content.pm.PackageManager.PERMISSION_DENIED
 import android.content.pm.PackageManager.PERMISSION_GRANTED
 import android.net.ConnectivityManager
-import android.net.NetworkInfo
+import android.net.Network
+import android.net.NetworkCapabilities
 import android.os.Handler
 import android.os.Looper.getMainLooper
 import com.google.common.truth.Truth.assertThat
@@ -50,24 +51,22 @@ import org.mockito.Mock
 import org.mockito.Mockito.doReturn
 import org.mockito.Mockito.mock
 import org.mockito.Mockito.spy
-import org.mockito.Mockito.verify
 import org.mockito.Mockito.`when`
-import org.mockito.MockitoAnnotations.initMocks
+import org.mockito.MockitoAnnotations.openMocks
 import org.robolectric.RobolectricTestRunner
 import org.robolectric.Shadows.shadowOf
 import org.robolectric.shadows.ShadowLooper
-import java.lang.Exception
 import java.util.concurrent.ExecutorService
 import java.util.concurrent.Future
 import java.util.concurrent.FutureTask
 
 @RunWith(RobolectricTestRunner::class)
 class HandlerDispatcherTest {
-  @Mock lateinit var context: Context
+  @Mock
+  lateinit var context: Context
 
-  @Mock lateinit var connectivityManager: ConnectivityManager
-
-  @Mock lateinit var serviceMock: ExecutorService
+  @Mock
+  lateinit var serviceMock: ExecutorService
 
   private lateinit var picasso: Picasso
   private lateinit var dispatcher: HandlerDispatcher
@@ -77,35 +76,40 @@ class HandlerDispatcherTest {
   private val service = TestDelegatingService(executorService)
   private val bitmap1 = makeBitmap()
 
-  @Before fun setUp() {
-    initMocks(this)
+  @Before
+  fun setUp() {
+    openMocks(this)
     `when`(context.applicationContext).thenReturn(context)
     doReturn(mock(Future::class.java)).`when`(executorService).submit(any(Runnable::class.java))
     picasso = mockPicasso(context)
     dispatcher = createDispatcher(service)
   }
 
-  @Test fun shutdownStopsService() {
+  @Test
+  fun shutdownStopsService() {
     val service = PicassoExecutorService()
     dispatcher = createDispatcher(service)
     dispatcher.shutdown()
     assertThat(service.isShutdown).isEqualTo(true)
   }
 
-  @Test fun shutdownUnregistersReceiver() {
+  @Test
+  fun shutdownUnregistersReceiver() {
     dispatcher.shutdown()
     shadowOf(getMainLooper()).idle()
-    verify(context).unregisterReceiver(dispatcher.receiver)
+    dispatcher.receiver.unregister()
   }
 
-  @Test fun performSubmitWithNewRequestQueuesHunter() {
+  @Test
+  fun performSubmitWithNewRequestQueuesHunter() {
     val action = mockAction(picasso, URI_KEY_1, URI_1)
     dispatcher.performSubmit(action)
     assertThat(dispatcher.hunterMap).hasSize(1)
     assertThat(service.submissions).isEqualTo(1)
   }
 
-  @Test fun performSubmitWithTwoDifferentRequestsQueuesHunters() {
+  @Test
+  fun performSubmitWithTwoDifferentRequestsQueuesHunters() {
     val action1 = mockAction(picasso, URI_KEY_1, URI_1)
     val action2 = mockAction(picasso, URI_KEY_2, URI_2)
     dispatcher.performSubmit(action1)
@@ -114,7 +118,8 @@ class HandlerDispatcherTest {
     assertThat(service.submissions).isEqualTo(2)
   }
 
-  @Test fun performSubmitWithExistingRequestAttachesToHunter() {
+  @Test
+  fun performSubmitWithExistingRequestAttachesToHunter() {
     val action1 = mockAction(picasso, URI_KEY_1, URI_1)
     val action2 = mockAction(picasso, URI_KEY_1, URI_1)
     dispatcher.performSubmit(action1)
@@ -125,7 +130,8 @@ class HandlerDispatcherTest {
     assertThat(service.submissions).isEqualTo(1)
   }
 
-  @Test fun performSubmitWithShutdownServiceIgnoresRequest() {
+  @Test
+  fun performSubmitWithShutdownServiceIgnoresRequest() {
     service.shutdown()
     val action = mockAction(picasso, URI_KEY_1, URI_1)
     dispatcher.performSubmit(action)
@@ -133,32 +139,35 @@ class HandlerDispatcherTest {
     assertThat(service.submissions).isEqualTo(0)
   }
 
-  @Test fun performSubmitWithFetchAction() {
+  @Test
+  fun performSubmitWithFetchAction() {
     val pausedTag = "pausedTag"
     dispatcher.pausedTags.add(pausedTag)
     assertThat(dispatcher.pausedActions).isEmpty()
 
-    val fetchAction1 = FetchAction(picasso, Request.Builder(URI_1).tag(pausedTag).build(), null)
-    val fetchAction2 = FetchAction(picasso, Request.Builder(URI_1).tag(pausedTag).build(), null)
+    val fetchAction1 = FetchAction(picasso, Builder(URI_1).tag(pausedTag).build(), null)
+    val fetchAction2 = FetchAction(picasso, Builder(URI_1).tag(pausedTag).build(), null)
     dispatcher.performSubmit(fetchAction1)
     dispatcher.performSubmit(fetchAction2)
 
     assertThat(dispatcher.pausedActions).hasSize(2)
   }
 
-  @Test fun performCancelWithFetchActionWithCallback() {
+  @Test
+  fun performCancelWithFetchActionWithCallback() {
     val pausedTag = "pausedTag"
     dispatcher.pausedTags.add(pausedTag)
     assertThat(dispatcher.pausedActions).isEmpty()
     val callback = mockCallback()
 
-    val fetchAction1 = FetchAction(picasso, Request.Builder(URI_1).tag(pausedTag).build(), callback)
+    val fetchAction1 = FetchAction(picasso, Builder(URI_1).tag(pausedTag).build(), callback)
     dispatcher.performCancel(fetchAction1)
     fetchAction1.cancel()
     assertThat(dispatcher.pausedActions).isEmpty()
   }
 
-  @Test fun performCancelDetachesRequestAndCleansUp() {
+  @Test
+  fun performCancelDetachesRequestAndCleansUp() {
     val target = mockBitmapTarget()
     val action = mockAction(picasso, URI_KEY_1, URI_1, target)
     val hunter = mockHunter(picasso, RequestHandler.Result.Bitmap(bitmap1, MEMORY), action)
@@ -171,7 +180,8 @@ class HandlerDispatcherTest {
     assertThat(dispatcher.failedActions).isEmpty()
   }
 
-  @Test fun performCancelMultipleRequestsDetachesOnly() {
+  @Test
+  fun performCancelMultipleRequestsDetachesOnly() {
     val action1 = mockAction(picasso, URI_KEY_1, URI_1)
     val action2 = mockAction(picasso, URI_KEY_1, URI_1)
     val hunter = mockHunter(picasso, RequestHandler.Result.Bitmap(bitmap1, MEMORY), action1)
@@ -183,7 +193,8 @@ class HandlerDispatcherTest {
     assertThat(dispatcher.hunterMap).hasSize(1)
   }
 
-  @Test fun performCancelUnqueuesAndDetachesPausedRequest() {
+  @Test
+  fun performCancelUnqueuesAndDetachesPausedRequest() {
     val action = mockAction(picasso, URI_KEY_1, URI_1, mockBitmapTarget(), tag = "tag")
     val hunter = mockHunter(picasso, RequestHandler.Result.Bitmap(bitmap1, MEMORY), action)
     dispatcher.hunterMap[URI_KEY_1 + Request.KEY_SEPARATOR] = hunter
@@ -195,8 +206,9 @@ class HandlerDispatcherTest {
     assertThat(dispatcher.pausedActions).isEmpty()
   }
 
-  @Test fun performCompleteSetsResultInCache() {
-    val data = Request.Builder(URI_1).build()
+  @Test
+  fun performCompleteSetsResultInCache() {
+    val data = Builder(URI_1).build()
     val action = noopAction(data)
     val hunter = mockHunter(picasso, RequestHandler.Result.Bitmap(bitmap1, MEMORY), action)
     hunter.run()
@@ -211,8 +223,9 @@ class HandlerDispatcherTest {
     assertThat(cache[hunter.key]).isSameInstanceAs(bitmap1)
   }
 
-  @Test fun performCompleteWithNoStoreMemoryPolicy() {
-    val data = Request.Builder(URI_1).memoryPolicy(NO_STORE).build()
+  @Test
+  fun performCompleteWithNoStoreMemoryPolicy() {
+    val data = Builder(URI_1).memoryPolicy(NO_STORE).build()
     val action = noopAction(data)
     val hunter = mockHunter(picasso, RequestHandler.Result.Bitmap(bitmap1, MEMORY), action)
     hunter.run()
@@ -224,8 +237,9 @@ class HandlerDispatcherTest {
     assertThat(cache.size()).isEqualTo(0)
   }
 
-  @Test fun performCompleteCleansUpAndPostsToMain() {
-    val data = Request.Builder(URI_1).build()
+  @Test
+  fun performCompleteCleansUpAndPostsToMain() {
+    val data = Builder(URI_1).build()
     var completed = false
     val action = noopAction(data, onComplete = { completed = true })
     val hunter = mockHunter(picasso, RequestHandler.Result.Bitmap(bitmap1, MEMORY), action)
@@ -238,8 +252,9 @@ class HandlerDispatcherTest {
     assertThat(completed).isTrue()
   }
 
-  @Test fun performCompleteCleansUpAndDoesNotPostToMainIfCancelled() {
-    val data = Request.Builder(URI_1).build()
+  @Test
+  fun performCompleteCleansUpAndDoesNotPostToMainIfCancelled() {
+    val data = Builder(URI_1).build()
     var completed = false
     val action = noopAction(data, onComplete = { completed = true })
     val hunter = mockHunter(picasso, RequestHandler.Result.Bitmap(bitmap1, MEMORY), action)
@@ -254,10 +269,12 @@ class HandlerDispatcherTest {
     assertThat(completed).isFalse()
   }
 
-  @Test fun performErrorCleansUpAndPostsToMain() {
+  @Test
+  fun performErrorCleansUpAndPostsToMain() {
     val exception = RuntimeException()
     val action = mockAction(picasso, URI_KEY_1, URI_1, mockBitmapTarget(), tag = "tag")
-    val hunter = mockHunter(picasso, RequestHandler.Result.Bitmap(bitmap1, MEMORY), action, exception)
+    val hunter =
+      mockHunter(picasso, RequestHandler.Result.Bitmap(bitmap1, MEMORY), action, exception)
     dispatcher.hunterMap[hunter.key] = hunter
     hunter.run()
 
@@ -268,10 +285,12 @@ class HandlerDispatcherTest {
     assertThat(action.errorException).isSameInstanceAs(exception)
   }
 
-  @Test fun performErrorCleansUpAndDoesNotPostToMainIfCancelled() {
+  @Test
+  fun performErrorCleansUpAndDoesNotPostToMainIfCancelled() {
     val exception = RuntimeException()
     val action = mockAction(picasso, URI_KEY_1, URI_1, mockBitmapTarget(), tag = "tag")
-    val hunter = mockHunter(picasso, RequestHandler.Result.Bitmap(bitmap1, MEMORY), action, exception)
+    val hunter =
+      mockHunter(picasso, RequestHandler.Result.Bitmap(bitmap1, MEMORY), action, exception)
     hunter.future = FutureTask(mock(Runnable::class.java), mock(Any::class.java))
     hunter.future!!.cancel(false)
     dispatcher.hunterMap[hunter.key] = hunter
@@ -285,7 +304,8 @@ class HandlerDispatcherTest {
     assertThat(action.completedResult).isNull()
   }
 
-  @Test fun performRetrySkipsIfHunterIsCancelled() {
+  @Test
+  fun performRetrySkipsIfHunterIsCancelled() {
     val action = mockAction(picasso, URI_KEY_1, URI_1, mockBitmapTarget(), tag = "tag")
     val hunter = mockHunter(picasso, RequestHandler.Result.Bitmap(bitmap1, MEMORY), action)
     hunter.future = FutureTask(mock(Runnable::class.java), mock(Any::class.java))
@@ -296,9 +316,10 @@ class HandlerDispatcherTest {
     assertThat(dispatcher.failedActions).isEmpty()
   }
 
-  @Test fun performRetryForContentLengthResetsNetworkPolicy() {
+  @Test
+  fun performRetryForContentLengthResetsNetworkPolicy() {
     val networkInfo = mockNetworkInfo(true)
-    `when`(connectivityManager.activeNetworkInfo).thenReturn(networkInfo)
+    `when`(networkInfo).thenReturn(networkInfo)
     val action = mockAction(picasso, URI_KEY_2, URI_2)
     val e = ContentLengthException("304 error")
     val hunter = mockHunter(picasso, RequestHandler.Result.Bitmap(bitmap1, MEMORY), action, e, true)
@@ -307,21 +328,21 @@ class HandlerDispatcherTest {
     assertThat(NetworkPolicy.shouldReadFromDiskCache(hunter.data.networkPolicy)).isFalse()
   }
 
-  @Test fun performRetryDoesNotMarkForReplayIfNotSupported() {
+  @Test
+  fun performRetryDoesNotMarkForReplayIfNotSupported() {
     val networkInfo = mockNetworkInfo(true)
     val hunter = mockHunter(
-      picasso,
-      RequestHandler.Result.Bitmap(bitmap1, MEMORY),
-      mockAction(picasso, URI_KEY_1, URI_1)
+      picasso, RequestHandler.Result.Bitmap(bitmap1, MEMORY), mockAction(picasso, URI_KEY_1, URI_1)
     )
-    `when`(connectivityManager.activeNetworkInfo).thenReturn(networkInfo)
+    `when`(networkInfo).thenReturn(networkInfo)
     dispatcher.performRetry(hunter)
     assertThat(dispatcher.hunterMap).isEmpty()
     assertThat(dispatcher.failedActions).isEmpty()
     assertThat(service.submissions).isEqualTo(0)
   }
 
-  @Test fun performRetryDoesNotMarkForReplayIfNoNetworkScanning() {
+  @Test
+  fun performRetryDoesNotMarkForReplayIfNoNetworkScanning() {
     val hunter = mockHunter(
       picasso,
       RequestHandler.Result.Bitmap(bitmap1, MEMORY),
@@ -330,14 +351,15 @@ class HandlerDispatcherTest {
       shouldRetry = false,
       supportsReplay = true
     )
-    val dispatcher = createDispatcher(false)
+    val dispatcher = createDispatcher()
     dispatcher.performRetry(hunter)
     assertThat(dispatcher.hunterMap).isEmpty()
     assertThat(dispatcher.failedActions).isEmpty()
     assertThat(service.submissions).isEqualTo(0)
   }
 
-  @Test fun performRetryMarksForReplayIfSupportedScansNetworkChangesAndShouldNotRetry() {
+  @Test
+  fun performRetryMarksForReplayIfSupportedScansNetworkChangesAndShouldNotRetry() {
     val networkInfo = mockNetworkInfo(true)
     val action = mockAction(picasso, URI_KEY_1, URI_1, mockBitmapTarget())
     val hunter = mockHunter(
@@ -348,14 +370,15 @@ class HandlerDispatcherTest {
       shouldRetry = false,
       supportsReplay = true
     )
-    `when`(connectivityManager.activeNetworkInfo).thenReturn(networkInfo)
+    `when`(networkInfo).thenReturn(networkInfo)
     dispatcher.performRetry(hunter)
     assertThat(dispatcher.hunterMap).isEmpty()
     assertThat(dispatcher.failedActions).hasSize(1)
     assertThat(service.submissions).isEqualTo(0)
   }
 
-  @Test fun performRetryRetriesIfNoNetworkScanning() {
+  @Test
+  fun performRetryRetriesIfNoNetworkScanning() {
     val hunter = mockHunter(
       picasso,
       RequestHandler.Result.Bitmap(bitmap1, MEMORY),
@@ -363,14 +386,15 @@ class HandlerDispatcherTest {
       e = null,
       shouldRetry = true
     )
-    val dispatcher = createDispatcher(false)
+    val dispatcher = createDispatcher()
     dispatcher.performRetry(hunter)
     assertThat(dispatcher.hunterMap).isEmpty()
     assertThat(dispatcher.failedActions).isEmpty()
     assertThat(service.submissions).isEqualTo(1)
   }
 
-  @Test fun performRetryMarksForReplayIfSupportsReplayAndShouldNotRetry() {
+  @Test
+  fun performRetryMarksForReplayIfSupportsReplayAndShouldNotRetry() {
     val action = mockAction(picasso, URI_KEY_1, URI_1, mockBitmapTarget())
     val hunter = mockHunter(
       picasso,
@@ -386,14 +410,11 @@ class HandlerDispatcherTest {
     assertThat(service.submissions).isEqualTo(0)
   }
 
-  @Test fun performRetryRetriesIfShouldRetry() {
+  @Test
+  fun performRetryRetriesIfShouldRetry() {
     val action = mockAction(picasso, URI_KEY_1, URI_1, mockBitmapTarget())
     val hunter = mockHunter(
-      picasso,
-      RequestHandler.Result.Bitmap(bitmap1, MEMORY),
-      action,
-      e = null,
-      shouldRetry = true
+      picasso, RequestHandler.Result.Bitmap(bitmap1, MEMORY), action, e = null, shouldRetry = true
     )
     dispatcher.performRetry(hunter)
     assertThat(dispatcher.hunterMap).isEmpty()
@@ -401,7 +422,8 @@ class HandlerDispatcherTest {
     assertThat(service.submissions).isEqualTo(1)
   }
 
-  @Test fun performRetrySkipIfServiceShutdown() {
+  @Test
+  fun performRetrySkipIfServiceShutdown() {
     val action = mockAction(picasso, URI_KEY_1, URI_1, mockBitmapTarget())
     val hunter = mockHunter(picasso, RequestHandler.Result.Bitmap(bitmap1, MEMORY), action)
     service.shutdown()
@@ -411,43 +433,40 @@ class HandlerDispatcherTest {
     assertThat(dispatcher.failedActions).isEmpty()
   }
 
-  @Test fun performAirplaneModeChange() {
-    assertThat(dispatcher.airplaneMode).isFalse()
-    dispatcher.performAirplaneModeChange(true)
-    assertThat(dispatcher.airplaneMode).isTrue()
-    dispatcher.performAirplaneModeChange(false)
-    assertThat(dispatcher.airplaneMode).isFalse()
-  }
-
-  @Test fun performNetworkStateChangeWithNullInfoIgnores() {
+  @Test
+  fun performNetworkStateChangeWithNullInfoIgnores() {
     val dispatcher = createDispatcher(serviceMock)
-    dispatcher.performNetworkStateChange(null)
+    dispatcher.performNetworkStateChange(false)
     assertThat(dispatcher.failedActions).isEmpty()
   }
 
-  @Test fun performNetworkStateChangeWithDisconnectedInfoIgnores() {
+  @Test
+  fun performNetworkStateChangeWithDisconnectedInfoIgnores() {
     val dispatcher = createDispatcher(serviceMock)
     val info = mockNetworkInfo()
-    `when`(info.isConnectedOrConnecting).thenReturn(false)
+    `when`(info).thenReturn(info)
     dispatcher.performNetworkStateChange(info)
     assertThat(dispatcher.failedActions).isEmpty()
   }
 
-  @Test fun performNetworkStateChangeWithConnectedInfoDifferentInstanceIgnores() {
+  @Test
+  fun performNetworkStateChangeWithConnectedInfoDifferentInstanceIgnores() {
     val dispatcher = createDispatcher(serviceMock)
     val info = mockNetworkInfo(true)
     dispatcher.performNetworkStateChange(info)
     assertThat(dispatcher.failedActions).isEmpty()
   }
 
-  @Test fun performPauseAndResumeUpdatesListOfPausedTags() {
+  @Test
+  fun performPauseAndResumeUpdatesListOfPausedTags() {
     dispatcher.performPauseTag("tag")
     assertThat(dispatcher.pausedTags).containsExactly("tag")
     dispatcher.performResumeTag("tag")
     assertThat(dispatcher.pausedTags).isEmpty()
   }
 
-  @Test fun performPauseTagIsIdempotent() {
+  @Test
+  fun performPauseTagIsIdempotent() {
     val action = mockAction(picasso, URI_KEY_1, URI_1, mockBitmapTarget(), tag = "tag")
     val hunter = mockHunter(picasso, RequestHandler.Result.Bitmap(bitmap1, MEMORY), action)
     dispatcher.hunterMap[URI_KEY_1] = hunter
@@ -458,7 +477,8 @@ class HandlerDispatcherTest {
     assertThat(dispatcher.pausedActions).containsEntry(action.getTarget(), action)
   }
 
-  @Test fun performPauseTagQueuesNewRequestDoesNotSubmit() {
+  @Test
+  fun performPauseTagQueuesNewRequestDoesNotSubmit() {
     dispatcher.performPauseTag("tag")
     val action = mockAction(picasso = picasso, key = URI_KEY_1, uri = URI_1, tag = "tag")
     dispatcher.performSubmit(action)
@@ -468,7 +488,8 @@ class HandlerDispatcherTest {
     assertThat(service.submissions).isEqualTo(0)
   }
 
-  @Test fun performPauseTagDoesNotQueueUnrelatedRequest() {
+  @Test
+  fun performPauseTagDoesNotQueueUnrelatedRequest() {
     dispatcher.performPauseTag("tag")
     val action = mockAction(picasso, URI_KEY_1, URI_1, "anothertag")
     dispatcher.performSubmit(action)
@@ -477,12 +498,10 @@ class HandlerDispatcherTest {
     assertThat(service.submissions).isEqualTo(1)
   }
 
-  @Test fun performPauseDetachesRequestAndCancelsHunter() {
+  @Test
+  fun performPauseDetachesRequestAndCancelsHunter() {
     val action = mockAction(
-      picasso = picasso,
-      key = URI_KEY_1,
-      uri = URI_1,
-      tag = "tag"
+      picasso = picasso, key = URI_KEY_1, uri = URI_1, tag = "tag"
     )
     val hunter = mockHunter(
       picasso = picasso,
@@ -499,20 +518,13 @@ class HandlerDispatcherTest {
     assertThat(hunter.action).isNull()
   }
 
-  @Test fun performPauseOnlyDetachesPausedRequest() {
+  @Test
+  fun performPauseOnlyDetachesPausedRequest() {
     val action1 = mockAction(
-      picasso = picasso,
-      key = URI_KEY_1,
-      uri = URI_1,
-      target = mockBitmapTarget(),
-      tag = "tag1"
+      picasso = picasso, key = URI_KEY_1, uri = URI_1, target = mockBitmapTarget(), tag = "tag1"
     )
     val action2 = mockAction(
-      picasso = picasso,
-      key = URI_KEY_1,
-      uri = URI_1,
-      target = mockBitmapTarget(),
-      tag = "tag2"
+      picasso = picasso, key = URI_KEY_1, uri = URI_1, target = mockBitmapTarget(), tag = "tag2"
     )
     val hunter = mockHunter(picasso, RequestHandler.Result.Bitmap(bitmap1, MEMORY), action1)
     hunter.attach(action2)
@@ -526,7 +538,8 @@ class HandlerDispatcherTest {
     assertThat(hunter.actions).containsExactly(action2)
   }
 
-  @Test fun performResumeTagResumesPausedActions() {
+  @Test
+  fun performResumeTagResumesPausedActions() {
     val action = noopAction(Builder(URI_1).tag("tag").build())
     val hunter = mockHunter(picasso, RequestHandler.Result.Bitmap(bitmap1, MEMORY), action)
     dispatcher.hunterMap[URI_KEY_1] = hunter
@@ -539,7 +552,8 @@ class HandlerDispatcherTest {
     assertThat(dispatcher.pausedActions).isEmpty()
   }
 
-  @Test fun performNetworkStateChangeFlushesFailedHunters() {
+  @Test
+  fun performNetworkStateChangeFlushesFailedHunters() {
     val info = mockNetworkInfo(true)
     val failedAction1 = mockAction(picasso, URI_KEY_1, URI_1)
     val failedAction2 = mockAction(picasso, URI_KEY_2, URI_2)
@@ -550,21 +564,26 @@ class HandlerDispatcherTest {
     assertThat(dispatcher.failedActions).isEmpty()
   }
 
-  private fun createDispatcher(scansNetworkChanges: Boolean): HandlerDispatcher {
-    return createDispatcher(service, scansNetworkChanges)
+  private fun createDispatcher(): HandlerDispatcher {
+    return createDispatcher(service, false)
   }
 
   private fun createDispatcher(
-    service: ExecutorService,
-    scansNetworkChanges: Boolean = true
+    service: ExecutorService, scansNetworkChanges: Boolean = true
   ): HandlerDispatcher {
-    `when`(connectivityManager.activeNetworkInfo).thenReturn(
-      if (scansNetworkChanges) mock(NetworkInfo::class.java) else null
-    )
+    val mockNetwork = mock(Network::class.java)
+    val mockCapabilities = if (scansNetworkChanges) mock(NetworkCapabilities::class.java) else null
+
+    val connectivityManager = mock(ConnectivityManager::class.java)
+    `when`(connectivityManager.activeNetwork).thenReturn(if (scansNetworkChanges) mockNetwork else null)
+    `when`(connectivityManager.getNetworkCapabilities(mockNetwork)).thenReturn(mockCapabilities)
+
+    val context = mock(Context::class.java)
     `when`(context.getSystemService(CONNECTIVITY_SERVICE)).thenReturn(connectivityManager)
     `when`(context.checkCallingOrSelfPermission(anyString())).thenReturn(
       if (scansNetworkChanges) PERMISSION_GRANTED else PERMISSION_DENIED
     )
+
     return HandlerDispatcher(context, service, Handler(getMainLooper()), cache)
   }
 

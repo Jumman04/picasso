@@ -16,9 +16,9 @@
 package com.squareup.picasso3
 
 import android.content.Context
-import android.content.res.Resources
 import android.graphics.Bitmap.Config.ARGB_8888
 import android.graphics.drawable.Drawable
+import androidx.test.core.app.ApplicationProvider
 import com.google.common.truth.Truth.assertThat
 import com.squareup.picasso3.Picasso.LoadedFrom.MEMORY
 import com.squareup.picasso3.Picasso.LoadedFrom.NETWORK
@@ -32,18 +32,18 @@ import org.junit.runner.RunWith
 import org.mockito.Mockito
 import org.mockito.Mockito.mock
 import org.robolectric.RobolectricTestRunner
-import org.robolectric.RuntimeEnvironment
 
 @RunWith(RobolectricTestRunner::class)
 class DrawableTargetActionTest {
 
-  @Test fun invokesSuccessIfTargetIsNotNull() {
+  @Test
+  fun invokesSuccessIfTargetIsNotNull() {
     val bitmap = makeBitmap()
     val target = mockDrawableTarget()
     val drawableCaptor = argumentCaptor<PicassoDrawable>()
     val placeholder = mock(Drawable::class.java)
     val action = DrawableTargetAction(
-      picasso = TestUtils.mockPicasso(RuntimeEnvironment.application),
+      picasso = TestUtils.mockPicasso(ApplicationProvider.getApplicationContext()),
       target = target,
       data = TestUtils.SIMPLE_REQUEST,
       noFade = false,
@@ -62,11 +62,12 @@ class DrawableTargetActionTest {
     }
   }
 
-  @Test fun invokesOnBitmapFailedIfTargetIsNotNullWithErrorDrawable() {
+  @Test
+  fun invokesOnBitmapFailedIfTargetIsNotNullWithErrorDrawable() {
     val errorDrawable = mock(Drawable::class.java)
     val target = mockDrawableTarget()
     val action = DrawableTargetAction(
-      picasso = TestUtils.mockPicasso(RuntimeEnvironment.application),
+      picasso = TestUtils.mockPicasso(ApplicationProvider.getApplicationContext()),
       target = target,
       data = TestUtils.SIMPLE_REQUEST,
       noFade = true,
@@ -81,19 +82,26 @@ class DrawableTargetActionTest {
     Mockito.verify(target).onDrawableFailed(e, errorDrawable)
   }
 
-  @Test fun invokesOnBitmapFailedIfTargetIsNotNullWithErrorResourceId() {
+  @Test
+  fun invokesOnBitmapFailedIfTargetIsNotNullWithErrorResourceId() {
     val errorDrawable = mock(Drawable::class.java)
     val context = mock(Context::class.java)
     val dispatcher = mock(Dispatcher::class.java)
     val cache = PlatformLruCache(0)
     val picasso = Picasso(
-      context, dispatcher,
-      TestUtils.UNUSED_CALL_FACTORY, null, cache, null,
+      context,
+      dispatcher,
+      TestUtils.UNUSED_CALL_FACTORY,
+      null,
+      cache,
+      null,
       TestUtils.NO_TRANSFORMERS,
       TestUtils.NO_HANDLERS,
-      TestUtils.NO_EVENT_LISTENERS, ARGB_8888, false, false
+      TestUtils.NO_EVENT_LISTENERS,
+      ARGB_8888,
+      false,
+      false
     )
-    val res = mock(Resources::class.java)
 
     val target = mockDrawableTarget()
     val action = DrawableTargetAction(
@@ -114,14 +122,19 @@ class DrawableTargetActionTest {
     Mockito.verify(target).onDrawableFailed(e, errorDrawable)
   }
 
-  @Test fun recyclingInSuccessThrowsException() {
-    val picasso = TestUtils.mockPicasso(RuntimeEnvironment.application)
+  @Test
+  fun recyclingInSuccessThrowsException() {
+    val picasso = TestUtils.mockPicasso(ApplicationProvider.getApplicationContext())
     val bitmap = makeBitmap()
     val action = DrawableTargetAction(
       picasso = picasso,
       target = object : DrawableTarget {
-        override fun onDrawableLoaded(drawable: Drawable, from: Picasso.LoadedFrom) = (drawable as PicassoDrawable).bitmap.recycle()
-        override fun onDrawableFailed(e: Exception, errorDrawable: Drawable?) = throw AssertionError()
+        override fun onDrawableLoaded(drawable: Drawable, from: Picasso.LoadedFrom) =
+          (drawable as PicassoDrawable).bitmap.recycle()
+
+        override fun onDrawableFailed(e: Exception, errorDrawable: Drawable?) =
+          throw AssertionError()
+
         override fun onPrepareLoad(placeHolderDrawable: Drawable?) = throw AssertionError()
       },
       data = TestUtils.SIMPLE_REQUEST,
@@ -134,7 +147,7 @@ class DrawableTargetActionTest {
     try {
       action.complete(RequestHandler.Result.Bitmap(bitmap, MEMORY))
       Assert.fail()
-    } catch (ignored: IllegalStateException) {
+    } catch (_: IllegalStateException) {
     }
   }
 }

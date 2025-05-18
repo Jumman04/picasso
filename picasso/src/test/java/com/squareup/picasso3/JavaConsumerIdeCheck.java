@@ -1,16 +1,18 @@
 package com.squareup.picasso3;
 
+import static android.graphics.Bitmap.Config.ALPHA_8;
+import static com.squareup.picasso3.Picasso.LoadedFrom.DISK;
+
 import android.content.Context;
 import android.graphics.Bitmap;
+
 import org.junit.Ignore;
 import org.junit.Test;
 import org.mockito.Mock;
 
-import static android.graphics.Bitmap.Config.ALPHA_8;
-import static com.squareup.picasso3.Picasso.LoadedFrom.DISK;
-
-public class _JavaConsumerIdeCheck {
-  @Mock Context context;
+public class JavaConsumerIdeCheck {
+  @Mock
+  Context context;
 
   @Test
   @Ignore("Quick IDE check for compile-time access to Kotlin internal methods from Java callers")
@@ -32,8 +34,7 @@ public class _JavaConsumerIdeCheck {
     MatrixTransformation matrixTransformation = new MatrixTransformation(request);
 
     Bitmap bitmap = Bitmap.createBitmap(0, 0, ALPHA_8);
-    RequestHandler.Result.Bitmap transform =
-      matrixTransformation.transform(new RequestHandler.Result.Bitmap(bitmap, DISK, 0));
+    RequestHandler.Result.Bitmap transform = matrixTransformation.transform(new RequestHandler.Result.Bitmap(bitmap, DISK, 0));
     Picasso.LoadedFrom loadedFrom = transform.getLoadedFrom();
     Picasso.RequestTransformer requestTransformer = request1 -> request1;
 

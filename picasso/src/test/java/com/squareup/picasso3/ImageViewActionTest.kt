@@ -18,6 +18,7 @@ package com.squareup.picasso3
 import android.graphics.Bitmap.Config.ARGB_8888
 import android.graphics.drawable.AnimationDrawable
 import android.graphics.drawable.Drawable
+import androidx.test.core.app.ApplicationProvider
 import com.google.common.truth.Truth.assertThat
 import com.squareup.picasso3.Picasso.LoadedFrom.MEMORY
 import com.squareup.picasso3.RequestHandler.Result.Bitmap
@@ -38,7 +39,6 @@ import org.mockito.Mockito.mock
 import org.mockito.Mockito.verify
 import org.mockito.Mockito.`when`
 import org.robolectric.RobolectricTestRunner
-import org.robolectric.RuntimeEnvironment
 
 @RunWith(RobolectricTestRunner::class)
 class ImageViewActionTest {
@@ -49,8 +49,18 @@ class ImageViewActionTest {
     val dispatcher = mock(Dispatcher::class.java)
     val cache = PlatformLruCache(0)
     val picasso = Picasso(
-      RuntimeEnvironment.application, dispatcher, UNUSED_CALL_FACTORY, null, cache, null,
-      NO_TRANSFORMERS, NO_HANDLERS, NO_EVENT_LISTENERS, ARGB_8888, false, false
+      ApplicationProvider.getApplicationContext(),
+      dispatcher,
+      UNUSED_CALL_FACTORY,
+      null,
+      cache,
+      null,
+      NO_TRANSFORMERS,
+      NO_HANDLERS,
+      NO_EVENT_LISTENERS,
+      ARGB_8888,
+      false,
+      false
     )
     val target = mockImageViewTarget()
     val callback = mockCallback()
@@ -73,7 +83,7 @@ class ImageViewActionTest {
     val target = mockImageViewTarget()
     val callback = mockCallback()
     val request = ImageViewAction(
-      picasso = mockPicasso(RuntimeEnvironment.application),
+      picasso = mockPicasso(ApplicationProvider.getApplicationContext()),
       target = target,
       data = SIMPLE_REQUEST,
       errorDrawable = null,
@@ -89,11 +99,12 @@ class ImageViewActionTest {
     verify(callback).onError(e)
   }
 
-  @Test fun invokesErrorIfTargetIsNotNullWithErrorResourceId() {
+  @Test
+  fun invokesErrorIfTargetIsNotNullWithErrorResourceId() {
     val target = mockImageViewTarget()
     val callback = mockCallback()
     val request = ImageViewAction(
-      picasso = mockPicasso(RuntimeEnvironment.application),
+      picasso = mockPicasso(ApplicationProvider.getApplicationContext()),
       target = target,
       data = SIMPLE_REQUEST,
       errorDrawable = null,
@@ -108,12 +119,13 @@ class ImageViewActionTest {
     verify(callback).onError(e)
   }
 
-  @Test fun invokesErrorIfTargetIsNotNullWithErrorDrawable() {
+  @Test
+  fun invokesErrorIfTargetIsNotNullWithErrorDrawable() {
     val errorDrawable = mock(Drawable::class.java)
     val target = mockImageViewTarget()
     val callback = mockCallback()
     val request = ImageViewAction(
-      picasso = mockPicasso(RuntimeEnvironment.application),
+      picasso = mockPicasso(ApplicationProvider.getApplicationContext()),
       target = target,
       data = SIMPLE_REQUEST,
       errorDrawable = errorDrawable,
@@ -129,8 +141,9 @@ class ImageViewActionTest {
     verify(callback).onError(e)
   }
 
-  @Test fun clearsCallbackOnCancel() {
-    val picasso = mockPicasso(RuntimeEnvironment.application)
+  @Test
+  fun clearsCallbackOnCancel() {
+    val picasso = mockPicasso(ApplicationProvider.getApplicationContext())
     val target = mockImageViewTarget()
     val callback = mockCallback()
     val request = ImageViewAction(
@@ -146,8 +159,9 @@ class ImageViewActionTest {
     assertThat(request.callback).isNull()
   }
 
-  @Test fun stopPlaceholderAnimationOnError() {
-    val picasso = mockPicasso(RuntimeEnvironment.application)
+  @Test
+  fun stopPlaceholderAnimationOnError() {
+    val picasso = mockPicasso(ApplicationProvider.getApplicationContext())
     val placeholder = mock(AnimationDrawable::class.java)
     val target = mockImageViewTarget()
     `when`(target.drawable).thenReturn(placeholder)

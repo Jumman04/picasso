@@ -38,8 +38,6 @@ import org.mockito.Mockito
 import org.mockito.MockitoAnnotations
 import org.robolectric.RobolectricTestRunner
 import org.robolectric.Shadows
-import java.lang.Exception
-import java.lang.RuntimeException
 import kotlin.coroutines.CoroutineContext
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
@@ -49,9 +47,11 @@ import kotlinx.coroutines.test.TestDispatcher
 @RunWith(RobolectricTestRunner::class)
 class InternalCoroutineDispatcherTest {
 
-  @Mock lateinit var context: Context
+  @Mock
+  lateinit var context: Context
 
-  @Mock lateinit var connectivityManager: ConnectivityManager
+  @Mock
+  lateinit var connectivityManager: ConnectivityManager
 
   private lateinit var picasso: Picasso
   private lateinit var dispatcher: InternalCoroutineDispatcher
@@ -60,13 +60,15 @@ class InternalCoroutineDispatcherTest {
   private val cache = PlatformLruCache(2048)
   private val bitmap1 = TestUtils.makeBitmap()
 
-  @Before fun setUp() {
-    MockitoAnnotations.initMocks(this)
+  @Before
+  fun setUp() {
+    MockitoAnnotations.openMocks(this)
     Mockito.`when`(context.applicationContext).thenReturn(context)
     dispatcher = createDispatcher()
   }
 
-  @Test fun shutdownCancelsRunningJob() {
+  @Test
+  fun shutdownCancelsRunningJob() {
     createDispatcher(true)
     val action = TestUtils.mockAction(picasso, TestUtils.URI_KEY_1, TestUtils.URI_1)
     dispatcher.dispatchSubmit(action)
@@ -78,7 +80,8 @@ class InternalCoroutineDispatcherTest {
     assertThat(action.completedResult).isNull()
   }
 
-  @Test fun shutdownPreventsFurtherChannelUse() {
+  @Test
+  fun shutdownPreventsFurtherChannelUse() {
     val dispatcher = createDispatcher(true, backgroundContext = Dispatchers.IO)
     val action = TestUtils.mockAction(picasso, TestUtils.URI_KEY_1, TestUtils.URI_1)
     dispatcher.shutdown()
@@ -89,13 +92,15 @@ class InternalCoroutineDispatcherTest {
     assertThat(action.completedResult).isNull()
   }
 
-  @Test fun shutdownUnregistersReceiver() {
+  @Test
+  fun shutdownUnregistersReceiver() {
     dispatcher.shutdown()
     Shadows.shadowOf(Looper.getMainLooper()).idle()
-    Mockito.verify(context).unregisterReceiver(dispatcher.receiver)
+    dispatcher.receiver.unregister()
   }
 
-  @Test fun dispatchSubmitWithNewRequestQueuesHunter() {
+  @Test
+  fun dispatchSubmitWithNewRequestQueuesHunter() {
     val action = TestUtils.mockAction(picasso, TestUtils.URI_KEY_1, TestUtils.URI_1)
     dispatcher.dispatchSubmit(action)
 
@@ -104,7 +109,8 @@ class InternalCoroutineDispatcherTest {
     assertThat(action.completedResult).isNotNull()
   }
 
-  @Test fun dispatchSubmitWithTwoDifferentRequestsQueuesHunters() {
+  @Test
+  fun dispatchSubmitWithTwoDifferentRequestsQueuesHunters() {
     val action1 = TestUtils.mockAction(picasso, TestUtils.URI_KEY_1, TestUtils.URI_1)
     val action2 = TestUtils.mockAction(picasso, TestUtils.URI_KEY_2, TestUtils.URI_2)
 
@@ -118,7 +124,8 @@ class InternalCoroutineDispatcherTest {
     assertThat(action2.completedResult).isNotEqualTo(action1.completedResult)
   }
 
-  @Test fun performSubmitWithExistingRequestAttachesToHunter() {
+  @Test
+  fun performSubmitWithExistingRequestAttachesToHunter() {
     val action1 = TestUtils.mockAction(picasso, TestUtils.URI_KEY_1, TestUtils.URI_1)
     val action2 = TestUtils.mockAction(picasso, TestUtils.URI_KEY_1, TestUtils.URI_1)
 
@@ -130,7 +137,8 @@ class InternalCoroutineDispatcherTest {
     assertThat(action2.completedResult).isEqualTo(action1.completedResult)
   }
 
-  @Test fun dispatchSubmitWithShutdownServiceIgnoresRequest() {
+  @Test
+  fun dispatchSubmitWithShutdownServiceIgnoresRequest() {
     dispatcher.shutdown()
 
     val action = TestUtils.mockAction(picasso, TestUtils.URI_KEY_1, TestUtils.URI_1)
@@ -140,15 +148,18 @@ class InternalCoroutineDispatcherTest {
     assertThat(action.completedResult).isNull()
   }
 
-  @Test fun dispatchSubmitWithFetchAction() {
+  @Test
+  fun dispatchSubmitWithFetchAction() {
     val pausedTag = "pausedTag"
     dispatcher.dispatchPauseTag(pausedTag)
     testDispatcher.scheduler.runCurrent()
     assertThat(dispatcher.pausedActions).isEmpty()
 
     var completed = false
-    val fetchAction1 = noopAction(Request.Builder(TestUtils.URI_1).tag(pausedTag).build(), { completed = true })
-    val fetchAction2 = noopAction(Request.Builder(TestUtils.URI_1).tag(pausedTag).build(), { completed = true })
+    val fetchAction1 =
+      noopAction(Builder(TestUtils.URI_1).tag(pausedTag).build(), { completed = true })
+    val fetchAction2 =
+      noopAction(Builder(TestUtils.URI_1).tag(pausedTag).build(), { completed = true })
     dispatcher.dispatchSubmit(fetchAction1)
     dispatcher.dispatchSubmit(fetchAction2)
     testDispatcher.scheduler.runCurrent()
@@ -157,7 +168,8 @@ class InternalCoroutineDispatcherTest {
     assertThat(completed).isFalse()
   }
 
-  @Test fun dispatchCancelWithFetchActionWithCallback() {
+  @Test
+  fun dispatchCancelWithFetchActionWithCallback() {
     val pausedTag = "pausedTag"
     dispatcher.dispatchPauseTag(pausedTag)
     testDispatcher.scheduler.runCurrent()
@@ -165,7 +177,8 @@ class InternalCoroutineDispatcherTest {
 
     val callback = TestUtils.mockCallback()
 
-    val fetchAction1 = FetchAction(picasso, Request.Builder(TestUtils.URI_1).tag(pausedTag).build(), callback)
+    val fetchAction1 =
+      FetchAction(picasso, Builder(TestUtils.URI_1).tag(pausedTag).build(), callback)
     dispatcher.dispatchSubmit(fetchAction1)
     testDispatcher.scheduler.runCurrent()
     assertThat(dispatcher.pausedActions).hasSize(1)
@@ -176,7 +189,8 @@ class InternalCoroutineDispatcherTest {
     assertThat(dispatcher.pausedActions).isEmpty()
   }
 
-  @Test fun dispatchCancelDetachesRequestAndCleansUp() {
+  @Test
+  fun dispatchCancelDetachesRequestAndCleansUp() {
     val target = TestUtils.mockBitmapTarget()
     val action = TestUtils.mockAction(picasso, TestUtils.URI_KEY_1, TestUtils.URI_1, target)
     val hunter = TestUtils.mockHunter(picasso, Bitmap(bitmap1, MEMORY), action).apply {
@@ -194,7 +208,8 @@ class InternalCoroutineDispatcherTest {
     assertThat(dispatcher.failedActions).isEmpty()
   }
 
-  @Test fun dispatchCancelMultipleRequestsDetachesOnly() {
+  @Test
+  fun dispatchCancelMultipleRequestsDetachesOnly() {
     val action1 = TestUtils.mockAction(picasso, TestUtils.URI_KEY_1, TestUtils.URI_1)
     val action2 = TestUtils.mockAction(picasso, TestUtils.URI_KEY_1, TestUtils.URI_1)
     val hunter = TestUtils.mockHunter(picasso, Bitmap(bitmap1, MEMORY), action1)
@@ -209,13 +224,10 @@ class InternalCoroutineDispatcherTest {
     assertThat(dispatcher.hunterMap).hasSize(1)
   }
 
-  @Test fun dispatchCancelUnqueuesAndDetachesPausedRequest() {
+  @Test
+  fun dispatchCancelUnqueuesAndDetachesPausedRequest() {
     val action = TestUtils.mockAction(
-      picasso,
-      TestUtils.URI_KEY_1,
-      TestUtils.URI_1,
-      TestUtils.mockBitmapTarget(),
-      tag = "tag"
+      picasso, TestUtils.URI_KEY_1, TestUtils.URI_1, TestUtils.mockBitmapTarget(), tag = "tag"
     )
     val hunter = TestUtils.mockHunter(picasso, Bitmap(bitmap1, MEMORY), action)
     dispatcher.dispatchSubmit(action)
@@ -231,8 +243,9 @@ class InternalCoroutineDispatcherTest {
     assertThat(dispatcher.pausedActions).isEmpty()
   }
 
-  @Test fun dispatchCompleteSetsResultInCache() {
-    val data = Request.Builder(TestUtils.URI_1).build()
+  @Test
+  fun dispatchCompleteSetsResultInCache() {
+    val data = Builder(TestUtils.URI_1).build()
     val action = noopAction(data)
     val hunter = TestUtils.mockHunter(picasso, Bitmap(bitmap1, MEMORY), action)
     hunter.run()
@@ -247,8 +260,9 @@ class InternalCoroutineDispatcherTest {
     assertThat(cache[hunter.key]).isSameInstanceAs(bitmap1)
   }
 
-  @Test fun dispatchCompleteWithNoStoreMemoryPolicy() {
-    val data = Request.Builder(TestUtils.URI_1).memoryPolicy(NO_STORE).build()
+  @Test
+  fun dispatchCompleteWithNoStoreMemoryPolicy() {
+    val data = Builder(TestUtils.URI_1).memoryPolicy(NO_STORE).build()
     val action = noopAction(data)
     val hunter = TestUtils.mockHunter(picasso, Bitmap(bitmap1, MEMORY), action)
     hunter.run()
@@ -261,8 +275,9 @@ class InternalCoroutineDispatcherTest {
     assertThat(cache.size()).isEqualTo(0)
   }
 
-  @Test fun dispatchCompleteCleansUpAndPostsToMain() {
-    val data = Request.Builder(TestUtils.URI_1).build()
+  @Test
+  fun dispatchCompleteCleansUpAndPostsToMain() {
+    val data = Builder(TestUtils.URI_1).build()
     var completed = false
     val action = noopAction(data, onComplete = { completed = true })
     val hunter = TestUtils.mockHunter(picasso, Bitmap(bitmap1, MEMORY), action)
@@ -275,8 +290,9 @@ class InternalCoroutineDispatcherTest {
     assertThat(completed).isTrue()
   }
 
-  @Test fun dispatchCompleteCleansUpAndDoesNotPostToMainIfCancelled() {
-    val data = Request.Builder(TestUtils.URI_1).build()
+  @Test
+  fun dispatchCompleteCleansUpAndDoesNotPostToMainIfCancelled() {
+    val data = Builder(TestUtils.URI_1).build()
     var completed = false
     val action = noopAction(data, onComplete = { completed = true })
     val hunter = TestUtils.mockHunter(picasso, Bitmap(bitmap1, MEMORY), action)
@@ -290,14 +306,11 @@ class InternalCoroutineDispatcherTest {
     assertThat(completed).isFalse()
   }
 
-  @Test fun dispatchErrorCleansUpAndPostsToMain() {
+  @Test
+  fun dispatchErrorCleansUpAndPostsToMain() {
     val exception = RuntimeException()
     val action = TestUtils.mockAction(
-      picasso,
-      TestUtils.URI_KEY_1,
-      TestUtils.URI_1,
-      TestUtils.mockBitmapTarget(),
-      tag = "tag"
+      picasso, TestUtils.URI_KEY_1, TestUtils.URI_1, TestUtils.mockBitmapTarget(), tag = "tag"
     )
     val hunter = TestUtils.mockHunter(picasso, Bitmap(bitmap1, MEMORY), action, exception)
     hunter.run()
@@ -310,14 +323,11 @@ class InternalCoroutineDispatcherTest {
     assertThat(action.errorException).isEqualTo(exception)
   }
 
-  @Test fun dispatchErrorCleansUpAndDoesNotPostToMainIfCancelled() {
+  @Test
+  fun dispatchErrorCleansUpAndDoesNotPostToMainIfCancelled() {
     val exception = RuntimeException()
     val action = TestUtils.mockAction(
-      picasso,
-      TestUtils.URI_KEY_1,
-      TestUtils.URI_1,
-      TestUtils.mockBitmapTarget(),
-      tag = "tag"
+      picasso, TestUtils.URI_KEY_1, TestUtils.URI_1, TestUtils.mockBitmapTarget(), tag = "tag"
     )
     val hunter = TestUtils.mockHunter(picasso, Bitmap(bitmap1, MEMORY), action, exception)
     hunter.run()
@@ -331,13 +341,10 @@ class InternalCoroutineDispatcherTest {
     assertThat(action.errorException).isNull()
   }
 
-  @Test fun dispatchRetrySkipsIfHunterIsCancelled() {
+  @Test
+  fun dispatchRetrySkipsIfHunterIsCancelled() {
     val action = TestUtils.mockAction(
-      picasso,
-      TestUtils.URI_KEY_1,
-      TestUtils.URI_1,
-      TestUtils.mockBitmapTarget(),
-      tag = "tag"
+      picasso, TestUtils.URI_KEY_1, TestUtils.URI_1, TestUtils.mockBitmapTarget(), tag = "tag"
     )
     val hunter = TestUtils.mockHunter(picasso, Bitmap(bitmap1, MEMORY), action)
     hunter.job = Job().apply { cancel() }
@@ -350,9 +357,10 @@ class InternalCoroutineDispatcherTest {
     assertThat(dispatcher.failedActions).isEmpty()
   }
 
-  @Test fun dispatchRetryForContentLengthResetsNetworkPolicy() {
+  @Test
+  fun dispatchRetryForContentLengthResetsNetworkPolicy() {
     val networkInfo = TestUtils.mockNetworkInfo(true)
-    Mockito.`when`(connectivityManager.activeNetworkInfo).thenReturn(networkInfo)
+    Mockito.`when`(networkInfo).thenReturn(networkInfo)
     val action = TestUtils.mockAction(picasso, TestUtils.URI_KEY_2, TestUtils.URI_2)
     val e = ContentLengthException("304 error")
     val hunter = TestUtils.mockHunter(picasso, Bitmap(bitmap1, MEMORY), action, e, true)
@@ -364,7 +372,8 @@ class InternalCoroutineDispatcherTest {
     assertThat(NetworkPolicy.shouldReadFromDiskCache(hunter.data.networkPolicy)).isFalse()
   }
 
-  @Test fun dispatchRetryDoesNotMarkForReplayIfNotSupported() {
+  @Test
+  fun dispatchRetryDoesNotMarkForReplayIfNotSupported() {
     val networkInfo = TestUtils.mockNetworkInfo(true)
     val hunter = TestUtils.mockHunter(
       picasso,
@@ -380,7 +389,8 @@ class InternalCoroutineDispatcherTest {
     assertThat(dispatcher.failedActions).isEmpty()
   }
 
-  @Test fun dispatchRetryDoesNotMarkForReplayIfNoNetworkScanning() {
+  @Test
+  fun dispatchRetryDoesNotMarkForReplayIfNoNetworkScanning() {
     val hunter = TestUtils.mockHunter(
       picasso,
       Bitmap(bitmap1, MEMORY),
@@ -398,23 +408,16 @@ class InternalCoroutineDispatcherTest {
     assertThat(dispatcher.failedActions).isEmpty()
   }
 
-  @Test fun dispatchRetryMarksForReplayIfSupportedScansNetworkChangesAndShouldNotRetry() {
+  @Test
+  fun dispatchRetryMarksForReplayIfSupportedScansNetworkChangesAndShouldNotRetry() {
     val networkInfo = TestUtils.mockNetworkInfo(true)
     val action = TestUtils.mockAction(
-      picasso,
-      TestUtils.URI_KEY_1,
-      TestUtils.URI_1,
-      TestUtils.mockBitmapTarget()
+      picasso, TestUtils.URI_KEY_1, TestUtils.URI_1, TestUtils.mockBitmapTarget()
     )
     val hunter = TestUtils.mockHunter(
-      picasso,
-      Bitmap(bitmap1, MEMORY),
-      action,
-      e = null,
-      shouldRetry = false,
-      supportsReplay = true
+      picasso, Bitmap(bitmap1, MEMORY), action, e = null, shouldRetry = false, supportsReplay = true
     )
-    Mockito.`when`(connectivityManager.activeNetworkInfo).thenReturn(networkInfo)
+    Mockito.`when`(networkInfo).thenReturn(networkInfo)
 
     dispatcher.dispatchRetry(hunter)
     testDispatcher.scheduler.advanceUntilIdle()
@@ -424,7 +427,8 @@ class InternalCoroutineDispatcherTest {
     assertThat(action.willReplay).isTrue()
   }
 
-  @Test fun dispatchRetryRetriesIfNoNetworkScanning() {
+  @Test
+  fun dispatchRetryRetriesIfNoNetworkScanning() {
     val dispatcher = createDispatcher(false)
     val action = TestUtils.mockAction(picasso, TestUtils.URI_KEY_1, TestUtils.URI_1)
     val hunter = TestUtils.mockHunter(
@@ -444,20 +448,13 @@ class InternalCoroutineDispatcherTest {
     assertThat(action.completedResult).isInstanceOf(Bitmap::class.java)
   }
 
-  @Test fun dispatchRetryMarksForReplayIfSupportsReplayAndShouldNotRetry() {
+  @Test
+  fun dispatchRetryMarksForReplayIfSupportsReplayAndShouldNotRetry() {
     val action = TestUtils.mockAction(
-      picasso,
-      TestUtils.URI_KEY_1,
-      TestUtils.URI_1,
-      TestUtils.mockBitmapTarget()
+      picasso, TestUtils.URI_KEY_1, TestUtils.URI_1, TestUtils.mockBitmapTarget()
     )
     val hunter = TestUtils.mockHunter(
-      picasso,
-      Bitmap(bitmap1, MEMORY),
-      action,
-      e = null,
-      shouldRetry = false,
-      supportsReplay = true
+      picasso, Bitmap(bitmap1, MEMORY), action, e = null, shouldRetry = false, supportsReplay = true
     )
 
     dispatcher.dispatchRetry(hunter)
@@ -468,12 +465,10 @@ class InternalCoroutineDispatcherTest {
     assertThat(action.willReplay).isTrue()
   }
 
-  @Test fun dispatchRetryRetriesIfShouldRetry() {
+  @Test
+  fun dispatchRetryRetriesIfShouldRetry() {
     val action = TestUtils.mockAction(
-      picasso,
-      TestUtils.URI_KEY_1,
-      TestUtils.URI_1,
-      TestUtils.mockBitmapTarget()
+      picasso, TestUtils.URI_KEY_1, TestUtils.URI_1, TestUtils.mockBitmapTarget()
     )
     val hunter = TestUtils.mockHunter(
       picasso,
@@ -492,12 +487,10 @@ class InternalCoroutineDispatcherTest {
     assertThat(action.completedResult).isInstanceOf(Bitmap::class.java)
   }
 
-  @Test fun dispatchRetrySkipIfServiceShutdown() {
+  @Test
+  fun dispatchRetrySkipIfServiceShutdown() {
     val action = TestUtils.mockAction(
-      picasso,
-      TestUtils.URI_KEY_1,
-      TestUtils.URI_1,
-      TestUtils.mockBitmapTarget()
+      picasso, TestUtils.URI_KEY_1, TestUtils.URI_1, TestUtils.mockBitmapTarget()
     )
     val hunter = TestUtils.mockHunter(picasso, Bitmap(bitmap1, MEMORY), action)
 
@@ -510,23 +503,10 @@ class InternalCoroutineDispatcherTest {
     assertThat(action.completedResult).isNull()
   }
 
-  @Test fun dispatchAirplaneModeChange() {
-    assertThat(dispatcher.airplaneMode).isFalse()
-
-    dispatcher.dispatchAirplaneModeChange(true)
-    testDispatcher.scheduler.runCurrent()
-
-    assertThat(dispatcher.airplaneMode).isTrue()
-
-    dispatcher.dispatchAirplaneModeChange(false)
-    testDispatcher.scheduler.runCurrent()
-
-    assertThat(dispatcher.airplaneMode).isFalse()
-  }
-
-  @Test fun dispatchNetworkStateChangeWithDisconnectedInfoIgnores() {
+  @Test
+  fun dispatchNetworkStateChangeWithDisconnectedInfoIgnores() {
     val info = TestUtils.mockNetworkInfo()
-    Mockito.`when`(info.isConnectedOrConnecting).thenReturn(false)
+    Mockito.`when`(info).thenReturn(false)
 
     dispatcher.dispatchNetworkStateChange(info)
     testDispatcher.scheduler.runCurrent()
@@ -534,7 +514,8 @@ class InternalCoroutineDispatcherTest {
     assertThat(dispatcher.failedActions).isEmpty()
   }
 
-  @Test fun dispatchNetworkStateChangeWithConnectedInfoDifferentInstanceIgnores() {
+  @Test
+  fun dispatchNetworkStateChangeWithConnectedInfoDifferentInstanceIgnores() {
     val info = TestUtils.mockNetworkInfo(true)
 
     dispatcher.dispatchNetworkStateChange(info)
@@ -543,7 +524,8 @@ class InternalCoroutineDispatcherTest {
     assertThat(dispatcher.failedActions).isEmpty()
   }
 
-  @Test fun dispatchPauseAndResumeUpdatesListOfPausedTags() {
+  @Test
+  fun dispatchPauseAndResumeUpdatesListOfPausedTags() {
     dispatcher.dispatchPauseTag("tag")
     testDispatcher.scheduler.runCurrent()
 
@@ -555,13 +537,10 @@ class InternalCoroutineDispatcherTest {
     assertThat(dispatcher.pausedTags).isEmpty()
   }
 
-  @Test fun dispatchPauseTagIsIdempotent() {
+  @Test
+  fun dispatchPauseTagIsIdempotent() {
     val action = TestUtils.mockAction(
-      picasso,
-      TestUtils.URI_KEY_1,
-      TestUtils.URI_1,
-      TestUtils.mockBitmapTarget(),
-      tag = "tag"
+      picasso, TestUtils.URI_KEY_1, TestUtils.URI_1, TestUtils.mockBitmapTarget(), tag = "tag"
     )
     val hunter = TestUtils.mockHunter(picasso, Bitmap(bitmap1, MEMORY), action)
     dispatcher.hunterMap[TestUtils.URI_KEY_1] = hunter
@@ -578,13 +557,11 @@ class InternalCoroutineDispatcherTest {
     assertThat(dispatcher.pausedActions).containsEntry(action.getTarget(), action)
   }
 
-  @Test fun dispatchPauseTagQueuesNewRequestDoesNotComplete() {
+  @Test
+  fun dispatchPauseTagQueuesNewRequestDoesNotComplete() {
     dispatcher.dispatchPauseTag("tag")
     val action = TestUtils.mockAction(
-      picasso = picasso,
-      key = TestUtils.URI_KEY_1,
-      uri = TestUtils.URI_1,
-      tag = "tag"
+      picasso = picasso, key = TestUtils.URI_KEY_1, uri = TestUtils.URI_1, tag = "tag"
     )
 
     dispatcher.dispatchSubmit(action)
@@ -596,7 +573,8 @@ class InternalCoroutineDispatcherTest {
     assertThat(action.completedResult).isNull()
   }
 
-  @Test fun dispatchPauseTagDoesNotQueueUnrelatedRequest() {
+  @Test
+  fun dispatchPauseTagDoesNotQueueUnrelatedRequest() {
     dispatcher.dispatchPauseTag("tag")
     testDispatcher.scheduler.runCurrent()
 
@@ -608,18 +586,13 @@ class InternalCoroutineDispatcherTest {
     assertThat(action.completedResult).isNotNull()
   }
 
-  @Test fun dispatchPauseDetachesRequestAndCancelsHunter() {
+  @Test
+  fun dispatchPauseDetachesRequestAndCancelsHunter() {
     val action = TestUtils.mockAction(
-      picasso = picasso,
-      key = TestUtils.URI_KEY_1,
-      uri = TestUtils.URI_1,
-      tag = "tag"
+      picasso = picasso, key = TestUtils.URI_KEY_1, uri = TestUtils.URI_1, tag = "tag"
     )
     val hunter = TestUtils.mockHunter(
-      picasso = picasso,
-      result = Bitmap(bitmap1, MEMORY),
-      action = action,
-      dispatcher = dispatcher
+      picasso = picasso, result = Bitmap(bitmap1, MEMORY), action = action, dispatcher = dispatcher
     )
     hunter.job = Job()
 
@@ -634,7 +607,8 @@ class InternalCoroutineDispatcherTest {
     assertThat(action.completedResult).isNull()
   }
 
-  @Test fun dispatchPauseOnlyDetachesPausedRequest() {
+  @Test
+  fun dispatchPauseOnlyDetachesPausedRequest() {
     val action1 = TestUtils.mockAction(
       picasso = picasso,
       key = TestUtils.URI_KEY_1,
@@ -664,7 +638,8 @@ class InternalCoroutineDispatcherTest {
     assertThat(hunter.actions).containsExactly(action2)
   }
 
-  @Test fun dispatchResumeTagIsIdempotent() {
+  @Test
+  fun dispatchResumeTagIsIdempotent() {
     var completedCount = 0
     val action = noopAction(Builder(TestUtils.URI_1).tag("tag").build(), { completedCount++ })
 
@@ -677,7 +652,8 @@ class InternalCoroutineDispatcherTest {
     assertThat(completedCount).isEqualTo(1)
   }
 
-  @Test fun dispatchNetworkStateChangeFlushesFailedHunters() {
+  @Test
+  fun dispatchNetworkStateChangeFlushesFailedHunters() {
     val info = TestUtils.mockNetworkInfo(true)
     val failedAction1 = TestUtils.mockAction(picasso, TestUtils.URI_KEY_1, TestUtils.URI_1)
     val failedAction2 = TestUtils.mockAction(picasso, TestUtils.URI_KEY_2, TestUtils.URI_2)
@@ -692,12 +668,13 @@ class InternalCoroutineDispatcherTest {
     assertThat(dispatcher.failedActions).isEmpty()
   }
 
-  @Test fun syncCancelWithMainBeforeHunting() {
+  @Test
+  fun syncCancelWithMainBeforeHunting() {
     val mainDispatcher = StandardTestDispatcher()
     val dispatcher = createDispatcher(mainContext = mainDispatcher)
 
     var completed = false
-    val action = noopAction(Request.Builder(TestUtils.URI_1).build()) { completed = true }
+    val action = noopAction(Builder(TestUtils.URI_1).build()) { completed = true }
 
     // Submit action, will be gated by main
     dispatcher.dispatchSubmit(action)
@@ -723,12 +700,13 @@ class InternalCoroutineDispatcherTest {
     assertThat(completed).isFalse()
   }
 
-  @Test fun doesntSyncWithMainIfHighPriorityRequestBeforeHunting() {
+  @Test
+  fun doesntSyncWithMainIfHighPriorityRequestBeforeHunting() {
     val mainDispatcher = StandardTestDispatcher()
     val dispatcher = createDispatcher(mainContext = mainDispatcher)
 
     var completed = false
-    val action = noopAction(Request.Builder(TestUtils.URI_1).priority(HIGH).build()) { completed = true }
+    val action = noopAction(Builder(TestUtils.URI_1).priority(HIGH).build()) { completed = true }
     // Submit action
     dispatcher.dispatchSubmit(action)
     testDispatcher.scheduler.runCurrent()
@@ -747,13 +725,15 @@ class InternalCoroutineDispatcherTest {
     Mockito.`when`(connectivityManager.activeNetworkInfo).thenReturn(
       if (scansNetworkChanges) Mockito.mock(NetworkInfo::class.java) else null
     )
-    Mockito.`when`(context.getSystemService(Context.CONNECTIVITY_SERVICE)).thenReturn(connectivityManager)
+    Mockito.`when`(context.getSystemService(Context.CONNECTIVITY_SERVICE))
+      .thenReturn(connectivityManager)
     Mockito.`when`(context.checkCallingOrSelfPermission(ArgumentMatchers.anyString())).thenReturn(
       if (scansNetworkChanges) PackageManager.PERMISSION_GRANTED else PackageManager.PERMISSION_DENIED
     )
 
     testDispatcher = StandardTestDispatcher()
-    picasso = TestUtils.mockPicasso(context).newBuilder().dispatchers(mainContext ?: testDispatcher, testDispatcher).build()
+    picasso = TestUtils.mockPicasso(context).newBuilder()
+      .dispatchers(mainContext ?: testDispatcher, testDispatcher).build()
     return InternalCoroutineDispatcher(
       context = context,
       mainThreadHandler = Handler(Looper.getMainLooper()),
