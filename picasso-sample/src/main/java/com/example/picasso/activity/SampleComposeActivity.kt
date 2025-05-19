@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.example.picasso
+package com.example.picasso.activity
 
 import android.graphics.Canvas
 import android.os.Bundle
@@ -50,6 +50,9 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.IntSize
 import androidx.compose.ui.unit.dp
 import androidx.core.graphics.createBitmap
+import com.example.picasso.Data
+import com.example.picasso.PicassoInitializer
+import com.example.picasso.R
 import com.squareup.picasso3.Picasso
 import com.squareup.picasso3.Picasso.LoadedFrom.MEMORY
 import com.squareup.picasso3.Request
@@ -75,7 +78,7 @@ class SampleComposeActivity : PicassoSampleActivity() {
 }
 
 @Composable
-fun Content(urls: List<String>, picasso: Picasso = PicassoInitializer.get()) {
+fun Content(urls: List<String>, picasso: Picasso = PicassoInitializer.Companion.get()) {
   var contentScale by remember { mutableStateOf(ContentScale.Inside) }
   var alignment by remember { mutableStateOf(Alignment.Center) }
 
@@ -103,7 +106,7 @@ fun ImageGrid(
   urls: List<String>,
   contentScale: ContentScale,
   alignment: Alignment,
-  picasso: Picasso = PicassoInitializer.get()
+  picasso: Picasso = PicassoInitializer.Companion.get()
 ) {
   LazyVerticalGrid(
     columns = Adaptive(150.dp), modifier = modifier

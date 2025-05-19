@@ -13,10 +13,13 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.example.picasso
+package com.example.picasso.activity
 
 import android.os.Bundle
 import android.widget.GridView
+import com.example.picasso.R
+import com.example.picasso.SampleScrollListener
+import com.example.picasso.adapter.SampleGridViewAdapter
 
 class SampleGridViewActivity : PicassoSampleActivity() {
   override fun onCreate(savedInstanceState: Bundle?) {

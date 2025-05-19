@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.example.picasso
+package com.example.picasso.activity
 
 import android.Manifest.permission.READ_CONTACTS
 import android.content.pm.PackageManager.PERMISSION_GRANTED
@@ -29,6 +29,9 @@ import androidx.loader.app.LoaderManager
 import androidx.loader.app.LoaderManager.LoaderCallbacks
 import androidx.loader.content.CursorLoader
 import androidx.loader.content.Loader
+import com.example.picasso.R
+import com.example.picasso.SampleScrollListener
+import com.example.picasso.adapter.SampleContactsAdapter
 
 class SampleContactsActivity : PicassoSampleActivity(), LoaderCallbacks<Cursor> {
   private lateinit var adapter: SampleContactsAdapter

@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.example.picasso
+package com.example.picasso.adapter
 
 import android.content.Context
 import android.view.LayoutInflater
@@ -22,6 +22,9 @@ import android.view.ViewGroup
 import android.widget.BaseAdapter
 import android.widget.ImageView
 import android.widget.TextView
+import com.example.picasso.Data
+import com.example.picasso.PicassoInitializer
+import com.example.picasso.R
 
 internal class SampleListDetailAdapter(private val context: Context) : BaseAdapter() {
   private val layoutInflater = LayoutInflater.from(context)
@@ -48,7 +51,8 @@ internal class SampleListDetailAdapter(private val context: Context) : BaseAdapt
     holder.text.text = url
 
     // Trigger the download of the URL asynchronously into the image view.
-    PicassoInitializer.get().load(url).placeholder(R.drawable.placeholder).error(R.drawable.error)
+    PicassoInitializer.Companion.get().load(url).placeholder(R.drawable.placeholder)
+      .error(R.drawable.error)
       .resizeDimen(R.dimen.list_detail_image_size, R.dimen.list_detail_image_size).centerInside()
       .tag(context).into(holder.image)
 

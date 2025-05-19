@@ -20,6 +20,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.RememberObserver
 import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableFloatStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
@@ -51,7 +52,7 @@ internal class PicassoPainter(
   private var lastRequestCreator: RequestCreator? by mutableStateOf(null)
   private val requestCreator: RequestCreator by derivedStateOf { request(picasso) }
   private var painter: Painter by mutableStateOf(EmptyPainter)
-  private var alpha: Float by mutableStateOf(DefaultAlpha)
+  private var alpha: Float by mutableFloatStateOf(DefaultAlpha)
   private var colorFilter: ColorFilter? by mutableStateOf(null)
 
   override val intrinsicSize: Size

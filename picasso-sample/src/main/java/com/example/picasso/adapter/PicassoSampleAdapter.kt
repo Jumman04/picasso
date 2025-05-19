@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.example.picasso
+package com.example.picasso.adapter
 
 import android.Manifest.permission.POST_NOTIFICATIONS
 import android.app.Activity
@@ -34,6 +34,14 @@ import androidx.core.app.ActivityCompat.requestPermissions
 import androidx.core.app.NotificationChannelCompat
 import androidx.core.app.NotificationCompat
 import androidx.core.app.NotificationManagerCompat
+import com.example.picasso.Data
+import com.example.picasso.PicassoInitializer
+import com.example.picasso.R
+import com.example.picasso.activity.SampleComposeActivity
+import com.example.picasso.activity.SampleContactsActivity
+import com.example.picasso.activity.SampleGalleryActivity
+import com.example.picasso.activity.SampleGridViewActivity
+import com.example.picasso.activity.SampleListDetailActivity
 import java.util.Random
 
 internal class PicassoSampleAdapter(context: Context?) : BaseAdapter() {
@@ -78,7 +86,8 @@ internal class PicassoSampleAdapter(context: Context?) : BaseAdapter() {
         notificationManager.notify(NOTIFICATION_ID, notification)
 
         // Now load an image for this notification.
-        PicassoInitializer.get().load(Data.URLS[Random().nextInt(Data.URLS.size)]).resizeDimen(
+        PicassoInitializer.Companion.get().load(Data.URLS[Random().nextInt(Data.URLS.size)])
+          .resizeDimen(
           R.dimen.notification_icon_width_height, R.dimen.notification_icon_width_height
         ).into(remoteViews, R.id.photo, NOTIFICATION_ID, notification)
       }

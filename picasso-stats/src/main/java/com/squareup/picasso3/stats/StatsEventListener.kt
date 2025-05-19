@@ -81,15 +81,24 @@ class StatsEventListener : EventListener {
   }
 
   fun getSnapshot() = Snapshot(
-    maxCacheSize, cacheSize, cacheHits, cacheMisses,
-    totalDownloadSize, totalOriginalBitmapSize, totalTransformedBitmapSize, averageDownloadSize,
-    averageOriginalBitmapSize, averageTransformedBitmapSize, downloadCount, originalBitmapCount,
-    transformedBitmapCount, System.currentTimeMillis()
+    maxCacheSize,
+    cacheSize,
+    cacheHits,
+    cacheMisses,
+    totalDownloadSize,
+    totalOriginalBitmapSize,
+    totalTransformedBitmapSize,
+    averageDownloadSize,
+    averageOriginalBitmapSize,
+    averageTransformedBitmapSize,
+    downloadCount,
+    originalBitmapCount,
+    transformedBitmapCount,
+    System.currentTimeMillis()
   )
 
   private fun average(
-    count: Int,
-    totalSize: Long
+    count: Int, totalSize: Long
   ): Double = totalSize * 1.0 / count
 
   data class Snapshot(

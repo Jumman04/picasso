@@ -13,13 +13,17 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.example.picasso
+package com.example.picasso.adapter
 
 import android.content.Context
 import android.view.View
 import android.view.ViewGroup
 import android.widget.BaseAdapter
 import android.widget.ImageView.ScaleType.CENTER_CROP
+import com.example.picasso.Data
+import com.example.picasso.PicassoInitializer
+import com.example.picasso.R
+import com.example.picasso.SquaredImageView
 
 internal class SampleGridViewAdapter(private val context: Context) : BaseAdapter() {
   private val urls: List<String>
@@ -44,7 +48,8 @@ internal class SampleGridViewAdapter(private val context: Context) : BaseAdapter
     val url = getItem(position)
 
     // Trigger the download of the URL asynchronously into the image view.
-    PicassoInitializer.get().load(url).placeholder(R.drawable.placeholder).error(R.drawable.error)
+    PicassoInitializer.Companion.get().load(url).placeholder(R.drawable.placeholder)
+      .error(R.drawable.error)
       .fit().tag(context).into(view)
 
     return view

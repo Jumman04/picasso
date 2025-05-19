@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.example.picasso
+package com.example.picasso.activity
 
 import android.os.Bundle
 import android.view.View
@@ -24,6 +24,9 @@ import android.widget.ListView
 import android.widget.ToggleButton
 import androidx.activity.OnBackPressedCallback
 import androidx.fragment.app.FragmentActivity
+import com.example.picasso.PicassoInitializer
+import com.example.picasso.R
+import com.example.picasso.adapter.PicassoSampleAdapter
 
 abstract class PicassoSampleActivity : FragmentActivity() {
   private lateinit var sampleContent: FrameLayout
@@ -47,7 +50,7 @@ abstract class PicassoSampleActivity : FragmentActivity() {
       activityList.visibility = if (checked) View.VISIBLE else View.GONE
     }
 
-    lifecycle.addObserver(PicassoInitializer.get())
+    lifecycle.addObserver(PicassoInitializer.Companion.get())
 
     onBackPressedDispatcher.addCallback(this, object : OnBackPressedCallback(true) {
       override fun handleOnBackPressed() {

@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.example.picasso
+package com.example.picasso.activity
 
 import android.content.Intent
 import android.os.Bundle
@@ -21,6 +21,8 @@ import android.provider.MediaStore.Images.Media
 import android.view.View
 import android.widget.ImageView
 import android.widget.ViewAnimator
+import com.example.picasso.PicassoInitializer
+import com.example.picasso.R
 import com.squareup.picasso3.Callback.EmptyCallback
 
 class SampleGalleryActivity : PicassoSampleActivity() {
@@ -69,7 +71,7 @@ class SampleGalleryActivity : PicassoSampleActivity() {
     // Index 1 is the progress bar. Show it while we're loading the image.
     animator.displayedChild = 1
 
-    PicassoInitializer.get().load(image).fit().centerInside().into(
+    PicassoInitializer.Companion.get().load(image).fit().centerInside().into(
       imageView, object : EmptyCallback() {
         override fun onSuccess() {
           // Index 0 is the image view.

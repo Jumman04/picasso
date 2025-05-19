@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.example.picasso
+package com.example.picasso.adapter
 
 import android.content.Context
 import android.database.Cursor
@@ -24,7 +24,9 @@ import android.view.ViewGroup
 import android.widget.QuickContactBadge
 import android.widget.TextView
 import androidx.cursoradapter.widget.CursorAdapter
-import com.example.picasso.SampleContactsActivity.ContactsQuery
+import com.example.picasso.PicassoInitializer
+import com.example.picasso.R
+import com.example.picasso.activity.SampleContactsActivity.ContactsQuery
 
 internal class SampleContactsAdapter(context: Context) : CursorAdapter(context, null, 0) {
   private val inflater = LayoutInflater.from(context)
@@ -51,7 +53,8 @@ internal class SampleContactsAdapter(context: Context) : CursorAdapter(context, 
       icon.assignContactUri(contactUri)
     }
 
-    PicassoInitializer.get().load(contactUri).placeholder(R.drawable.contact_picture_placeholder)
+    PicassoInitializer.Companion.get().load(contactUri)
+      .placeholder(R.drawable.contact_picture_placeholder)
       .tag(context).into(holder.icon)
   }
 

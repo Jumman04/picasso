@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.example.picasso
+package com.example.picasso.activity
 
 import android.os.Bundle
 import android.view.LayoutInflater
@@ -24,6 +24,10 @@ import android.widget.ImageView
 import android.widget.ListView
 import android.widget.TextView
 import androidx.fragment.app.Fragment
+import com.example.picasso.PicassoInitializer
+import com.example.picasso.R
+import com.example.picasso.SampleScrollListener
+import com.example.picasso.adapter.SampleListDetailAdapter
 
 class SampleListDetailActivity : PicassoSampleActivity() {
   override fun onCreate(savedInstanceState: Bundle?) {
@@ -79,7 +83,7 @@ class SampleListDetailActivity : PicassoSampleActivity() {
 
       val url = requireArguments().getString(KEY_URL)
       urlView.text = url
-      PicassoInitializer.get().load(url).fit().tag(activity).into(imageView)
+      PicassoInitializer.Companion.get().load(url).fit().tag(activity).into(imageView)
 
       return view
     }
