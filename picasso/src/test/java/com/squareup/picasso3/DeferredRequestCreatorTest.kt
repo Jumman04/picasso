@@ -22,6 +22,7 @@ import com.squareup.picasso3.TestUtils.mockCallback
 import com.squareup.picasso3.TestUtils.mockFitImageViewTarget
 import com.squareup.picasso3.TestUtils.mockPicasso
 import com.squareup.picasso3.TestUtils.mockRequestCreator
+import com.squareup.picasso3.action.ImageViewAction
 import org.junit.Test
 import org.junit.runner.RunWith
 import org.mockito.Mockito.never

@@ -19,11 +19,6 @@ import android.content.Context
 import android.graphics.Bitmap
 import android.graphics.Bitmap.Config.ARGB_8888
 import com.google.common.truth.Truth.assertThat
-import com.squareup.picasso3.MediaStoreRequestHandler.Companion.getPicassoKind
-import com.squareup.picasso3.MediaStoreRequestHandler.PicassoKind.FULL
-import com.squareup.picasso3.MediaStoreRequestHandler.PicassoKind.MICRO
-import com.squareup.picasso3.MediaStoreRequestHandler.PicassoKind.MINI
-import com.squareup.picasso3.RequestHandler.Callback
 import com.squareup.picasso3.Shadows.ShadowImageThumbnails
 import com.squareup.picasso3.Shadows.ShadowVideoThumbnails
 import com.squareup.picasso3.TestUtils.MEDIA_STORE_CONTENT_1_URL
@@ -33,6 +28,13 @@ import com.squareup.picasso3.TestUtils.MEDIA_STORE_CONTENT_KEY_2
 import com.squareup.picasso3.TestUtils.makeBitmap
 import com.squareup.picasso3.TestUtils.mockAction
 import com.squareup.picasso3.TestUtils.mockPicasso
+import com.squareup.picasso3.base.RequestHandler
+import com.squareup.picasso3.base.RequestHandler.Callback
+import com.squareup.picasso3.requestHandler.MediaStoreRequestHandler
+import com.squareup.picasso3.requestHandler.MediaStoreRequestHandler.Companion.getPicassoKind
+import com.squareup.picasso3.requestHandler.MediaStoreRequestHandler.PicassoKind.FULL
+import com.squareup.picasso3.requestHandler.MediaStoreRequestHandler.PicassoKind.MICRO
+import com.squareup.picasso3.requestHandler.MediaStoreRequestHandler.PicassoKind.MINI
 import org.junit.Assert.fail
 import org.junit.Before
 import org.junit.Test

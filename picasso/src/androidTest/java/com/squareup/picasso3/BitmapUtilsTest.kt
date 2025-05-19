@@ -20,10 +20,10 @@ import android.graphics.Bitmap.Config.RGB_565
 import android.graphics.BitmapFactory
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import com.google.common.truth.Truth.assertThat
-import com.squareup.picasso3.BitmapUtils.calculateInSampleSize
-import com.squareup.picasso3.BitmapUtils.createBitmapOptions
-import com.squareup.picasso3.BitmapUtils.requiresInSampleSize
 import com.squareup.picasso3.TestUtils.URI_1
+import com.squareup.picasso3.utils.BitmapUtils.calculateInSampleSize
+import com.squareup.picasso3.utils.BitmapUtils.createBitmapOptions
+import com.squareup.picasso3.utils.BitmapUtils.requiresInSampleSize
 import org.junit.Test
 import org.junit.runner.RunWith
 

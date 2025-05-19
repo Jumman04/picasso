@@ -18,6 +18,7 @@ package com.squareup.picasso3
 import android.net.Uri
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import com.google.common.truth.Truth.assertThat
+import com.squareup.picasso3.requestHandler.AssetRequestHandler
 import org.junit.Test
 import org.junit.runner.RunWith
 

@@ -23,6 +23,10 @@ import androidx.annotation.DrawableRes
 import androidx.annotation.Px
 import com.squareup.picasso3.Picasso.Priority
 import com.squareup.picasso3.Picasso.Priority.NORMAL
+import com.squareup.picasso3.enums.MemoryPolicy
+import com.squareup.picasso3.enums.NetworkPolicy
+import com.squareup.picasso3.interfaces.Transformation
+import com.squareup.picasso3.utils.Utils
 import okhttp3.Headers
 import java.util.concurrent.TimeUnit.NANOSECONDS
 import java.util.concurrent.TimeUnit.SECONDS
@@ -37,11 +41,11 @@ class Request internal constructor(builder: Builder) {
   @JvmField
   var started: Long = 0
 
-  /** The [MemoryPolicy] to use for this request. */
+  /** The [com.squareup.picasso3.enums.MemoryPolicy] to use for this request. */
   @JvmField
   val memoryPolicy: Int = builder.memoryPolicy
 
-  /** The [NetworkPolicy] to use for this request. */
+  /** The [com.squareup.picasso3.enums.NetworkPolicy] to use for this request. */
   @JvmField
   val networkPolicy: Int = builder.networkPolicy
 
@@ -518,7 +522,7 @@ class Request internal constructor(builder: Builder) {
     }
 
     /**
-     * Specifies the [MemoryPolicy] to use for this request. You may specify additional policy
+     * Specifies the [com.squareup.picasso3.enums.MemoryPolicy] to use for this request. You may specify additional policy
      * options using the varargs parameter.
      */
     fun memoryPolicy(
@@ -532,7 +536,7 @@ class Request internal constructor(builder: Builder) {
     }
 
     /**
-     * Specifies the [NetworkPolicy] to use for this request. You may specify additional
+     * Specifies the [com.squareup.picasso3.enums.NetworkPolicy] to use for this request. You may specify additional
      * policy options using the varargs parameter.
      */
     fun networkPolicy(

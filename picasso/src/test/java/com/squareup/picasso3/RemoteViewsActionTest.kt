@@ -21,7 +21,6 @@ import androidx.annotation.DrawableRes
 import androidx.test.core.app.ApplicationProvider
 import com.google.common.truth.Truth.assertThat
 import com.squareup.picasso3.Picasso.LoadedFrom.NETWORK
-import com.squareup.picasso3.RemoteViewsAction.RemoteViewsTarget
 import com.squareup.picasso3.TestUtils.NO_EVENT_LISTENERS
 import com.squareup.picasso3.TestUtils.NO_HANDLERS
 import com.squareup.picasso3.TestUtils.NO_TRANSFORMERS
@@ -30,6 +29,12 @@ import com.squareup.picasso3.TestUtils.UNUSED_CALL_FACTORY
 import com.squareup.picasso3.TestUtils.makeBitmap
 import com.squareup.picasso3.TestUtils.mockCallback
 import com.squareup.picasso3.TestUtils.mockImageViewTarget
+import com.squareup.picasso3.action.ImageViewAction
+import com.squareup.picasso3.base.RemoteViewsAction
+import com.squareup.picasso3.base.RemoteViewsAction.RemoteViewsTarget
+import com.squareup.picasso3.base.RequestHandler
+import com.squareup.picasso3.interfaces.Callback
+import com.squareup.picasso3.interfaces.Dispatcher
 import org.junit.Before
 import org.junit.Test
 import org.junit.runner.RunWith

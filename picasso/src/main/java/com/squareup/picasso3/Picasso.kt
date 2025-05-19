@@ -28,19 +28,35 @@ import androidx.annotation.DrawableRes
 import androidx.annotation.IdRes
 import androidx.lifecycle.DefaultLifecycleObserver
 import androidx.lifecycle.LifecycleOwner
-import com.squareup.picasso3.MemoryPolicy.Companion.shouldReadFromMemoryCache
 import com.squareup.picasso3.Picasso.LoadedFrom.MEMORY
-import com.squareup.picasso3.RemoteViewsAction.RemoteViewsTarget
-import com.squareup.picasso3.RequestHandler.Result
-import com.squareup.picasso3.Utils.OWNER_MAIN
-import com.squareup.picasso3.Utils.VERB_COMPLETED
-import com.squareup.picasso3.Utils.VERB_ERRORED
-import com.squareup.picasso3.Utils.VERB_RESUMED
-import com.squareup.picasso3.Utils.calculateDiskCacheSize
-import com.squareup.picasso3.Utils.calculateMemoryCacheSize
-import com.squareup.picasso3.Utils.checkMain
-import com.squareup.picasso3.Utils.createDefaultCacheDir
-import com.squareup.picasso3.Utils.log
+import com.squareup.picasso3.base.Action
+import com.squareup.picasso3.base.RemoteViewsAction.RemoteViewsTarget
+import com.squareup.picasso3.base.RequestHandler
+import com.squareup.picasso3.base.RequestHandler.Result
+import com.squareup.picasso3.dispatcher.HandlerDispatcher
+import com.squareup.picasso3.dispatcher.InternalCoroutineDispatcher
+import com.squareup.picasso3.enums.MemoryPolicy.Companion.shouldReadFromMemoryCache
+import com.squareup.picasso3.interfaces.BitmapTarget
+import com.squareup.picasso3.interfaces.Dispatcher
+import com.squareup.picasso3.interfaces.DrawableTarget
+import com.squareup.picasso3.interfaces.EventListener
+import com.squareup.picasso3.requestHandler.AssetRequestHandler
+import com.squareup.picasso3.requestHandler.ContactsPhotoRequestHandler
+import com.squareup.picasso3.requestHandler.ContentStreamRequestHandler
+import com.squareup.picasso3.requestHandler.FileRequestHandler
+import com.squareup.picasso3.requestHandler.MediaStoreRequestHandler
+import com.squareup.picasso3.requestHandler.NetworkRequestHandler
+import com.squareup.picasso3.requestHandler.ResourceDrawableRequestHandler
+import com.squareup.picasso3.requestHandler.ResourceRequestHandler
+import com.squareup.picasso3.utils.Utils.OWNER_MAIN
+import com.squareup.picasso3.utils.Utils.VERB_COMPLETED
+import com.squareup.picasso3.utils.Utils.VERB_ERRORED
+import com.squareup.picasso3.utils.Utils.VERB_RESUMED
+import com.squareup.picasso3.utils.Utils.calculateDiskCacheSize
+import com.squareup.picasso3.utils.Utils.calculateMemoryCacheSize
+import com.squareup.picasso3.utils.Utils.checkMain
+import com.squareup.picasso3.utils.Utils.createDefaultCacheDir
+import com.squareup.picasso3.utils.Utils.log
 import okhttp3.Cache
 import okhttp3.Call
 import okhttp3.OkHttpClient
@@ -145,13 +161,13 @@ class Picasso internal constructor(
     cancelExistingRequest(view)
   }
 
-  /** Cancel any existing requests for the specified [BitmapTarget] instance. */
+  /** Cancel any existing requests for the specified [com.squareup.picasso3.interfaces.BitmapTarget] instance. */
   fun cancelRequest(target: BitmapTarget) {
     // checkMain() is called from cancelExistingRequest()
     cancelExistingRequest(target)
   }
 
-  /** Cancel any existing requests for the specified [DrawableTarget] instance. */
+  /** Cancel any existing requests for the specified [com.squareup.picasso3.interfaces.DrawableTarget] instance. */
   fun cancelRequest(target: DrawableTarget) {
     // checkMain() is called from cancelExistingRequest()
     cancelExistingRequest(target)

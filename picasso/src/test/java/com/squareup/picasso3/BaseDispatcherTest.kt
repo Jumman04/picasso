@@ -17,7 +17,8 @@ package com.squareup.picasso3
 
 import android.content.Context
 import android.net.ConnectivityManager
-import com.squareup.picasso3.BaseDispatcher.NetworkBroadcastReceiver
+import com.squareup.picasso3.base.BaseDispatcher
+import com.squareup.picasso3.base.BaseDispatcher.NetworkBroadcastReceiver
 import org.junit.Before
 import org.junit.Test
 import org.junit.runner.RunWith

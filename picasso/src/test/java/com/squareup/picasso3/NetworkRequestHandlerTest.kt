@@ -17,7 +17,6 @@ package com.squareup.picasso3
 
 import androidx.test.core.app.ApplicationProvider
 import com.google.common.truth.Truth.assertThat
-import com.squareup.picasso3.RequestHandler.Result
 import com.squareup.picasso3.TestUtils.CUSTOM_HEADER_NAME
 import com.squareup.picasso3.TestUtils.CUSTOM_HEADER_VALUE
 import com.squareup.picasso3.TestUtils.EventRecorder
@@ -26,6 +25,10 @@ import com.squareup.picasso3.TestUtils.URI_1
 import com.squareup.picasso3.TestUtils.URI_KEY_1
 import com.squareup.picasso3.TestUtils.mockNetworkInfo
 import com.squareup.picasso3.TestUtils.mockPicasso
+import com.squareup.picasso3.base.RequestHandler
+import com.squareup.picasso3.base.RequestHandler.Result
+import com.squareup.picasso3.interfaces.Dispatcher
+import com.squareup.picasso3.requestHandler.NetworkRequestHandler
 import okhttp3.CacheControl
 import okhttp3.MediaType
 import okhttp3.Protocol.HTTP_1_1

@@ -31,10 +31,10 @@ import androidx.compose.ui.graphics.DefaultAlpha
 import androidx.compose.ui.graphics.drawscope.DrawScope
 import androidx.compose.ui.graphics.painter.Painter
 import com.google.accompanist.drawablepainter.DrawablePainter
-import com.squareup.picasso3.DrawableTarget
 import com.squareup.picasso3.Picasso
 import com.squareup.picasso3.Picasso.LoadedFrom
 import com.squareup.picasso3.RequestCreator
+import com.squareup.picasso3.interfaces.DrawableTarget
 
 @Composable
 fun Picasso.rememberPainter(

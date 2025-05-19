@@ -56,7 +56,7 @@ import com.example.picasso.R
 import com.squareup.picasso3.Picasso
 import com.squareup.picasso3.Picasso.LoadedFrom.MEMORY
 import com.squareup.picasso3.Request
-import com.squareup.picasso3.RequestHandler
+import com.squareup.picasso3.base.RequestHandler
 import com.squareup.picasso3.compose.rememberPainter
 import kotlinx.coroutines.Dispatchers
 

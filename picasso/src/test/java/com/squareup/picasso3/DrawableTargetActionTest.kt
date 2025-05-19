@@ -26,6 +26,10 @@ import com.squareup.picasso3.TestUtils.argumentCaptor
 import com.squareup.picasso3.TestUtils.eq
 import com.squareup.picasso3.TestUtils.makeBitmap
 import com.squareup.picasso3.TestUtils.mockDrawableTarget
+import com.squareup.picasso3.action.DrawableTargetAction
+import com.squareup.picasso3.base.RequestHandler
+import com.squareup.picasso3.interfaces.Dispatcher
+import com.squareup.picasso3.interfaces.DrawableTarget
 import org.junit.Assert
 import org.junit.Test
 import org.junit.runner.RunWith

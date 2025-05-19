@@ -27,19 +27,33 @@ import androidx.annotation.DrawableRes
 import androidx.annotation.IdRes
 import androidx.core.content.ContextCompat
 import com.squareup.picasso3.BitmapHunter.Companion.forRequest
-import com.squareup.picasso3.MemoryPolicy.Companion.shouldReadFromMemoryCache
-import com.squareup.picasso3.MemoryPolicy.Companion.shouldWriteToMemoryCache
 import com.squareup.picasso3.Picasso.LoadedFrom
 import com.squareup.picasso3.PicassoDrawable.Companion.setPlaceholder
 import com.squareup.picasso3.PicassoDrawable.Companion.setResult
-import com.squareup.picasso3.RemoteViewsAction.AppWidgetAction
-import com.squareup.picasso3.RemoteViewsAction.NotificationAction
-import com.squareup.picasso3.RemoteViewsAction.RemoteViewsTarget
-import com.squareup.picasso3.Utils.OWNER_MAIN
-import com.squareup.picasso3.Utils.VERB_COMPLETED
-import com.squareup.picasso3.Utils.checkMain
-import com.squareup.picasso3.Utils.checkNotMain
-import com.squareup.picasso3.Utils.log
+import com.squareup.picasso3.action.BitmapTargetAction
+import com.squareup.picasso3.action.DrawableTargetAction
+import com.squareup.picasso3.action.FetchAction
+import com.squareup.picasso3.action.GetAction
+import com.squareup.picasso3.action.ImageViewAction
+import com.squareup.picasso3.base.RemoteViewsAction
+import com.squareup.picasso3.base.RemoteViewsAction.AppWidgetAction
+import com.squareup.picasso3.base.RemoteViewsAction.NotificationAction
+import com.squareup.picasso3.base.RemoteViewsAction.RemoteViewsTarget
+import com.squareup.picasso3.base.RequestHandler
+import com.squareup.picasso3.enums.MemoryPolicy
+import com.squareup.picasso3.enums.MemoryPolicy.Companion.shouldReadFromMemoryCache
+import com.squareup.picasso3.enums.MemoryPolicy.Companion.shouldWriteToMemoryCache
+import com.squareup.picasso3.enums.NetworkPolicy
+import com.squareup.picasso3.interfaces.BitmapTarget
+import com.squareup.picasso3.interfaces.Callback
+import com.squareup.picasso3.interfaces.DrawableTarget
+import com.squareup.picasso3.interfaces.Transformation
+import com.squareup.picasso3.utils.Utils
+import com.squareup.picasso3.utils.Utils.OWNER_MAIN
+import com.squareup.picasso3.utils.Utils.VERB_COMPLETED
+import com.squareup.picasso3.utils.Utils.checkMain
+import com.squareup.picasso3.utils.Utils.checkNotMain
+import com.squareup.picasso3.utils.Utils.log
 import java.io.IOException
 import java.util.concurrent.atomic.AtomicInteger
 
@@ -302,7 +316,7 @@ class RequestCreator internal constructor(
   }
 
   /**
-   * Specifies the [MemoryPolicy] to use for this request. You may specify additional policy
+   * Specifies the [com.squareup.picasso3.enums.MemoryPolicy] to use for this request. You may specify additional policy
    * options using the varargs parameter.
    */
   fun memoryPolicy(
@@ -313,7 +327,7 @@ class RequestCreator internal constructor(
   }
 
   /**
-   * Specifies the [NetworkPolicy] to use for this request. You may specify additional policy
+   * Specifies the [com.squareup.picasso3.enums.NetworkPolicy] to use for this request. You may specify additional policy
    * options using the varargs parameter.
    */
   fun networkPolicy(
@@ -363,11 +377,11 @@ class RequestCreator internal constructor(
   }
 
   /**
-   * Asynchronously fulfills the request without a [ImageView] or [BitmapTarget],
-   * and invokes the target [Callback] with the result. This is useful when you want to warm
+   * Asynchronously fulfills the request without a [ImageView] or [com.squareup.picasso3.interfaces.BitmapTarget],
+   * and invokes the target [com.squareup.picasso3.interfaces.Callback] with the result. This is useful when you want to warm
    * up the cache with an image.
    *
-   * *Note:* The [Callback] param is a strong reference and will prevent your
+   * *Note:* The [com.squareup.picasso3.interfaces.Callback] param is a strong reference and will prevent your
    * [android.app.Activity] or [android.app.Fragment] from being garbage collected
    * until the request is completed.
    *
@@ -402,9 +416,9 @@ class RequestCreator internal constructor(
   }
 
   /**
-   * Asynchronously fulfills the request into the specified [BitmapTarget]. In most cases, you
+   * Asynchronously fulfills the request into the specified [com.squareup.picasso3.interfaces.BitmapTarget]. In most cases, you
    * should use this when you are dealing with a custom [View][android.view.View] or view
-   * holder which should implement the [BitmapTarget] interface.
+   * holder which should implement the [com.squareup.picasso3.interfaces.BitmapTarget] interface.
    *
    * Implementing on a [View][android.view.View]:
    * ```
@@ -450,9 +464,9 @@ class RequestCreator internal constructor(
   }
 
   /**
-   * Asynchronously fulfills the request into the specified [DrawableTarget]. In most cases, you
+   * Asynchronously fulfills the request into the specified [com.squareup.picasso3.interfaces.DrawableTarget]. In most cases, you
    * should use this when you are dealing with a custom [View][android.view.View] or view
-   * holder which should implement the [DrawableTarget] interface.
+   * holder which should implement the [com.squareup.picasso3.interfaces.DrawableTarget] interface.
    */
   fun into(target: DrawableTarget) {
     val started = System.nanoTime()

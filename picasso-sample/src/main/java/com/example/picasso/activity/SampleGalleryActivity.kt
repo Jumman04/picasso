@@ -15,15 +15,15 @@
  */
 package com.example.picasso.activity
 
-import android.content.Intent
 import android.os.Bundle
-import android.provider.MediaStore.Images.Media
-import android.view.View
+import android.widget.Button
 import android.widget.ImageView
 import android.widget.ViewAnimator
+import androidx.activity.result.PickVisualMediaRequest
+import androidx.activity.result.contract.ActivityResultContracts
 import com.example.picasso.PicassoInitializer
 import com.example.picasso.R
-import com.squareup.picasso3.Callback.EmptyCallback
+import com.squareup.picasso3.interfaces.Callback.EmptyCallback
 
 class SampleGalleryActivity : PicassoSampleActivity() {
   private lateinit var imageView: ImageView
@@ -38,10 +38,12 @@ class SampleGalleryActivity : PicassoSampleActivity() {
     animator = findViewById(R.id.animator)
     imageView = findViewById(R.id.image)
 
-    findViewById<View>(R.id.go).setOnClickListener {
-      val gallery = Intent(Intent.ACTION_PICK, Media.EXTERNAL_CONTENT_URI)
-      startActivityForResult(gallery, GALLERY_REQUEST)
+    val button = findViewById<Button>(R.id.go)
+    button.setOnClickListener {
+      resultLauncher.launch(PickVisualMediaRequest(ActivityResultContracts.PickVisualMedia.ImageOnly))
     }
+
+    button.performClick()
 
     if (savedInstanceState != null) {
       image = savedInstanceState.getString(KEY_IMAGE)
@@ -51,20 +53,17 @@ class SampleGalleryActivity : PicassoSampleActivity() {
     }
   }
 
+  private val resultLauncher =
+    registerForActivityResult(ActivityResultContracts.PickVisualMedia()) { uri ->
+      if (uri != null) {
+        image = uri.toString()
+        loadImage()
+      } else imageView.setImageDrawable(null)
+    }
+
   override fun onSaveInstanceState(outState: Bundle) {
     super.onSaveInstanceState(outState)
     outState.putString(KEY_IMAGE, image)
-  }
-
-  override fun onActivityResult(
-    requestCode: Int, resultCode: Int, data: Intent?
-  ) {
-    if (requestCode == GALLERY_REQUEST && resultCode == RESULT_OK && data != null) {
-      image = data.data.toString()
-      loadImage()
-    } else {
-      super.onActivityResult(requestCode, resultCode, data)
-    }
   }
 
   private fun loadImage() {
@@ -81,7 +80,6 @@ class SampleGalleryActivity : PicassoSampleActivity() {
   }
 
   companion object {
-    private const val GALLERY_REQUEST = 9391
     private const val KEY_IMAGE = "com.example.picasso:image"
   }
 }

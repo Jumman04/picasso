@@ -37,7 +37,7 @@ import com.google.common.truth.Truth.assertThat
 import com.squareup.picasso3.Picasso
 import com.squareup.picasso3.Picasso.LoadedFrom
 import com.squareup.picasso3.Request
-import com.squareup.picasso3.RequestHandler
+import com.squareup.picasso3.base.RequestHandler
 import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith

@@ -40,17 +40,16 @@ internal class SampleGridViewAdapter(private val context: Context) : BaseAdapter
   override fun getView(
     position: Int, convertView: View?, parent: ViewGroup
   ): View {
-    val view = convertView as? SquaredImageView ?: SquaredImageView(context).apply {
-      scaleType = CENTER_CROP
-    }
+    val view = convertView as? SquaredImageView ?: SquaredImageView(context)
+
+    view.scaleType = CENTER_CROP
 
     // Get the image URL for the current position.
     val url = getItem(position)
 
     // Trigger the download of the URL asynchronously into the image view.
     PicassoInitializer.Companion.get().load(url).placeholder(R.drawable.placeholder)
-      .error(R.drawable.error)
-      .fit().tag(context).into(view)
+      .error(R.drawable.error).fit().tag(context).into(view)
 
     return view
   }

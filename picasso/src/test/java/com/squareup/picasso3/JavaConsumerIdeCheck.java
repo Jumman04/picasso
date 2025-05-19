@@ -6,6 +6,11 @@ import static com.squareup.picasso3.Picasso.LoadedFrom.DISK;
 import android.content.Context;
 import android.graphics.Bitmap;
 
+import com.squareup.picasso3.base.RequestHandler;
+import com.squareup.picasso3.interfaces.Dispatcher;
+import com.squareup.picasso3.requestHandler.AssetRequestHandler;
+import com.squareup.picasso3.requestHandler.ResourceDrawableRequestHandler;
+
 import org.junit.Ignore;
 import org.junit.Test;
 import org.mockito.Mock;

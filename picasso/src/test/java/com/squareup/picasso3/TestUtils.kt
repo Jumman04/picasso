@@ -41,8 +41,16 @@ import com.squareup.picasso3.BitmapHunterTest.TestableBitmapHunter
 import com.squareup.picasso3.Picasso.LoadedFrom.MEMORY
 import com.squareup.picasso3.Picasso.Priority
 import com.squareup.picasso3.Picasso.RequestTransformer
-import com.squareup.picasso3.RequestHandler.Result
-import com.squareup.picasso3.RequestHandler.Result.Bitmap
+import com.squareup.picasso3.base.Action
+import com.squareup.picasso3.base.RequestHandler
+import com.squareup.picasso3.base.RequestHandler.Result
+import com.squareup.picasso3.base.RequestHandler.Result.Bitmap
+import com.squareup.picasso3.interfaces.BitmapTarget
+import com.squareup.picasso3.interfaces.Callback
+import com.squareup.picasso3.interfaces.Dispatcher
+import com.squareup.picasso3.interfaces.DrawableLoader
+import com.squareup.picasso3.interfaces.DrawableTarget
+import com.squareup.picasso3.interfaces.EventListener
 import okhttp3.Call
 import okhttp3.Response
 import okio.Timeout
@@ -246,7 +254,7 @@ internal object TestUtils {
   )
 
   fun mockPicasso(context: Context): Picasso {
-    // Inject a RequestHandler that can handle any request.
+    // Inject a requestHandler that can handle any request.
     val requestHandler: RequestHandler = object : RequestHandler() {
       override fun canHandleRequest(data: Request): Boolean {
         return true

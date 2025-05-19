@@ -26,8 +26,8 @@ import android.graphics.PorterDuff.Mode.MULTIPLY
 import android.graphics.PorterDuffXfermode
 import android.graphics.Shader.TileMode.REPEAT
 import com.squareup.picasso3.Picasso
-import com.squareup.picasso3.RequestHandler.Result
-import com.squareup.picasso3.Transformation
+import com.squareup.picasso3.base.RequestHandler.Result
+import com.squareup.picasso3.interfaces.Transformation
 import java.io.IOException
 
 class GrayscaleTransformation(private val picasso: Picasso) : Transformation {

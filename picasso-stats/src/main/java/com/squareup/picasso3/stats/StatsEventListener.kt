@@ -17,8 +17,8 @@ package com.squareup.picasso3.stats
 
 import android.graphics.Bitmap
 import android.util.Log
-import com.squareup.picasso3.EventListener
 import com.squareup.picasso3.TAG
+import com.squareup.picasso3.interfaces.EventListener
 import okio.Buffer
 import okio.BufferedSink
 import java.io.IOException

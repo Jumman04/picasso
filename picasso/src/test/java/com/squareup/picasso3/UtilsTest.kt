@@ -21,7 +21,8 @@ import com.squareup.picasso3.TestUtils.RESOURCE_ID_URI
 import com.squareup.picasso3.TestUtils.RESOURCE_TYPE_URI
 import com.squareup.picasso3.TestUtils.URI_1
 import com.squareup.picasso3.TestUtils.mockPackageResourceContext
-import com.squareup.picasso3.Utils.isWebPFile
+import com.squareup.picasso3.utils.Utils
+import com.squareup.picasso3.utils.Utils.isWebPFile
 import okio.Buffer
 import org.junit.Test
 import org.junit.runner.RunWith

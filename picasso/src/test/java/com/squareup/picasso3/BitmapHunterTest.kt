@@ -26,14 +26,12 @@ import com.google.common.truth.Truth.assertThat
 import com.squareup.picasso3.BitmapHunter.Companion.applyTransformations
 import com.squareup.picasso3.BitmapHunter.Companion.forRequest
 import com.squareup.picasso3.MatrixTransformation.Companion.transformResult
-import com.squareup.picasso3.NetworkRequestHandler.ResponseException
 import com.squareup.picasso3.Picasso.LoadedFrom.MEMORY
 import com.squareup.picasso3.Picasso.LoadedFrom.NETWORK
 import com.squareup.picasso3.Picasso.Priority.HIGH
 import com.squareup.picasso3.Picasso.Priority.LOW
 import com.squareup.picasso3.Picasso.Priority.NORMAL
 import com.squareup.picasso3.Request.Companion.KEY_SEPARATOR
-import com.squareup.picasso3.RequestHandler.Result.Bitmap
 import com.squareup.picasso3.TestUtils.ASSET_KEY_1
 import com.squareup.picasso3.TestUtils.ASSET_URI_1
 import com.squareup.picasso3.TestUtils.BITMAP_RESOURCE_VALUE
@@ -68,6 +66,20 @@ import com.squareup.picasso3.TestUtils.mockAction
 import com.squareup.picasso3.TestUtils.mockImageViewTarget
 import com.squareup.picasso3.TestUtils.mockPicasso
 import com.squareup.picasso3.TestUtils.mockResources
+import com.squareup.picasso3.base.Action
+import com.squareup.picasso3.base.RequestHandler
+import com.squareup.picasso3.base.RequestHandler.Result.Bitmap
+import com.squareup.picasso3.interfaces.Dispatcher
+import com.squareup.picasso3.interfaces.Transformation
+import com.squareup.picasso3.requestHandler.AssetRequestHandler
+import com.squareup.picasso3.requestHandler.ContactsPhotoRequestHandler
+import com.squareup.picasso3.requestHandler.ContentStreamRequestHandler
+import com.squareup.picasso3.requestHandler.FileRequestHandler
+import com.squareup.picasso3.requestHandler.MediaStoreRequestHandler
+import com.squareup.picasso3.requestHandler.NetworkRequestHandler
+import com.squareup.picasso3.requestHandler.NetworkRequestHandler.ResponseException
+import com.squareup.picasso3.requestHandler.ResourceDrawableRequestHandler
+import com.squareup.picasso3.requestHandler.ResourceRequestHandler
 import org.junit.Assert.fail
 import org.junit.Before
 import org.junit.Test
@@ -1099,7 +1111,7 @@ class BitmapHunterTest {
   // @Test public void transformDrawables() {
   //  final AtomicInteger transformationCount = new AtomicInteger();
   //  Transformation identity = new Transformation() {
-  //    @Override public RequestHandler.Result.Bitmap transform(RequestHandler.Result.Bitmap source) {
+  //    @Override public requestHandler.Result.Bitmap transform(requestHandler.Result.Bitmap source) {
   //      transformationCount.incrementAndGet();
   //      return source;
   //    }
@@ -1110,7 +1122,7 @@ class BitmapHunterTest {
   //  };
   //  List<Transformation> transformations = asList(identity, identity, identity);
   //  Drawable original = new BitmapDrawable(Bitmap.createBitmap(10, 10, ARGB_8888));
-  //  RequestHandler.Result.Bitmap result = new RequestHandler.Result.Bitmap(original, MEMORY);
+  //  requestHandler.Result.Bitmap result = new requestHandler.Result.Bitmap(original, MEMORY);
   //  Request data = new Request.Builder(URI_1).build();
   //  BitmapHunter.applyTransformations(picasso, data, transformations, result);
   //  assertThat(transformationCount.get()).isEqualTo(3);

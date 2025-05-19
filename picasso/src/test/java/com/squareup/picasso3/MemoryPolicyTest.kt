@@ -16,8 +16,9 @@
 package com.squareup.picasso3
 
 import com.google.common.truth.Truth.assertThat
-import com.squareup.picasso3.MemoryPolicy.NO_CACHE
-import com.squareup.picasso3.MemoryPolicy.NO_STORE
+import com.squareup.picasso3.enums.MemoryPolicy
+import com.squareup.picasso3.enums.MemoryPolicy.NO_CACHE
+import com.squareup.picasso3.enums.MemoryPolicy.NO_STORE
 import org.junit.Test
 
 class MemoryPolicyTest {

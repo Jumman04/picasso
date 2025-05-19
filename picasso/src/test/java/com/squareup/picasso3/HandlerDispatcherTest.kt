@@ -25,8 +25,6 @@ import android.net.NetworkCapabilities
 import android.os.Handler
 import android.os.Looper.getMainLooper
 import com.google.common.truth.Truth.assertThat
-import com.squareup.picasso3.MemoryPolicy.NO_STORE
-import com.squareup.picasso3.NetworkRequestHandler.ContentLengthException
 import com.squareup.picasso3.Picasso.LoadedFrom.MEMORY
 import com.squareup.picasso3.Picasso.LoadedFrom.NETWORK
 import com.squareup.picasso3.Request.Builder
@@ -43,6 +41,13 @@ import com.squareup.picasso3.TestUtils.mockCallback
 import com.squareup.picasso3.TestUtils.mockHunter
 import com.squareup.picasso3.TestUtils.mockNetworkInfo
 import com.squareup.picasso3.TestUtils.mockPicasso
+import com.squareup.picasso3.action.FetchAction
+import com.squareup.picasso3.base.Action
+import com.squareup.picasso3.base.RequestHandler
+import com.squareup.picasso3.dispatcher.HandlerDispatcher
+import com.squareup.picasso3.enums.MemoryPolicy.NO_STORE
+import com.squareup.picasso3.enums.NetworkPolicy
+import com.squareup.picasso3.requestHandler.NetworkRequestHandler.ContentLengthException
 import org.junit.Before
 import org.junit.Test
 import org.junit.runner.RunWith

@@ -30,7 +30,7 @@ import android.os.SystemClock
 import android.widget.ImageView
 import com.squareup.picasso3.Picasso.LoadedFrom
 import com.squareup.picasso3.Picasso.LoadedFrom.MEMORY
-import com.squareup.picasso3.RequestHandler.Result
+import com.squareup.picasso3.base.RequestHandler.Result
 
 internal class PicassoDrawable(
   context: Context,

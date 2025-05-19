@@ -22,7 +22,7 @@ import app.cash.paparazzi.Paparazzi
 import com.squareup.picasso3.Picasso
 import com.squareup.picasso3.Picasso.LoadedFrom.MEMORY
 import com.squareup.picasso3.Request
-import com.squareup.picasso3.RequestHandler
+import com.squareup.picasso3.base.RequestHandler
 import org.junit.Rule
 import org.junit.Test
 import kotlinx.coroutines.Dispatchers

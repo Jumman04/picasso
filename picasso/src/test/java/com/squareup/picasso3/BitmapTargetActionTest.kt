@@ -30,6 +30,10 @@ import com.squareup.picasso3.TestUtils.UNUSED_CALL_FACTORY
 import com.squareup.picasso3.TestUtils.makeBitmap
 import com.squareup.picasso3.TestUtils.mockBitmapTarget
 import com.squareup.picasso3.TestUtils.mockPicasso
+import com.squareup.picasso3.action.BitmapTargetAction
+import com.squareup.picasso3.base.RequestHandler
+import com.squareup.picasso3.interfaces.BitmapTarget
+import com.squareup.picasso3.interfaces.Dispatcher
 import org.junit.Assert.fail
 import org.junit.Test
 import org.junit.runner.RunWith

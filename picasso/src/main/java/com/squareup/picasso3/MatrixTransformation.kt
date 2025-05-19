@@ -27,8 +27,9 @@ import androidx.exifinterface.media.ExifInterface.ORIENTATION_ROTATE_270
 import androidx.exifinterface.media.ExifInterface.ORIENTATION_ROTATE_90
 import androidx.exifinterface.media.ExifInterface.ORIENTATION_TRANSPOSE
 import androidx.exifinterface.media.ExifInterface.ORIENTATION_TRANSVERSE
-import com.squareup.picasso3.BitmapUtils.shouldResize
-import com.squareup.picasso3.RequestHandler.Result.Bitmap
+import com.squareup.picasso3.base.RequestHandler.Result.Bitmap
+import com.squareup.picasso3.interfaces.Transformation
+import com.squareup.picasso3.utils.BitmapUtils.shouldResize
 import kotlin.math.ceil
 import kotlin.math.cos
 import kotlin.math.floor

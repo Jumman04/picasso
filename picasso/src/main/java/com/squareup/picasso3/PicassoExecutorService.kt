@@ -17,6 +17,7 @@ package com.squareup.picasso3
 
 import android.os.Process
 import android.os.Process.THREAD_PRIORITY_BACKGROUND
+import com.squareup.picasso3.utils.Utils
 import java.util.concurrent.Future
 import java.util.concurrent.FutureTask
 import java.util.concurrent.PriorityBlockingQueue

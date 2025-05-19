@@ -19,6 +19,7 @@ import android.view.View
 import android.view.View.OnAttachStateChangeListener
 import android.view.ViewTreeObserver
 import android.widget.ImageView
+import com.squareup.picasso3.interfaces.Callback
 import java.lang.ref.WeakReference
 
 internal class DeferredRequestCreator(

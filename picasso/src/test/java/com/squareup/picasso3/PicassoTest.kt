@@ -25,9 +25,6 @@ import com.google.common.truth.Truth.assertThat
 import com.squareup.picasso3.Picasso.Listener
 import com.squareup.picasso3.Picasso.LoadedFrom.MEMORY
 import com.squareup.picasso3.Picasso.LoadedFrom.NETWORK
-import com.squareup.picasso3.RemoteViewsAction.RemoteViewsTarget
-import com.squareup.picasso3.RequestHandler.Result
-import com.squareup.picasso3.RequestHandler.Result.Bitmap
 import com.squareup.picasso3.TestUtils.EventRecorder
 import com.squareup.picasso3.TestUtils.FakeAction
 import com.squareup.picasso3.TestUtils.NO_HANDLERS
@@ -45,6 +42,15 @@ import com.squareup.picasso3.TestUtils.mockHunter
 import com.squareup.picasso3.TestUtils.mockImageViewTarget
 import com.squareup.picasso3.TestUtils.mockPicasso
 import com.squareup.picasso3.TestUtils.mockRequestCreator
+import com.squareup.picasso3.action.ImageViewAction
+import com.squareup.picasso3.base.Action
+import com.squareup.picasso3.base.RemoteViewsAction.RemoteViewsTarget
+import com.squareup.picasso3.base.RequestHandler
+import com.squareup.picasso3.base.RequestHandler.Result
+import com.squareup.picasso3.base.RequestHandler.Result.Bitmap
+import com.squareup.picasso3.dispatcher.HandlerDispatcher
+import com.squareup.picasso3.dispatcher.InternalCoroutineDispatcher
+import com.squareup.picasso3.interfaces.Dispatcher
 import org.junit.Assert.fail
 import org.junit.Before
 import org.junit.Rule
