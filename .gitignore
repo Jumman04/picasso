@@ -33,6 +33,5 @@ tmp
 # Gradle
 .gradle
 jniLibs
-build
 local.properties
 reports

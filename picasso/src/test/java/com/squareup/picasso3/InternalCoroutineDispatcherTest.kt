@@ -163,9 +163,9 @@ class InternalCoroutineDispatcherTest {
 
     var completed = false
     val fetchAction1 =
-      noopAction(Builder(TestUtils.URI_1).tag(pausedTag).build(), { completed = true })
+      noopAction(Builder(TestUtils.URI_1).tag(pausedTag).build()) { completed = true }
     val fetchAction2 =
-      noopAction(Builder(TestUtils.URI_1).tag(pausedTag).build(), { completed = true })
+      noopAction(Builder(TestUtils.URI_1).tag(pausedTag).build()) { completed = true }
     dispatcher.dispatchSubmit(fetchAction1)
     dispatcher.dispatchSubmit(fetchAction2)
     testDispatcher.scheduler.runCurrent()
@@ -647,7 +647,7 @@ class InternalCoroutineDispatcherTest {
   @Test
   fun dispatchResumeTagIsIdempotent() {
     var completedCount = 0
-    val action = noopAction(Builder(TestUtils.URI_1).tag("tag").build(), { completedCount++ })
+    val action = noopAction(Builder(TestUtils.URI_1).tag("tag").build()) { completedCount++ }
 
     dispatcher.dispatchPauseTag("tag")
     dispatcher.dispatchSubmit(action)

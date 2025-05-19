@@ -82,7 +82,7 @@ configurations {
 }
 
 dependencies {
-  osstrich 'com.squareup.osstrich:osstrich:1.4.0'
+  osstrich libs.osstrich
 }
 
 tasks.register('deployJavadoc', JavaExec) {
