@@ -31,10 +31,6 @@ import com.squareup.picasso3.TestUtils.mockPicasso
 import com.squareup.picasso3.base.RequestHandler
 import com.squareup.picasso3.base.RequestHandler.Callback
 import com.squareup.picasso3.requestHandler.MediaStoreRequestHandler
-import com.squareup.picasso3.requestHandler.MediaStoreRequestHandler.Companion.getPicassoKind
-import com.squareup.picasso3.requestHandler.MediaStoreRequestHandler.PicassoKind.FULL
-import com.squareup.picasso3.requestHandler.MediaStoreRequestHandler.PicassoKind.MICRO
-import com.squareup.picasso3.requestHandler.MediaStoreRequestHandler.PicassoKind.MINI
 import org.junit.Assert.fail
 import org.junit.Before
 import org.junit.Test
@@ -90,27 +86,6 @@ class MediaStoreRequestHandlerTest {
 
         override fun onError(t: Throwable) = fail(t.message)
       })
-  }
-
-  @Test
-  fun getPicassoKindMicro() {
-    assertThat(getPicassoKind(96, 96)).isEqualTo(MICRO)
-    assertThat(getPicassoKind(95, 95)).isEqualTo(MICRO)
-  }
-
-  @Test
-  fun getPicassoKindMini() {
-    assertThat(getPicassoKind(512, 384)).isEqualTo(MINI)
-    assertThat(getPicassoKind(100, 100)).isEqualTo(MINI)
-  }
-
-  @Test
-  fun getPicassoKindFull() {
-    assertThat(getPicassoKind(513, 385)).isEqualTo(FULL)
-    assertThat(getPicassoKind(1000, 1000)).isEqualTo(FULL)
-    assertThat(getPicassoKind(1000, 384)).isEqualTo(FULL)
-    assertThat(getPicassoKind(1000, 96)).isEqualTo(FULL)
-    assertThat(getPicassoKind(96, 1000)).isEqualTo(FULL)
   }
 
   private fun assertBitmapsEqual(a: Bitmap, b: Bitmap) {

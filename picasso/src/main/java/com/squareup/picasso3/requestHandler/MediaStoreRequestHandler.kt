@@ -18,14 +18,20 @@ package com.squareup.picasso3.requestHandler
 import android.content.ContentResolver
 import android.content.ContentUris
 import android.content.Context
+import android.graphics.Bitmap
+import android.graphics.BitmapFactory
+import android.net.Uri
+import android.os.Build
+import android.os.CancellationSignal
 import android.provider.MediaStore
 import android.provider.MediaStore.Video
+import android.util.Size
 import com.squareup.picasso3.Picasso
 import com.squareup.picasso3.Picasso.LoadedFrom
 import com.squareup.picasso3.Request
 import com.squareup.picasso3.utils.BitmapUtils.calculateInSampleSize
-import com.squareup.picasso3.utils.BitmapUtils.createBitmapOptions
 import com.squareup.picasso3.utils.BitmapUtils.decodeStream
+import java.io.IOException
 
 internal class MediaStoreRequestHandler(context: Context) : ContentStreamRequestHandler(context) {
   override fun canHandleRequest(data: Request): Boolean {
@@ -37,59 +43,26 @@ internal class MediaStoreRequestHandler(context: Context) : ContentStreamRequest
     var signaledCallback = false
     try {
       val contentResolver = context.contentResolver
-      val requestUri = checkNotNull(request.uri) { "request.uri == null" }
-      val exifOrientation = getExifOrientation(requestUri)
+      val requestUri: Uri = checkNotNull(request.uri) { "request.uri == null" }
+      val orientation = getExifOrientation(requestUri)
 
-      val mimeType = contentResolver.getType(requestUri)
-      val isVideo = mimeType != null && mimeType.startsWith("video/")
-
+      // Try thumbnail generation when size requested
       if (request.hasSize()) {
-        val picassoKind = getPicassoKind(request.targetWidth, request.targetHeight)
-        if (!isVideo && picassoKind == PicassoKind.FULL) {
-          val source = getSource(requestUri)
-          val bitmap = decodeStream(source, request)
+        val width = request.targetWidth
+        val height = request.targetHeight
+        val thumb = loadThumbnail(contentResolver, requestUri, width, height, request)
+        if (thumb != null) {
           signaledCallback = true
-          callback.onSuccess(Result.Bitmap(bitmap, LoadedFrom.DISK, exifOrientation))
-          return
-        }
-
-        val id = ContentUris.parseId(requestUri)
-
-        val options = checkNotNull(createBitmapOptions(request)) { "options == null" }
-        options.inJustDecodeBounds = true
-
-        calculateInSampleSize(
-          request.targetWidth,
-          request.targetHeight,
-          picassoKind.width,
-          picassoKind.height,
-          options,
-          request
-        )
-
-        val bitmap = if (isVideo) {
-          // Since MediaStore doesn't provide the full screen kind thumbnail, we use the mini kind
-          // instead which is the largest thumbnail size can be fetched from MediaStore.
-          val kind =
-            if (picassoKind == PicassoKind.FULL) Video.Thumbnails.MINI_KIND else picassoKind.androidKind
-          Video.Thumbnails.getThumbnail(contentResolver, id, kind, options)
-        } else {
-          MediaStore.Images.Thumbnails.getThumbnail(
-            contentResolver, id, picassoKind.androidKind, options
-          )
-        }
-
-        if (bitmap != null) {
-          signaledCallback = true
-          callback.onSuccess(Result.Bitmap(bitmap, LoadedFrom.DISK, exifOrientation))
+          callback.onSuccess(Result.Bitmap(thumb, LoadedFrom.DISK, orientation))
           return
         }
       }
 
+      // Fallback: full decode with down sampling
       val source = getSource(requestUri)
       val bitmap = decodeStream(source, request)
       signaledCallback = true
-      callback.onSuccess(Result.Bitmap(bitmap, LoadedFrom.DISK, exifOrientation))
+      callback.onSuccess(Result.Bitmap(bitmap, LoadedFrom.DISK, orientation))
     } catch (e: Exception) {
       if (!signaledCallback) {
         callback.onError(e)
@@ -97,25 +70,56 @@ internal class MediaStoreRequestHandler(context: Context) : ContentStreamRequest
     }
   }
 
-  internal enum class PicassoKind(val androidKind: Int, val width: Int, val height: Int) {
-    MICRO(
-      MediaStore.Images.Thumbnails.MICRO_KIND, 96, 96
-    ),
-    MINI(
-      MediaStore.Images.Thumbnails.MINI_KIND, 512, 384
-    ),
-    FULL(MediaStore.Images.Thumbnails.FULL_SCREEN_KIND, -1, -1)
-  }
+  @Throws(IOException::class)
+  private fun loadThumbnail(
+    resolver: ContentResolver, uri: Uri, width: Int, height: Int, request: Request
+  ): Bitmap? {
+    return if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
+      // Modern thumbnail API for images and videos
+      resolver.loadThumbnail(uri, Size(width, height), CancellationSignal())
+    } else {
+      // Legacy pre-Q thumbnail via MediaStore
+      val id = ContentUris.parseId(uri)
+      val mime = resolver.getType(uri) ?: return null
+      val isVideo = mime.startsWith("video/")
+      val kind = getPicassoKind(width, height).androidKind
 
-  companion object {
-    fun getPicassoKind(targetWidth: Int, targetHeight: Int): PicassoKind {
-      return if (targetWidth <= PicassoKind.MICRO.width && targetHeight <= PicassoKind.MICRO.height) {
-        PicassoKind.MICRO
-      } else if (targetWidth <= PicassoKind.MINI.width && targetHeight <= PicassoKind.MINI.height) {
-        PicassoKind.MINI
+      // Prepare options for down sampling
+      val options = BitmapFactory.Options().apply {
+        inJustDecodeBounds = true
+      }
+      calculateInSampleSize(
+        request.targetWidth, request.targetHeight,/* reqWidth */
+        width,/* reqHeight */
+        height, options, request
+      )
+      options.inJustDecodeBounds = false
+
+      @Suppress("DEPRECATION") return if (isVideo) {
+        // Video thumbnail
+        Video.Thumbnails.getThumbnail(resolver, id, kind, options)
       } else {
-        PicassoKind.FULL
+        // Image thumbnail
+        MediaStore.Images.Thumbnails.getThumbnail(resolver, id, kind, options)
       }
     }
+  }
+
+  /**
+   * Choose a thumbnail kind based on requested target dimensions.
+   */
+  private fun getPicassoKind(targetWidth: Int, targetHeight: Int): PicassoKind {
+    return when {
+      targetWidth <= PicassoKind.MICRO.width && targetHeight <= PicassoKind.MICRO.height -> PicassoKind.MICRO
+      targetWidth <= PicassoKind.MINI.width && targetHeight <= PicassoKind.MINI.height -> PicassoKind.MINI
+      else -> PicassoKind.FULL
+    }
+  }
+
+  @Suppress("DEPRECATION")
+  private enum class PicassoKind(val androidKind: Int, val width: Int, val height: Int) {
+    MICRO(MediaStore.Images.Thumbnails.MICRO_KIND, 96, 96),
+    MINI(MediaStore.Images.Thumbnails.MINI_KIND, 512, 384),
+    FULL(MediaStore.Images.Thumbnails.FULL_SCREEN_KIND, -1, -1)
   }
 }
