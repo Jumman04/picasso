@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.squareup.picasso3
+package com.squareup.picasso3.utils
 
 import android.app.ActivityManager
 import android.content.Context
@@ -27,6 +27,9 @@ import android.os.Message
 import android.os.StatFs
 import android.util.Log
 import androidx.core.content.ContextCompat
+import com.squareup.picasso3.BitmapHunter
+import com.squareup.picasso3.Request
+import com.squareup.picasso3.TAG
 import okio.BufferedSource
 import okio.ByteString
 import okio.ByteString.Companion.encodeUtf8

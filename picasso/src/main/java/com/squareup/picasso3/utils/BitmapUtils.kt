@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.squareup.picasso3
+package com.squareup.picasso3.utils
 
 import android.annotation.SuppressLint
 import android.content.Context
@@ -25,6 +25,7 @@ import android.os.Build.VERSION
 import android.util.TypedValue
 import androidx.annotation.DrawableRes
 import androidx.annotation.RequiresApi
+import com.squareup.picasso3.Request
 import okio.Buffer
 import okio.BufferedSource
 import okio.ForwardingSource
@@ -38,7 +39,7 @@ import kotlin.math.min
 internal object BitmapUtils {
   /**
    * Lazily create [BitmapFactory.Options] based in given
-   * [Request], only instantiating them if needed.
+   * [com.squareup.picasso3.Request], only instantiating them if needed.
    */
   fun createBitmapOptions(data: Request): BitmapFactory.Options? {
     val justBounds = data.hasSize()

@@ -13,54 +13,51 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.squareup.picasso3
+package com.squareup.picasso3.action
 
-import android.graphics.drawable.Animatable
 import android.graphics.drawable.Drawable
-import android.widget.ImageView
 import androidx.annotation.DrawableRes
-import com.squareup.picasso3.RequestHandler.Result
+import androidx.core.content.ContextCompat
+import com.squareup.picasso3.Picasso
+import com.squareup.picasso3.Request
+import com.squareup.picasso3.base.Action
+import com.squareup.picasso3.base.RequestHandler.Result
+import com.squareup.picasso3.base.RequestHandler.Result.Bitmap
+import com.squareup.picasso3.interfaces.BitmapTarget
 import java.lang.ref.WeakReference
 
-internal class ImageViewAction(
+internal class BitmapTargetAction(
   picasso: Picasso,
-  target: ImageView,
+  target: BitmapTarget,
   data: Request,
-  val errorDrawable: Drawable?,
-  @DrawableRes val errorResId: Int,
-  val noFade: Boolean,
-  var callback: Callback?
+  private val errorDrawable: Drawable?,
+  @DrawableRes val errorResId: Int
 ) : Action(picasso, data) {
   private val targetReference = WeakReference(target)
 
   override fun complete(result: Result) {
     val target = targetReference.get() ?: return
 
-    PicassoDrawable.setResult(target, picasso.context, result, noFade, picasso.indicatorsEnabled)
-    callback?.onSuccess()
+    if (result is Bitmap) {
+      val bitmap = result.bitmap
+      target.onBitmapLoaded(bitmap, result.loadedFrom)
+      check(!bitmap.isRecycled) { "Target callback must not recycle bitmap!" }
+    }
   }
 
   override fun error(e: Exception) {
     val target = targetReference.get() ?: return
 
-    val placeholder = target.drawable
-    if (placeholder is Animatable) {
-      (placeholder as Animatable).stop()
+    val drawable = if (errorResId != 0) {
+      ContextCompat.getDrawable(picasso.context, errorResId)
+    } else {
+      errorDrawable
     }
-    if (errorResId != 0) {
-      target.setImageResource(errorResId)
-    } else if (errorDrawable != null) {
-      target.setImageDrawable(errorDrawable)
-    }
-    callback?.onError(e)
+
+    target.onBitmapFailed(e, drawable)
   }
 
-  override fun getTarget(): ImageView? {
+  override fun getTarget(): BitmapTarget? {
     return targetReference.get()
-  }
-
-  override fun cancel() {
-    super.cancel()
-    callback = null
   }
 }

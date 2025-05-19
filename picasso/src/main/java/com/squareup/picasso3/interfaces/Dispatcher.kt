@@ -13,7 +13,10 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.squareup.picasso3
+package com.squareup.picasso3.interfaces
+
+import com.squareup.picasso3.BitmapHunter
+import com.squareup.picasso3.base.Action
 
 internal interface Dispatcher {
   fun shutdown()

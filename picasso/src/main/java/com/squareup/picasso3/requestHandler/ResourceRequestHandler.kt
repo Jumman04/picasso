@@ -13,20 +13,24 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.squareup.picasso3
+package com.squareup.picasso3.requestHandler
 
 import android.content.ContentResolver
 import android.content.Context
-import android.net.Uri
-import androidx.exifinterface.media.ExifInterface
-import com.squareup.picasso3.BitmapUtils.decodeStream
+import com.squareup.picasso3.Picasso
 import com.squareup.picasso3.Picasso.LoadedFrom.DISK
-import java.io.FileNotFoundException
+import com.squareup.picasso3.Request
+import com.squareup.picasso3.base.RequestHandler
+import com.squareup.picasso3.utils.BitmapUtils.decodeResource
+import com.squareup.picasso3.utils.BitmapUtils.isXmlResource
 
-internal class FileRequestHandler(context: Context) : ContentStreamRequestHandler(context) {
+internal class ResourceRequestHandler(private val context: Context) : RequestHandler() {
   override fun canHandleRequest(data: Request): Boolean {
-    val uri = data.uri
-    return uri != null && ContentResolver.SCHEME_FILE == uri.scheme
+    return if (data.resourceId != 0 && !isXmlResource(context.resources, data.resourceId)) {
+      true
+    } else {
+      data.uri != null && ContentResolver.SCHEME_ANDROID_RESOURCE == data.uri.scheme
+    }
   }
 
   override fun load(
@@ -34,23 +38,13 @@ internal class FileRequestHandler(context: Context) : ContentStreamRequestHandle
   ) {
     var signaledCallback = false
     try {
-      val requestUri = checkNotNull(request.uri)
-      val source = getSource(requestUri)
-      val bitmap = decodeStream(source, request)
-      val exifRotation = getExifOrientation(requestUri)
+      val bitmap = decodeResource(context, request)
       signaledCallback = true
-      callback.onSuccess(Result.Bitmap(bitmap, DISK, exifRotation))
+      callback.onSuccess(Result.Bitmap(bitmap, DISK))
     } catch (e: Exception) {
       if (!signaledCallback) {
         callback.onError(e)
       }
     }
-  }
-
-  override fun getExifOrientation(uri: Uri): Int {
-    val path = uri.path ?: throw FileNotFoundException("path == null, uri: $uri")
-    return ExifInterface(path).getAttributeInt(
-      ExifInterface.TAG_ORIENTATION, ExifInterface.ORIENTATION_NORMAL
-    )
   }
 }

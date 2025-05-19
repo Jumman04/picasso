@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2013 Square, Inc.
+ * Copyright (C) 2018 Square, Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -13,25 +13,11 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.squareup.picasso3
+package com.squareup.picasso3.interfaces
 
-import com.squareup.picasso3.RequestHandler.Result
+import android.graphics.drawable.Drawable
+import androidx.annotation.DrawableRes
 
-internal class FetchAction(
-  picasso: Picasso, data: Request, private var callback: Callback?
-) : Action(picasso, data) {
-  override fun complete(result: Result) {
-    callback?.onSuccess()
-  }
-
-  override fun error(e: Exception) {
-    callback?.onError(e)
-  }
-
-  override fun getTarget() = this
-
-  override fun cancel() {
-    super.cancel()
-    callback = null
-  }
+internal fun interface DrawableLoader {
+  fun load(@DrawableRes resId: Int): Drawable?
 }

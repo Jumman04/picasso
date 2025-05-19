@@ -1,25 +1,13 @@
-/*
- * Copyright (C) 2013 Square, Inc.
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *      http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
-package com.squareup.picasso3
+package com.squareup.picasso3.requestHandler
 
 import android.content.ContentResolver
 import android.content.Context
 import android.content.res.AssetManager
-import com.squareup.picasso3.BitmapUtils.decodeStream
-import com.squareup.picasso3.Picasso.LoadedFrom.DISK
+import com.squareup.picasso3.Initializer
+import com.squareup.picasso3.Picasso
+import com.squareup.picasso3.Request
+import com.squareup.picasso3.base.RequestHandler
+import com.squareup.picasso3.utils.BitmapUtils
 import okio.source
 
 internal class AssetRequestHandler(private val context: Context) : RequestHandler() {
@@ -40,9 +28,9 @@ internal class AssetRequestHandler(private val context: Context) : RequestHandle
     var signaledCallback = false
     try {
       assetManager!!.open(getFilePath(request)).source().use { source ->
-        val bitmap = decodeStream(source, request)
+        val bitmap = BitmapUtils.decodeStream(source, request)
         signaledCallback = true
-        callback.onSuccess(Result.Bitmap(bitmap, DISK))
+        callback.onSuccess(Result.Bitmap(bitmap, Picasso.LoadedFrom.DISK))
       }
     } catch (e: Exception) {
       if (!signaledCallback) {

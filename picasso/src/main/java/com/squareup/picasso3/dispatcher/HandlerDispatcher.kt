@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.squareup.picasso3
+package com.squareup.picasso3.dispatcher
 
 import android.content.Context
 import android.os.Handler
@@ -21,8 +21,14 @@ import android.os.HandlerThread
 import android.os.Looper
 import android.os.Message
 import android.os.Process.THREAD_PRIORITY_BACKGROUND
+import com.squareup.picasso3.BitmapHunter
 import com.squareup.picasso3.Picasso.Priority.HIGH
-import com.squareup.picasso3.Utils.flushStackLocalLeaks
+import com.squareup.picasso3.PicassoExecutorService
+import com.squareup.picasso3.PlatformLruCache
+import com.squareup.picasso3.base.Action
+import com.squareup.picasso3.base.BaseDispatcher
+import com.squareup.picasso3.utils.Utils
+import com.squareup.picasso3.utils.Utils.flushStackLocalLeaks
 import java.util.concurrent.ExecutorService
 
 internal class HandlerDispatcher internal constructor(

@@ -13,12 +13,16 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.squareup.picasso3
+package com.squareup.picasso3.requestHandler
 
 import android.content.Context
 import androidx.core.content.ContextCompat
-import com.squareup.picasso3.BitmapUtils.isXmlResource
+import com.squareup.picasso3.Picasso
 import com.squareup.picasso3.Picasso.LoadedFrom.DISK
+import com.squareup.picasso3.Request
+import com.squareup.picasso3.base.RequestHandler
+import com.squareup.picasso3.interfaces.DrawableLoader
+import com.squareup.picasso3.utils.BitmapUtils.isXmlResource
 
 internal class ResourceDrawableRequestHandler private constructor(
   private val context: Context, private val loader: DrawableLoader

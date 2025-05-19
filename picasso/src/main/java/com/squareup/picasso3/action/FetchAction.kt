@@ -13,14 +13,29 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.squareup.picasso3
+package com.squareup.picasso3.action
 
-import com.squareup.picasso3.RequestHandler.Result
+import com.squareup.picasso3.Picasso
+import com.squareup.picasso3.Request
+import com.squareup.picasso3.base.Action
+import com.squareup.picasso3.base.RequestHandler.Result
+import com.squareup.picasso3.interfaces.Callback
 
-internal class GetAction(
-  picasso: Picasso, data: Request
+internal class FetchAction(
+  picasso: Picasso, data: Request, private var callback: Callback?
 ) : Action(picasso, data) {
-  override fun complete(result: Result) = Unit
-  override fun error(e: Exception) = Unit
-  override fun getTarget() = throw AssertionError()
+  override fun complete(result: Result) {
+    callback?.onSuccess()
+  }
+
+  override fun error(e: Exception) {
+    callback?.onError(e)
+  }
+
+  override fun getTarget() = this
+
+  override fun cancel() {
+    super.cancel()
+    callback = null
+  }
 }

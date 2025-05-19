@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.squareup.picasso3
+package com.squareup.picasso3.interfaces
 
 import android.graphics.drawable.Drawable
 import com.squareup.picasso3.Picasso.LoadedFrom
@@ -40,7 +40,7 @@ interface DrawableTarget {
    * Callback indicating the image could not be successfully loaded.
    *
    * **Note:** The passed [Drawable] may be `null` if none has been
-   * specified via [RequestCreator.error].
+   * specified via [com.squareup.picasso3.RequestCreator.error].
    */
   fun onDrawableFailed(
     e: Exception, errorDrawable: Drawable?
@@ -51,7 +51,7 @@ interface DrawableTarget {
    *
    *
    * **Note:** The passed [Drawable] may be `null` if none has been
-   * specified via [RequestCreator.placeholder].
+   * specified via [com.squareup.picasso3.RequestCreator.placeholder].
    */
   fun onPrepareLoad(placeHolderDrawable: Drawable?)
 }

@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.squareup.picasso3
+package com.squareup.picasso3.enums
 
 /** Designates the policy to use for network requests.  */
 enum class NetworkPolicy(val index: Int) {

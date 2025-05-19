@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2018 Square, Inc.
+ * Copyright (C) 2013 Square, Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -13,11 +13,17 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.squareup.picasso3
+package com.squareup.picasso3.action
 
-import android.graphics.drawable.Drawable
-import androidx.annotation.DrawableRes
+import com.squareup.picasso3.Picasso
+import com.squareup.picasso3.Request
+import com.squareup.picasso3.base.Action
+import com.squareup.picasso3.base.RequestHandler.Result
 
-internal fun interface DrawableLoader {
-  fun load(@DrawableRes resId: Int): Drawable?
+internal class GetAction(
+  picasso: Picasso, data: Request
+) : Action(picasso, data) {
+  override fun complete(result: Result) = Unit
+  override fun error(e: Exception) = Unit
+  override fun getTarget() = throw AssertionError()
 }

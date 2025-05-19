@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.squareup.picasso3
+package com.squareup.picasso3.requestHandler
 
 import android.content.ContentResolver
 import android.content.Context
@@ -21,8 +21,11 @@ import android.content.UriMatcher
 import android.net.Uri
 import android.provider.ContactsContract
 import android.provider.ContactsContract.Contacts
-import com.squareup.picasso3.BitmapUtils.decodeStream
+import com.squareup.picasso3.Picasso
 import com.squareup.picasso3.Picasso.LoadedFrom.DISK
+import com.squareup.picasso3.Request
+import com.squareup.picasso3.base.RequestHandler
+import com.squareup.picasso3.utils.BitmapUtils.decodeStream
 import okio.Source
 import okio.source
 import java.io.FileNotFoundException

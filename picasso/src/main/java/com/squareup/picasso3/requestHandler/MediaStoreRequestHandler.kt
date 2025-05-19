@@ -13,17 +13,19 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.squareup.picasso3
+package com.squareup.picasso3.requestHandler
 
 import android.content.ContentResolver
 import android.content.ContentUris
 import android.content.Context
 import android.provider.MediaStore
 import android.provider.MediaStore.Video
-import com.squareup.picasso3.BitmapUtils.calculateInSampleSize
-import com.squareup.picasso3.BitmapUtils.createBitmapOptions
-import com.squareup.picasso3.BitmapUtils.decodeStream
+import com.squareup.picasso3.Picasso
 import com.squareup.picasso3.Picasso.LoadedFrom
+import com.squareup.picasso3.Request
+import com.squareup.picasso3.utils.BitmapUtils.calculateInSampleSize
+import com.squareup.picasso3.utils.BitmapUtils.createBitmapOptions
+import com.squareup.picasso3.utils.BitmapUtils.decodeStream
 
 internal class MediaStoreRequestHandler(context: Context) : ContentStreamRequestHandler(context) {
   override fun canHandleRequest(data: Request): Boolean {
