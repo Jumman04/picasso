@@ -1,19 +1,4 @@
-/*
- * Copyright (C) 2014 Square, Inc.
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *      http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
-package com.squareup.picasso3
+package com.squareup.picasso3.base
 
 import android.app.Notification
 import android.app.NotificationManager
@@ -21,8 +6,9 @@ import android.appwidget.AppWidgetManager
 import android.widget.RemoteViews
 import androidx.annotation.DrawableRes
 import androidx.core.content.ContextCompat
-import com.squareup.picasso3.RequestHandler.Result
-import com.squareup.picasso3.RequestHandler.Result.Bitmap
+import com.squareup.picasso3.Picasso
+import com.squareup.picasso3.Request
+import com.squareup.picasso3.interfaces.Callback
 
 internal abstract class RemoteViewsAction(
   picasso: Picasso,
@@ -31,8 +17,8 @@ internal abstract class RemoteViewsAction(
   val target: RemoteViewsTarget,
   var callback: Callback?
 ) : Action(picasso, data) {
-  override fun complete(result: Result) {
-    if (result is Bitmap) {
+  override fun complete(result: RequestHandler.Result) {
+    if (result is RequestHandler.Result.Bitmap) {
       target.remoteViews.setImageViewBitmap(target.viewId, result.bitmap)
       update()
       callback?.onSuccess()

@@ -1,23 +1,8 @@
-/*
- * Copyright (C) 2013 Square, Inc.
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *      http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
-package com.squareup.picasso3
+package com.squareup.picasso3.interfaces
 
 import android.graphics.Bitmap
 import android.graphics.drawable.Drawable
-import com.squareup.picasso3.Picasso.LoadedFrom
+import com.squareup.picasso3.Picasso
 
 /**
  * Represents an arbitrary listener for image loading.
@@ -35,14 +20,14 @@ interface BitmapTarget {
    * **Note:** You must not recycle the bitmap.
    */
   fun onBitmapLoaded(
-    bitmap: Bitmap, from: LoadedFrom
+    bitmap: Bitmap, from: Picasso.LoadedFrom
   )
 
   /**
    * Callback indicating the image could not be successfully loaded.
    *
-   * **Note:** The passed [Drawable] may be `null` if none has been
-   * specified via [RequestCreator.error] or [RequestCreator.error].
+   * **Note:** The passed [android.graphics.drawable.Drawable] may be `null` if none has been
+   * specified via [com.squareup.picasso3.RequestCreator.error] or [com.squareup.picasso3.RequestCreator.error].
    */
   fun onBitmapFailed(
     e: Exception, errorDrawable: Drawable?
@@ -53,7 +38,7 @@ interface BitmapTarget {
    *
    *
    * **Note:** The passed [Drawable] may be `null` if none has been
-   * specified via [RequestCreator.placeholder] or [RequestCreator.placeholder].
+   * specified via [com.squareup.picasso3.RequestCreator.placeholder] or [com.squareup.picasso3.RequestCreator.placeholder].
    */
   fun onPrepareLoad(placeHolderDrawable: Drawable?)
 }

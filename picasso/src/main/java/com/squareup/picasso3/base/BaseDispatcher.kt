@@ -1,21 +1,6 @@
-/*
- * Copyright (C) 2013 Square, Inc.
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *      http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
-package com.squareup.picasso3
+package com.squareup.picasso3.base
 
-import android.Manifest.permission.ACCESS_NETWORK_STATE
+import android.Manifest
 import android.annotation.SuppressLint
 import android.content.Context
 import android.net.ConnectivityManager
@@ -27,22 +12,13 @@ import android.util.Log
 import androidx.annotation.CallSuper
 import androidx.annotation.MainThread
 import androidx.core.content.ContextCompat
-import com.squareup.picasso3.BitmapHunter.Companion.forRequest
-import com.squareup.picasso3.MemoryPolicy.Companion.shouldWriteToMemoryCache
-import com.squareup.picasso3.NetworkPolicy.NO_CACHE
-import com.squareup.picasso3.NetworkRequestHandler.ContentLengthException
-import com.squareup.picasso3.RequestHandler.Result.Bitmap
-import com.squareup.picasso3.Utils.OWNER_DISPATCHER
-import com.squareup.picasso3.Utils.VERB_CANCELED
-import com.squareup.picasso3.Utils.VERB_DELIVERED
-import com.squareup.picasso3.Utils.VERB_ENQUEUED
-import com.squareup.picasso3.Utils.VERB_PAUSED
-import com.squareup.picasso3.Utils.VERB_REPLAYING
-import com.squareup.picasso3.Utils.VERB_RETRYING
-import com.squareup.picasso3.Utils.VERB__
-import com.squareup.picasso3.Utils.getLogIdsForHunter
-import com.squareup.picasso3.Utils.hasPermission
-import com.squareup.picasso3.Utils.log
+import com.squareup.picasso3.BitmapHunter
+import com.squareup.picasso3.PlatformLruCache
+import com.squareup.picasso3.enums.MemoryPolicy
+import com.squareup.picasso3.enums.NetworkPolicy
+import com.squareup.picasso3.interfaces.Dispatcher
+import com.squareup.picasso3.requestHandler.NetworkRequestHandler
+import com.squareup.picasso3.utils.Utils
 import java.util.WeakHashMap
 
 internal abstract class BaseDispatcher internal constructor(
@@ -65,7 +41,8 @@ internal abstract class BaseDispatcher internal constructor(
   @get:JvmName("-receiver")
   internal val receiver: NetworkBroadcastReceiver = NetworkBroadcastReceiver(this)
 
-  private val scansNetworkChanges: Boolean = hasPermission(context, ACCESS_NETWORK_STATE)
+  private val scansNetworkChanges: Boolean =
+    Utils.hasPermission(context, Manifest.permission.ACCESS_NETWORK_STATE)
 
   init {
     receiver.register()
@@ -81,9 +58,9 @@ internal abstract class BaseDispatcher internal constructor(
     if (action.tag in pausedTags) {
       pausedActions[action.getTarget()] = action
       if (action.picasso.isLoggingEnabled) {
-        log(
-          owner = OWNER_DISPATCHER,
-          verb = VERB_PAUSED,
+        Utils.log(
+          owner = Utils.OWNER_DISPATCHER,
+          verb = Utils.VERB_PAUSED,
           logId = action.request.logId(),
           extras = "because tag '${action.tag}' is paused"
         )
@@ -99,9 +76,9 @@ internal abstract class BaseDispatcher internal constructor(
 
     if (isShutdown()) {
       if (action.picasso.isLoggingEnabled) {
-        log(
-          owner = OWNER_DISPATCHER,
-          verb = VERB__,
+        Utils.log(
+          owner = Utils.OWNER_DISPATCHER,
+          verb = Utils.VERB__,
           logId = action.request.logId(),
           extras = "because shut down"
         )
@@ -109,7 +86,7 @@ internal abstract class BaseDispatcher internal constructor(
       return
     }
 
-    hunter = forRequest(action.picasso, this, cache, action)
+    hunter = BitmapHunter.Companion.forRequest(action.picasso, this, cache, action)
     dispatchSubmit(hunter)
     hunterMap[action.request.key] = hunter
     if (dismissFailed) {
@@ -117,7 +94,11 @@ internal abstract class BaseDispatcher internal constructor(
     }
 
     if (action.picasso.isLoggingEnabled) {
-      log(owner = OWNER_DISPATCHER, verb = VERB_ENQUEUED, logId = action.request.logId())
+      Utils.log(
+        owner = Utils.OWNER_DISPATCHER,
+        verb = Utils.VERB_ENQUEUED,
+        logId = action.request.logId()
+      )
     }
   }
 
@@ -129,7 +110,7 @@ internal abstract class BaseDispatcher internal constructor(
       if (hunter.cancel()) {
         hunterMap.remove(key)
         if (action.picasso.isLoggingEnabled) {
-          log(OWNER_DISPATCHER, VERB_CANCELED, action.request.logId())
+          Utils.log(Utils.OWNER_DISPATCHER, Utils.VERB_CANCELED, action.request.logId())
         }
       }
     }
@@ -137,9 +118,9 @@ internal abstract class BaseDispatcher internal constructor(
     if (action.tag in pausedTags) {
       pausedActions.remove(action.getTarget())
       if (action.picasso.isLoggingEnabled) {
-        log(
-          owner = OWNER_DISPATCHER,
-          verb = VERB_CANCELED,
+        Utils.log(
+          owner = Utils.OWNER_DISPATCHER,
+          verb = Utils.VERB_CANCELED,
           logId = action.request.logId(),
           extras = "because paused request got canceled"
         )
@@ -148,7 +129,12 @@ internal abstract class BaseDispatcher internal constructor(
 
     val remove = failedActions.remove(action.getTarget())
     if (remove != null && remove.picasso.isLoggingEnabled) {
-      log(OWNER_DISPATCHER, VERB_CANCELED, remove.request.logId(), "from replaying")
+      Utils.log(
+        Utils.OWNER_DISPATCHER,
+        Utils.VERB_CANCELED,
+        remove.request.logId(),
+        "from replaying"
+      )
     }
   }
 
@@ -178,9 +164,9 @@ internal abstract class BaseDispatcher internal constructor(
         hunter.detach(single)
         pausedActions[single.getTarget()] = single
         if (loggingEnabled) {
-          log(
-            owner = OWNER_DISPATCHER,
-            verb = VERB_PAUSED,
+          Utils.log(
+            owner = Utils.OWNER_DISPATCHER,
+            verb = Utils.VERB_PAUSED,
             logId = single.request.logId(),
             extras = "because tag '$tag' was paused"
           )
@@ -196,9 +182,9 @@ internal abstract class BaseDispatcher internal constructor(
           hunter.detach(action)
           pausedActions[action.getTarget()] = action
           if (loggingEnabled) {
-            log(
-              owner = OWNER_DISPATCHER,
-              verb = VERB_PAUSED,
+            Utils.log(
+              owner = Utils.OWNER_DISPATCHER,
+              verb = Utils.VERB_PAUSED,
               logId = action.request.logId(),
               extras = "because tag '$tag' was paused"
             )
@@ -211,10 +197,10 @@ internal abstract class BaseDispatcher internal constructor(
       if (hunter.cancel()) {
         iterator.remove()
         if (loggingEnabled) {
-          log(
-            owner = OWNER_DISPATCHER,
-            verb = VERB_CANCELED,
-            logId = getLogIdsForHunter(hunter),
+          Utils.log(
+            owner = Utils.OWNER_DISPATCHER,
+            verb = Utils.VERB_CANCELED,
+            logId = Utils.getLogIdsForHunter(hunter),
             extras = "all actions paused"
           )
         }
@@ -269,12 +255,14 @@ internal abstract class BaseDispatcher internal constructor(
 
     if (hunter.shouldRetry(isConnected)) {
       if (hunter.picasso.isLoggingEnabled) {
-        log(
-          owner = OWNER_DISPATCHER, verb = VERB_RETRYING, logId = getLogIdsForHunter(hunter)
+        Utils.log(
+          owner = Utils.OWNER_DISPATCHER,
+          verb = Utils.VERB_RETRYING,
+          logId = Utils.getLogIdsForHunter(hunter)
         )
       }
-      if (hunter.exception is ContentLengthException) {
-        hunter.data = hunter.data.newBuilder().networkPolicy(NO_CACHE).build()
+      if (hunter.exception is NetworkRequestHandler.ContentLengthException) {
+        hunter.data = hunter.data.newBuilder().networkPolicy(NetworkPolicy.NO_CACHE).build()
       }
       dispatchSubmit(hunter)
     } else {
@@ -287,10 +275,10 @@ internal abstract class BaseDispatcher internal constructor(
   }
 
   fun performComplete(hunter: BitmapHunter) {
-    if (shouldWriteToMemoryCache(hunter.data.memoryPolicy)) {
+    if (MemoryPolicy.Companion.shouldWriteToMemoryCache(hunter.data.memoryPolicy)) {
       val result = hunter.result
       if (result != null) {
-        if (result is Bitmap) {
+        if (result is RequestHandler.Result.Bitmap) {
           val bitmap = result.bitmap
           cache[hunter.key] = bitmap
         }
@@ -332,8 +320,10 @@ internal abstract class BaseDispatcher internal constructor(
         val action = iterator.next()
         iterator.remove()
         if (action.picasso.isLoggingEnabled) {
-          log(
-            owner = OWNER_DISPATCHER, verb = VERB_REPLAYING, logId = action.request.logId()
+          Utils.log(
+            owner = Utils.OWNER_DISPATCHER,
+            verb = Utils.VERB_REPLAYING,
+            logId = action.request.logId()
           )
         }
         performSubmit(action, false)
@@ -358,7 +348,7 @@ internal abstract class BaseDispatcher internal constructor(
     }
     val result = hunter.result
     if (result != null) {
-      if (result is Bitmap) {
+      if (result is RequestHandler.Result.Bitmap) {
         val bitmap = result.bitmap
         bitmap.prepareToDraw()
       }
@@ -371,8 +361,10 @@ internal abstract class BaseDispatcher internal constructor(
   private fun logDelivery(bitmapHunter: BitmapHunter) {
     val picasso = bitmapHunter.picasso
     if (picasso.isLoggingEnabled) {
-      log(
-        owner = OWNER_DISPATCHER, verb = VERB_DELIVERED, logId = getLogIdsForHunter(bitmapHunter)
+      Utils.log(
+        owner = Utils.OWNER_DISPATCHER,
+        verb = Utils.VERB_DELIVERED,
+        logId = Utils.getLogIdsForHunter(bitmapHunter)
       )
     }
   }
@@ -393,7 +385,7 @@ internal abstract class BaseDispatcher internal constructor(
 
     @SuppressLint("MissingPermission")
     fun register() {
-      if (hasPermission(dispatcher.context, ACCESS_NETWORK_STATE)) {
+      if (Utils.hasPermission(dispatcher.context, Manifest.permission.ACCESS_NETWORK_STATE)) {
         val request = NetworkRequest.Builder().build()
         connectivityManager?.registerNetworkCallback(request, callback)
       } else {
