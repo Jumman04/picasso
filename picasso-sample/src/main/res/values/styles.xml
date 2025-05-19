@@ -1,6 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources xmlns:tools="http://schemas.android.com/tools">
-  <style name="Widget.PicassoSample.Button" parent="android:Widget.Button">
+
+<style name="Widget.PicassoSample.Button" parent="android:Widget.Button">
     <item name="android:background">@drawable/button_selector</item>
     <item name="android:minHeight">48dip</item>
     <item name="android:minWidth">64dip</item>
@@ -50,4 +51,5 @@
   <style name="Widget.PicassoSample.DescriptionUrl" parent="android:Widget.TextView">
     <item name="android:textSize">15sp</item>
   </style>
+
 </resources>

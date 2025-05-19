@@ -26,7 +26,7 @@
     tools:ignore="GoogleAppIndexingWarning">
 
     <activity
-      android:name=".SampleGridViewActivity"
+      android:name=".activity.SampleGridViewActivity"
       android:exported="true">
       <intent-filter>
         <action android:name="android.intent.action.MAIN" />
@@ -36,10 +36,10 @@
       </intent-filter>
     </activity>
 
-    <activity android:name=".SampleComposeActivity" />
-    <activity android:name=".SampleContactsActivity" />
-    <activity android:name=".SampleGalleryActivity" />
-    <activity android:name=".SampleListDetailActivity" />
+    <activity android:name=".activity.SampleComposeActivity" />
+    <activity android:name=".activity.SampleContactsActivity" />
+    <activity android:name=".activity.SampleGalleryActivity" />
+    <activity android:name=".activity.SampleListDetailActivity" />
 
     <receiver
       android:name="SampleWidgetProvider"
